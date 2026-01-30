@@ -9,11 +9,41 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack{
+            ScrollView{
+                VStack {
+                    
+                        NavigationLink(destination: TapScreen(), label: {
+                            ZStack{
+                            Image("Header")
+                                .resizable()
+                                .scaledToFit()
+                            Text("The Daily Intercept")
+                            }
+                        })
+                    
+                    
+                        NavigationLink(destination: TapScreen(), label: {
+                            ZStack{
+                            Image("Header")
+                                .resizable()
+                                .scaledToFit()
+                                Text("Agency Academy")
+                            }
+                        })
+                    
+                    
+                        NavigationLink(destination: TapScreen(), label: {
+                            ZStack {
+                            Image("Header")
+                                .resizable()
+                                .scaledToFit()
+                                Text("The Warehouse")
+                            }
+                        })
+                    }
+                
+            }
         }
         .padding()
     }
