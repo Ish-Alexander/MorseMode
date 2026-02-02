@@ -18,7 +18,8 @@ struct ContentView: View {
                             Image("Header")
                                 .resizable()
                                 .scaledToFit()
-                            Text("The Daily Intercept")
+                            Text("Daily Intercept")
+                                    .font(.body)
                             }
                         })
                     
@@ -29,6 +30,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 Text("Agency Academy")
+                                    .font(.body)
                             }
                         })
                     
@@ -38,11 +40,11 @@ struct ContentView: View {
                             Image("Header")
                                 .resizable()
                                 .scaledToFit()
-                                Text("The Warehouse")
+                                Text("Warehouse")
+                                    .font(.body)
                             }
                         })
                     }
-                
             }
         }
         .padding()

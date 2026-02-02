@@ -16,28 +16,33 @@ struct TapScreen: View {
     
     var body: some View{
         VStack{
-            Button(action: {}) {
-                Image("Radar")
-                    .resizable()
-                    .scaledToFit()
-                    .rotationEffect(.degrees(rotationAngle))
-                    .onAppear() {
-                        withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
-                            rotationAngle = 360
-                        }
-                    }
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.0)
-                            .onEnded { _ in
-                                isPressing = false
+            
+                Button(action: {}) {
+                    ZStack{
+                    Image("Radar")
+                        .resizable()
+                        .scaledToFit()
+                        .ignoresSafeArea()
+                        .rotationEffect(.degrees(rotationAngle))
+                        .onAppear() {
+                            withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
+                                rotationAngle = 360
                             }
-                    )
-                    .onLongPressGesture(minimumDuration: 0.0, pressing: { pressing in
-                        isPressing = pressing
-                        if pressing {
-                            WKInterfaceDevice.current().play(hapticType)
                         }
-                    }, perform: {})
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 0.0)
+                                .onEnded { _ in
+                                    isPressing = false
+                                }
+                        )
+                        .onLongPressGesture(minimumDuration: 0.0, pressing: { pressing in
+                            isPressing = pressing
+                            if pressing {
+                                WKInterfaceDevice.current().play(hapticType)
+                            }
+                        }, perform: {})
+                    Text("Decode")
+                }
             }
         }
     }
