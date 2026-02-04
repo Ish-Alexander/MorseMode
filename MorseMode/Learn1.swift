@@ -13,7 +13,7 @@ struct Learn1: View {
     var body: some View {
         NavigationStack{
             ZStack {
-                Color.navy
+                Color.black
                     .ignoresSafeArea()
             
                 ScrollView {
@@ -23,6 +23,7 @@ struct Learn1: View {
                                 ZStack {
                                     Image("Header")
                                     Text(letter)}
+                                .foregroundStyle(.neonGreen)
                             }
                     )}
                     }

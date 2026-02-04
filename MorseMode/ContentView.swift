@@ -8,12 +8,29 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject private var morseEngine = MorseEngine()
+    @EnvironmentObject var userProgress: UserProgress
+    
     var body: some View {
+        
         NavigationStack{
             ZStack {
-                Color.navy
+                Color.black
                     .ignoresSafeArea()
                 VStack {
+                    
+                    HStack(alignment: .top){
+                        ZStack{
+                            Image("Level")
+                                .resizable()
+                                .scaledToFit()
+                                .font(.largeTitle)
+                            Text("Level: \(userProgress.level)")
+                                .bold()
+                                .foregroundStyle(.neonGreen)
+                        }
+                    }
                     
                     NavigationLink(destination: Daily(), label: {
                         ZStack{
@@ -22,6 +39,7 @@ struct ContentView: View {
                                 .scaledToFit()
                             Text("The Daily Intercept")
                                 .font(.custom("kkberkbm", size: 24))
+                                .foregroundStyle(.neonGreen)
                             
                         }
                     })
@@ -33,16 +51,18 @@ struct ContentView: View {
                                 .scaledToFit()
                             Text("Agency Academy")
                                 .font(.custom("kkberkbm", size: 24))
+                                .foregroundStyle(.neonGreen)
                         }
                     })
                     
-                    NavigationLink(destination: Practice(), label: {
+                    NavigationLink(destination: Practice(morseEngine: MorseEngine(), letter: .a), label: {
                         ZStack {
                             Image("Header")
                                 .resizable()
                                 .scaledToFit()
                             Text("The Warehouse")
                                 .font(.custom("kkberkbm", size: 24))
+                                .foregroundStyle(.neonGreen)
                         }
                     })
                     
@@ -55,4 +75,6 @@ struct ContentView: View {
 }
 #Preview {
     ContentView()
+        .environmentObject(UserProgress())
 }
+

@@ -14,7 +14,7 @@ struct Daily: View {
                 .ignoresSafeArea()
             
             Text("Hello")
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
         }
     }
 }

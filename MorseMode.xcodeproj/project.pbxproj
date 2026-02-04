@@ -40,6 +40,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		191E6A0B2F338D120093EDD8 /* Exceptions for "MorseMode" folder in "MorseMode Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				kkberkbm.ttf,
+			);
+			target = 197D237F2F226AF2003F8307 /* MorseMode Watch App */;
+		};
 		198603FE2F2AB9C00061466F /* Exceptions for "MorseMode" folder in "MorseMode" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -54,6 +61,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				198603FE2F2AB9C00061466F /* Exceptions for "MorseMode" folder in "MorseMode" target */,
+				191E6A0B2F338D120093EDD8 /* Exceptions for "MorseMode" folder in "MorseMode Watch App" target */,
 			);
 			path = MorseMode;
 			sourceTree = "<group>";
