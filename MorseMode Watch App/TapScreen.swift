@@ -42,6 +42,7 @@ struct TapScreen: View {
                             }
                         }, perform: {})
                     Text("Decode")
+                            .font(.custom("berkelium bitmap", size: 18))
                 }
             }
         }

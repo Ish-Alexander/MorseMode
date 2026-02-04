@@ -11,8 +11,6 @@ struct Practice: View {
     
     @ObservedObject var morseEngine: MorseEngine
     
-    @State private var showLetter: Bool = false
-            
     @State private var letterToShow: String = ""
             
     @State private var tappedImageName: String = "ImageA"
@@ -31,8 +29,9 @@ struct Practice: View {
                         .scaledToFit()
                         .overlay(
                             Group{
-                                if showLetter{
+                                if !letterToShow.isEmpty {
                                     Text(letterToShow)
+                                        .font(.custom("berkelium bitmap", size: 200))
                                         .foregroundStyle(.neonGreen)
                                 }
                             }
@@ -43,120 +42,117 @@ struct Practice: View {
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onAppear(
-                                    perform: morseEngine.prepareEngine
-                                )
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .a)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "A" : ""
-                                }
                             Text("A")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .a)
+                        self.letterToShow = "A"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .b)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "B" : ""
-                                }
                             Text("B")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .b)
+                        self.letterToShow = "B"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .c)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "C" : ""
-                                }
                             Text("C")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .c)
+                        self.letterToShow = "C"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .d)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "D" : ""
-                                }
                             Text("D")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .d)
+                        self.letterToShow = "D"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .e)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "E" : ""
-                                }
                             Text("E")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .e)
+                        self.letterToShow = "E"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .f)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "F" : ""
-                                }
                             Text("F")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .f)
+                        self.letterToShow = "F"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .g)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "G" : ""
-                                }
                             Text("G")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .g)
+                        self.letterToShow = "G"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .h)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "H" : ""
-                                }
                             Text("H")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .h)
+                        self.letterToShow = "H"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .i)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "I" : ""
-                                }
                             Text("I")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .i)
+                        self.letterToShow = "I"
                     }
                 }
                 
@@ -165,117 +161,117 @@ struct Practice: View {
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .j)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "J" : ""
-                                }
                             Text("J")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .j)
+                        self.letterToShow = "J"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .k)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "K" : ""
-                                }
                             Text("K")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .k)
+                        self.letterToShow = "K"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .l)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "L" : ""
-                                }
                             Text("L")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .l)
+                        self.letterToShow = "L"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .m)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "M" : ""
-                                }
                             Text("M")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .m)
+                        self.letterToShow = "M"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .n)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "N" : ""
-                                }
                             Text("N")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .n)
+                        self.letterToShow = "N"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .o)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "O" : ""
-                                }
                             Text("O")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .o)
+                        self.letterToShow = "O"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .p)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "P" : ""
-                                }
                             Text("P")
+                            .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .p)
+                        self.letterToShow = "P"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .q)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "Q" : ""
-                                }
                             Text("Q")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .q)
+                        self.letterToShow = "Q"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .r)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "R" : ""
-                                }
                             Text("R")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .r)
+                        self.letterToShow = "R"
                     }
                 }
                 
@@ -284,104 +280,104 @@ struct Practice: View {
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .s)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "S" : ""
-                                }
                             Text("S")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .s)
+                        self.letterToShow = "S"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .t)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "T" : ""
-                                }
                             Text("T")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .t)
+                        self.letterToShow = "T"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .u)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "U" : ""
-                                }
                             Text("U")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .u)
+                        self.letterToShow = "U"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .v)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "V" : ""
-                                }
                             Text("V")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .v)
+                        self.letterToShow = "V"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .w)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "W" : ""
-                                }
                             Text("W")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .w)
+                        self.letterToShow = "W"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .x)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "X" : ""
-                                }
                             Text("X")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .x)
+                        self.letterToShow = "X"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .y)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "Y" : ""
-                                }
                             Text("Y")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .y)
+                        self.letterToShow = "Y"
                     }
                     
                     ZStack{
                             Image("Circle")
                                 .resizable()
                                 .scaledToFit()
-                                .onTapGesture {
-                                    morseEngine.performHaptic(for: .z)
-                                    self.showLetter.toggle()
-                                    self.letterToShow = self.showLetter ? "Z" : ""
-                                }
                             Text("Z")
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
+                    }
+                    .onTapGesture {
+                        morseEngine.performHaptic(for: .z)
+                        self.letterToShow = "Z"
                     }
                 }
             }

@@ -29,7 +29,7 @@ enum MorseCharacter{
                     .init(parameterID: .hapticSharpness, value: 0.4)
                 ],
                 relativeTime: relativeTime,
-                duration: 0.6
+                duration: 0.5
             )
         }
     }
@@ -39,7 +39,7 @@ enum MorseCharacter{
         case .dot:
             return 0.12
         case .dash:
-            return 0.6
+            return 0.5
         }
     }
 }

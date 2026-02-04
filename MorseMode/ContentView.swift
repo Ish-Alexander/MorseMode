@@ -13,7 +13,7 @@ struct ContentView: View {
     @EnvironmentObject var userProgress: UserProgress
     
     var body: some View {
-        
+    
         NavigationStack{
             ZStack {
                 Color.black
@@ -27,6 +27,7 @@ struct ContentView: View {
                                 .scaledToFit()
                                 .font(.largeTitle)
                             Text("Level: \(userProgress.level)")
+                                .font(.custom("Berkelium Bitmap", size: 18))
                                 .bold()
                                 .foregroundStyle(.neonGreen)
                         }
@@ -38,7 +39,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                             Text("The Daily Intercept")
-                                .font(.custom("kkberkbm", size: 24))
+                                .font(.custom("berkelium bitmap", size: 22))
                                 .foregroundStyle(.neonGreen)
                             
                         }
@@ -50,7 +51,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                             Text("Agency Academy")
-                                .font(.custom("kkberkbm", size: 24))
+                                .font(.custom("berkelium bitmap", size: 24))
                                 .foregroundStyle(.neonGreen)
                         }
                     })
@@ -61,7 +62,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                             Text("The Warehouse")
-                                .font(.custom("kkberkbm", size: 24))
+                                .font(.custom("berkelium bitmap", size: 24))
                                 .foregroundStyle(.neonGreen)
                         }
                     })

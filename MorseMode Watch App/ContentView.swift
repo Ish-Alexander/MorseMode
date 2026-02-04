@@ -19,7 +19,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                             Text("Daily Intercept")
-                                    .font(.body)
+                                    .font(.custom("berkelium bitmap", size: 14))
                             }
                         })
                     
@@ -30,7 +30,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 Text("Agency Academy")
-                                    .font(.body)
+                                    .font(.custom("berkelium bitmap", size: 12))
                             }
                         })
                     
@@ -41,7 +41,7 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 Text("Warehouse")
-                                    .font(.body)
+                                    .font(.custom("berkelium bitmap", size: 14))
                             }
                         })
                     }

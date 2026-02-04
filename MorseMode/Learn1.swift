@@ -23,6 +23,7 @@ struct Learn1: View {
                                 ZStack {
                                     Image("Header")
                                     Text(letter)}
+                                .font(.custom("berkelium bitmap", size: 20))
                                 .foregroundStyle(.neonGreen)
                             }
                     )}

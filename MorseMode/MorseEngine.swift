@@ -19,11 +19,13 @@ final class MorseEngine: ObservableObject {
     }
     
     func prepareEngine() {
+        //
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else {
             print("Haptics not supported")
             return
         }
         do {
+            //
             engine = try CHHapticEngine()
             try engine?.start()
             
