@@ -11,16 +11,19 @@ import CoreHaptics
 import Combine
 
 final class MorseEngine: ObservableObject {
+    // This is the only view that can use this
     
     private var engine: CHHapticEngine?
+    //Haptic system
     
     init() {
         prepareEngine()
     }
     
     func prepareEngine() {
-        //
+        // Sets up haptics
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else {
+            //Checks for device support
             print("Haptics not supported")
             return
         }
@@ -28,8 +31,9 @@ final class MorseEngine: ObservableObject {
             //
             engine = try CHHapticEngine()
             try engine?.start()
-            
+            // Builds the engine and turns it on
             engine?.resetHandler = {[weak self] in
+                // Watches for system resets and interruptions
                 do{
                     try self?.engine?.start()
                 } catch{
@@ -49,7 +53,9 @@ final class MorseEngine: ObservableObject {
 
             for symbol in letter.morseRepresentation {
                 events.append(symbol.hapticEvent(relativeTime: time))
+                // How each symbol knows how to generate its vibration
                 time += symbol.duration + 0.15
+                // adds a gap between symbols
             }
 
             do {

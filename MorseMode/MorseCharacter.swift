@@ -13,17 +13,21 @@ enum MorseCharacter{
     case dash
     
     func hapticEvent(relativeTime:  TimeInterval) -> CHHapticEvent {
+        // Creates a vibration (Dot or Dash)
         switch self {
         case .dot:
             return  CHHapticEvent(eventType: .hapticTransient, parameters: [
+                // Short, quick taps
                 .init(parameterID: .hapticIntensity, value: 1),
                 .init(parameterID: .hapticSharpness, value: 1)
             ],
                                   relativeTime: relativeTime
+                                  // When should the vibration happen?
             )
         case .dash:
             return CHHapticEvent(
                 eventType: .hapticContinuous,
+                // Long, drawn out taps
                 parameters: [
                     .init(parameterID: .hapticIntensity, value: 1),
                     .init(parameterID: .hapticSharpness, value: 0.4)

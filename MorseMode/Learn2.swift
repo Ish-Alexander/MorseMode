@@ -44,24 +44,29 @@ struct Learn2: View {
                         .font(.custom("berkelium bitmap", size: 200))
                         .foregroundStyle(.neonGreen)
                         .onAppear {
+                            // Sets letter
                             if let incomingSelectedLetter {
                                 letter = incomingSelectedLetter
                                 playHapticsForCurrentLetter()
                             }
                         }
                         .onChange(of: incomingSelectedLetter) {
+                            // Changes letter when selected on previous screen
                             guard let incomingSelectedLetter else { return }
                             letter = incomingSelectedLetter
                             playHapticsForCurrentLetter()
                         }
                 }
-                ZStack{
-                    Image("Radar")
-                        .resizable()
-                        .frame(width:75, height: 75)
-                    Text("Play Code")
+                Button{
+                    playHapticsForCurrentLetter()
+                } label: {
+                    ZStack{
+                            Image("Radar")
+                                .resizable()
+                                .frame(width:75, height: 75)
+                        }
+                    }
                 }
-            }
             .onAppear {
                 if let incoming = incomingSelectedLetter, !incoming.isEmpty {
                     letter = String(incoming.prefix(1)).uppercased()
