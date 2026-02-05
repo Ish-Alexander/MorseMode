@@ -35,62 +35,39 @@ enum Letter{
     case y
     case z
     
-    var letterRepresentation: String {
-        switch self {
-        case .a:
-            "a"
-        case .b:
-            "b"
-        case .c:
-            "c"
-        case .d:
-            "d"
-        case .e:
-            "e"
-        case .f:
-            "f"
-        case .g:
-            "g"
-        case .h:
-            "h"
-        case .i:
-            "i"
-        case .j:
-            "j"
-        case .k:
-            "k"
-        case .l:
-            "l"
-        case .m:
-            "m"
-        case .n:
-            "n"
-        case .o:
-            "o"
-        case .p:
-            "p"
-        case .q:
-            "q"
-        case .r:
-            "r"
-        case .s:
-            "s"
-        case .t:
-            "t"
-        case .u:
-            "u"
-        case .v:
-            "v"
-        case .w:
-            "w"
-        case .x:
-            "x"
-        case .y:
-            "y"
-        case .z:
-            "z"
-            }
+    init?(string: String) {
+        switch string.lowercased() {
+        case "a": self = .a
+        case "b": self = .b
+        case "c": self = .c
+        case "d": self = .d
+        case "e": self = .e
+        case "f": self = .f
+        case "g": self = .g
+        case "h": self = .h
+        case "i": self = .i
+        case "j": self = .j
+        case "k": self = .k
+        case "l": self = .l
+        case "m": self = .m
+        case "n": self = .n
+        case "o": self = .o
+        case "p": self = .p
+        case "q": self = .q
+        case "r": self = .r
+        case "s": self = .s
+        case "t": self = .t
+        case "u": self = .u
+        case "v": self = .v
+        case "w": self = .w
+        case "x": self = .x
+        case "y": self = .y
+        case "z": self = .z
+        default:
+            return nil
         }
+    }
+
     var morseRepresentation: [MorseCharacter]{
         switch self{
         case .a:

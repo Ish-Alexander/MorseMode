@@ -12,11 +12,13 @@ import SwiftUI
 @main
 struct MorseModeApp: App {
     
+    @StateObject private var morseEngine = MorseEngine()
     @StateObject private var userProgress = UserProgress()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(morseEngine)
                 .environmentObject(userProgress)
         }
     }

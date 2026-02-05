@@ -19,7 +19,7 @@ struct Learn1: View {
                 ScrollView {
                     VStack{
                         ForEach(alphabet, id: \.self) {letter in
-                            NavigationLink(destination: Learn2(), label:  {
+                            NavigationLink(destination: Learn2(incomingSelectedLetter: letter), label:  {
                                 ZStack {
                                     Image("Header")
                                     Text(letter)}
