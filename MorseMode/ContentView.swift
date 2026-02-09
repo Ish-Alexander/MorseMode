@@ -9,7 +9,10 @@ import SwiftUI
 import WatchConnectivity
 import Combine
 
-// Define destinations you can navigate to programmatically
+#if canImport(UIKit)
+import UIKit
+#endif
+
 private enum AppDestination: Hashable {
     case daily
     case academy
@@ -20,9 +23,7 @@ struct ContentView: View {
     @StateObject private var morseEngine = MorseEngine()
     @EnvironmentObject var userProgress: UserProgress
 
-    // Observe the shared connectivity singleton
     @StateObject private var connectivity = MorseModeConnectivity.shared
-    // Path for programmatic navigation
     @State private var path = NavigationPath()
 
     var body: some View {
@@ -37,14 +38,20 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .font(.largeTitle)
+                            Image("Icon")
+                                
+                                .resizable()
+                                .scaledToFit()
+                                .offset(x: -109, y: -10)
+                                .frame(width: 90)
                             Text("Level: \(userProgress.level)")
                                 .font(.custom("Berkelium Bitmap", size: 18))
                                 .bold()
                                 .foregroundStyle(.neonGreen)
+                                .offset(x: 33)
                         }
                     }
 
-                    // Your existing links remain usable locally
                     NavigationLink(destination: Daily(), label: {
                         ZStack{
                             Image("Header")
@@ -80,21 +87,16 @@ struct ContentView: View {
                 }
                 .padding()
             }
-            // Listen for requests coming from the watch
             .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
                 if let destination = mapRequestedView(requested) {
-                    // Push the destination
                     path.append(destination)
-                    // Reset so the same request can trigger again
                     DispatchQueue.main.async {
                         connectivity.requestedView = nil
                     }
                 } else {
-                    // Helpful debug if strings don't match
                     print("Unknown requested view: \(requested)")
                 }
             }
-            // Define the destinations for programmatic navigation
             .navigationDestination(for: AppDestination.self) { destination in
                 switch destination {
                 case .daily:
@@ -108,7 +110,6 @@ struct ContentView: View {
         }
     }
 
-    // Map the strings coming from the watch to your destinations
     private func mapRequestedView(_ view: String) -> AppDestination? {
         switch view {
         case "Daily":
@@ -120,6 +121,19 @@ struct ContentView: View {
         default:
             return nil
         }
+    }
+    
+    // MARK: - Haptics
+    private func replayHaptics() {
+        // If your MorseEngine exposes a replay method, call it here.
+        // Uncomment and implement as needed:
+        // morseEngine.replayLastHaptics()
+
+        // Fallback: provide a quick haptic so the button has immediate feedback.
+        #if canImport(UIKit)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        #endif
     }
 }
 
