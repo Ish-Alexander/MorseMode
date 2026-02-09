@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WatchConnectivity
 
 struct Daily: View {
     var body: some View {

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WatchKit
+import WatchConnectivity
 
 struct TapScreen: View {
     
@@ -17,7 +18,11 @@ struct TapScreen: View {
     var body: some View{
         VStack{
             
-                Button(action: {}) {
+                Button(action: {
+                    MorseModeApp.shared.send([
+                        "action": "decodeTapped"
+                    ])
+                }) {
                     ZStack{
                     Image("Radar")
                         .resizable()

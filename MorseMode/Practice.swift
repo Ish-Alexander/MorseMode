@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WatchConnectivity
 
 struct Practice: View {
     
@@ -16,6 +17,13 @@ struct Practice: View {
     @State private var tappedImageName: String = "ImageA"
     
     let letter: Letter
+    
+    private func sendToWatch(_ letter: Letter) {
+        MorseModeConnectivity.shared.send([
+            "action": "playMorse",
+            "letter": String(describing: letter).uppercased()
+        ])
+    }
             
     var body: some View {
         
@@ -48,6 +56,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .a)
+                        sendToWatch(.a)
                         self.letterToShow = "A"
                     }
                     
@@ -61,6 +70,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .b)
+                        sendToWatch(.b)
                         self.letterToShow = "B"
                     }
                     
@@ -74,6 +84,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .c)
+                        sendToWatch(.c)
                         self.letterToShow = "C"
                     }
                     
@@ -87,6 +98,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .d)
+                        sendToWatch(.d)
                         self.letterToShow = "D"
                     }
                     
@@ -100,6 +112,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .e)
+                        sendToWatch(.e)
                         self.letterToShow = "E"
                     }
                     
@@ -113,6 +126,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .f)
+                        sendToWatch(.f)
                         self.letterToShow = "F"
                     }
                     
@@ -126,6 +140,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .g)
+                        sendToWatch(.g)
                         self.letterToShow = "G"
                     }
                     
@@ -139,6 +154,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .h)
+                        sendToWatch(.h)
                         self.letterToShow = "H"
                     }
                     
@@ -152,6 +168,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .i)
+                        sendToWatch(.i)
                         self.letterToShow = "I"
                     }
                 }
@@ -167,6 +184,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .j)
+                        sendToWatch(.j)
                         self.letterToShow = "J"
                     }
                     
@@ -180,6 +198,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .k)
+                        sendToWatch(.k)
                         self.letterToShow = "K"
                     }
                     
@@ -193,6 +212,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .l)
+                        sendToWatch(.l)
                         self.letterToShow = "L"
                     }
                     
@@ -206,6 +226,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .m)
+                        sendToWatch(.m)
                         self.letterToShow = "M"
                     }
                     
@@ -219,6 +240,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .n)
+                        sendToWatch(.n)
                         self.letterToShow = "N"
                     }
                     
@@ -232,6 +254,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .o)
+                        sendToWatch(.o)
                         self.letterToShow = "O"
                     }
                     
@@ -245,6 +268,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .p)
+                        sendToWatch(.p)
                         self.letterToShow = "P"
                     }
                     
@@ -258,6 +282,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .q)
+                        sendToWatch(.q)
                         self.letterToShow = "Q"
                     }
                     
@@ -271,6 +296,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .r)
+                        sendToWatch(.r)
                         self.letterToShow = "R"
                     }
                 }
@@ -286,6 +312,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .s)
+                        sendToWatch(.s)
                         self.letterToShow = "S"
                     }
                     
@@ -299,6 +326,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .t)
+                        sendToWatch(.t)
                         self.letterToShow = "T"
                     }
                     
@@ -312,6 +340,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .u)
+                        sendToWatch(.u)
                         self.letterToShow = "U"
                     }
                     
@@ -325,6 +354,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .v)
+                        sendToWatch(.v)
                         self.letterToShow = "V"
                     }
                     
@@ -338,6 +368,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .w)
+                        sendToWatch(.w)
                         self.letterToShow = "W"
                     }
                     
@@ -351,6 +382,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .x)
+                        sendToWatch(.x)
                         self.letterToShow = "X"
                     }
                     
@@ -364,6 +396,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .y)
+                        sendToWatch(.y)
                         self.letterToShow = "Y"
                     }
                     
@@ -377,6 +410,7 @@ struct Practice: View {
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .z)
+                        sendToWatch(.z)
                         self.letterToShow = "Z"
                     }
                 }
@@ -389,3 +423,4 @@ struct Practice: View {
     let morseEngine = MorseEngine()
     Practice(morseEngine: morseEngine, letter: .a)
 }
+

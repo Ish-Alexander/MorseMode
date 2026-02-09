@@ -8,6 +8,7 @@
 import SwiftUI
 import Foundation
 import Combine
+import WatchConnectivity
 
 struct Learn2: View {
     var incomingSelectedLetter: String?
@@ -24,6 +25,22 @@ struct Learn2: View {
         guard let letterEnum = Letter(string: letter) else { return }
         morseEngine.performHaptic(for: letterEnum)
     }
+
+    func sendHapticToWatch(_ letter: Letter) {
+
+        let payload: [String: Any] = [
+            "action": "playMorse",
+            "letter": String(describing: letter)
+        ]
+
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(payload, replyHandler: nil)
+        } else {
+            try? WCSession.default.updateApplicationContext(payload)
+        }
+    }
+
+
     
     var body: some View {
         ZStack {
@@ -57,20 +74,28 @@ struct Learn2: View {
                             playHapticsForCurrentLetter()
                         }
                 }
-                Button{
+                Button {
                     playHapticsForCurrentLetter()
+                    MorseModeConnectivity.shared.send([
+                        "action": "playMorse",
+                        "letter": letter
+                    ])
                 } label: {
-                    ZStack{
-                            Image("Radar")
-                                .resizable()
-                                .frame(width:75, height: 75)
-                        }
+                    ZStack {
+                        Image("Radar")
+                            .resizable()
+                            .frame(width: 75, height: 75)
                     }
                 }
+            }
             .onAppear {
                 if let incoming = incomingSelectedLetter, !incoming.isEmpty {
                     letter = String(incoming.prefix(1)).uppercased()
                     playHapticsForCurrentLetter()
+                    MorseModeConnectivity.shared.send([
+                        "action": "playMorse",
+                        "letter": letter
+                    ])
                 }
             }
             .onChange(of: incomingSelectedLetter) { _, newValue in
