@@ -15,6 +15,23 @@ struct Learn2: View {
     @EnvironmentObject var userProgress: UserProgress
     @EnvironmentObject var morseEngine: MorseEngine
     @State private var letter: String = ""
+    @AppStorage("Learn2_isPracticeMode") private var isPracticeMode: Bool = true
+    @State private var lastFeedback: String = ""
+    @State private var lastReceivedPattern: String = ""
+    @State private var rotationAngle: Double = 0
+    #if canImport(WatchConnectivity)
+        private let watchDelegate = Learn2WatchDelegate()
+    #endif
+
+    // Simple Morse map for validation
+    private let morseMap: [Character: String] = [
+        "A": ".-",   "B": "-...", "C": "-.-.", "D": "-..",  "E": ".",
+        "F": "..-.", "G": "--.",  "H": "....", "I": "..",   "J": ".---",
+        "K": "-.-",  "L": ".-..", "M": "--",   "N": "-.",  "O": "---",
+        "P": ".--.","Q": "--.-", "R": ".-.",  "S": "...",  "T": "-",
+        "U": "..-",  "V": "...-", "W": ".--",  "X": "-..-", "Y": "-.--",
+        "Z": "--.."
+    ]
     private static let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
     func createNewItem() {
@@ -40,7 +57,52 @@ struct Learn2: View {
         }
     }
 
-
+    private func handleIncomingMorsePattern(_ pattern: String) {
+        print("[Phone] handleIncomingMorsePattern called with: \(pattern)")
+        guard isPracticeMode else { return }
+        lastReceivedPattern = pattern
+        let target = letter.uppercased()
+        print("[Phone] Current target letter: \(target)")
+        guard let targetChar = target.first, let expected = morseMap[targetChar] else {
+            lastFeedback = "No target letter"
+            return
+        }
+        print("[Phone] Expected pattern: \(expected) vs received: \(pattern)")
+        if pattern == expected {
+            print("[Phone] Pattern correct. Sending feedback: correct")
+            lastFeedback = "Correct!"
+            let feedbackPayload: [String: Any] = [
+                "action": "feedback",
+                "result": "correct"
+            ]
+            if WCSession.default.isReachable {
+                WCSession.default.sendMessage(feedbackPayload, replyHandler: nil)
+            } else {
+                try? WCSession.default.updateApplicationContext(feedbackPayload)
+            }
+            // Move to a new challenge after a short delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                createNewItem()
+                lastFeedback = ""
+            }
+        } else {
+            print("[Phone] Pattern incorrect. Sending feedback: incorrect")
+            lastFeedback = "Incorrect (got: \(pattern), want: \(expected))"
+            let feedbackPayload: [String: Any] = [
+                "action": "feedback",
+                "result": "incorrect"
+            ]
+            if WCSession.default.isReachable {
+                WCSession.default.sendMessage(feedbackPayload, replyHandler: nil)
+            } else {
+                try? WCSession.default.updateApplicationContext(feedbackPayload)
+            }
+            // Fade the feedback after a moment
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                if lastFeedback.contains("Incorrect") { lastFeedback = "" }
+            }
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -48,10 +110,43 @@ struct Learn2: View {
                 .ignoresSafeArea()
             VStack{
                 Text("Level: \(userProgress.level)")
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.neon)
+                    .font(.custom("berkelium bitmap", size: 16))
                 
                 Text("EXP: \(userProgress.currentEXP)")
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.neon)
+                    .font(.custom("berkelium bitmap", size: 16))
+                
+                // EXP Progress toward next level
+                VStack(alignment: .leading, spacing: 6) {
+                    let progress = min(max(Double(userProgress.currentEXP) / Double(max(userProgress.expNeededForNextLevel, 1)), 0), 1)
+                    ProgressView(value: progress) {
+                        Text("Next Level Progress")
+                            .foregroundStyle(.neon.opacity(0.9))
+                            .font(.custom("berkelium bitmap", size: 10))
+                    }
+                    .tint(.neon)
+                    .progressViewStyle(.linear)
+
+                    HStack {
+                        Text("\(userProgress.currentEXP) / \(userProgress.expNeededForNextLevel) EXP")
+                            .foregroundStyle(.neon.opacity(0.8))
+                            .font(.custom("berkelium bitmap", size: 10))
+                        Spacer()
+                        Text("\(Int(progress * 100))%")
+                            .foregroundStyle(.neon.opacity(0.8))
+                            .font(.custom("berkelium bitmap", size: 10))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 4)
+                
+                if !lastFeedback.isEmpty {
+                    Text(lastFeedback)
+                        .foregroundStyle(lastFeedback.contains("Correct") ? .green : .yellow)
+                        .font(.subheadline)
+                }
+                
                 ZStack{
                     Image("Tube")
                         .resizable()
@@ -59,7 +154,7 @@ struct Learn2: View {
                     
                     Text(letter)
                         .font(.custom("berkelium bitmap", size: 200))
-                        .foregroundStyle(.neonGreen)
+                        .foregroundStyle(.neon)
                         .onAppear {
                             // Sets letter
                             if let incomingSelectedLetter {
@@ -76,7 +171,7 @@ struct Learn2: View {
                 }
                 Button {
                     playHapticsForCurrentLetter()
-                    MorseModeConnectivity.shared.send([
+                    MorseModePhoneConnectivity.shared.send([
                         "action": "playMorse",
                         "letter": letter
                     ])
@@ -85,6 +180,14 @@ struct Learn2: View {
                         Image("Radar")
                             .resizable()
                             .frame(width: 75, height: 75)
+                            .scaledToFit()
+                            .ignoresSafeArea()
+                            .rotationEffect(.degrees(rotationAngle))
+                            .onAppear() {
+                                withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
+                                    rotationAngle = 360
+                                }
+                            }
                     }
                 }
             }
@@ -92,10 +195,38 @@ struct Learn2: View {
                 if let incoming = incomingSelectedLetter, !incoming.isEmpty {
                     letter = String(incoming.prefix(1)).uppercased()
                     playHapticsForCurrentLetter()
-                    MorseModeConnectivity.shared.send([
+                    MorseModePhoneConnectivity.shared.send([
                         "action": "playMorse",
                         "letter": letter
                     ])
+                }
+                if letter.isEmpty { createNewItem() }
+                if WCSession.isSupported() {
+                    let session = WCSession.default
+                    if session.delegate == nil {
+                        session.delegate = watchDelegate
+                        print("[Phone] WCSession delegate set to Learn2WatchDelegate")
+                    } else {
+                        print("[Phone] WCSession delegate already set: \(String(describing: type(of: session.delegate!)))")
+                    }
+                    session.activate()
+                    print("[Phone] WCSession activation requested")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        let payload: [String: Any] = ["action": "ping", "from": "phone"]
+                        if WCSession.default.isReachable {
+                            WCSession.default.sendMessage(payload, replyHandler: nil, errorHandler: { error in
+                                print("[Phone] ping sendMessage error: \(error)")
+                            })
+                            print("[Phone] Sent ping via sendMessage")
+                        } else {
+                            do {
+                                try WCSession.default.updateApplicationContext(payload)
+                                print("[Phone] Sent ping via applicationContext")
+                            } catch {
+                                print("[Phone] ping updateApplicationContext error: \(error)")
+                            }
+                        }
+                    }
                 }
             }
             .onChange(of: incomingSelectedLetter) { _, newValue in
@@ -104,27 +235,201 @@ struct Learn2: View {
                     playHapticsForCurrentLetter()
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MorseModeWatchInput"))) { notification in
+                print("[Phone] Learn2 received MorseModeWatchInput notification: \(String(describing: notification.userInfo))")
+                guard isPracticeMode,
+                      let userInfo = notification.userInfo as? [String: Any],
+                      let action = userInfo["action"] as? String, action == "morseInput",
+                      let pattern = userInfo["pattern"] as? String else { return }
+                print("[Phone] Learn2 handling pattern: \(pattern)")
+                handleIncomingMorsePattern(pattern)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MorseModeAwardEXP"))) { notification in
+                print("[Phone] Learn2 received MorseModeAwardEXP notification: \(String(describing: notification.userInfo))")
+                guard let userInfo = notification.userInfo as? [String: Any],
+                      let amount = userInfo["amount"] as? Int else { return }
+                print("[Phone] Awarding EXP amount: \(amount)")
+                userProgress.addEXP(amount)
+                lastFeedback = "Awarded +\(amount) EXP"
+            }
+            .onReceive(Just(())) { _ in /* placeholder to keep modifier chain valid */ }
         }
     }
 }
+
+#if canImport(WatchConnectivity)
+final class Learn2WatchDelegate: NSObject, WCSessionDelegate {
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        print("[Phone] didReceiveMessage: \(message)")
+        if let action = message["action"] as? String, action == "morseInput",
+           let pattern = message["pattern"] as? String {
+            print("[Phone] Received morseInput via message: \(pattern)")
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: ["action": action, "pattern": pattern])
+                print("[Phone] Posted MorseModeWatchInput notification (message path)")
+            }
+        }
+        if let action = message["action"] as? String, action == "awardEXP" {
+            let amount = message["amount"] as? Int ?? 10
+            print("[Phone] Received awardEXP via message: amount=\(amount)")
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("MorseModeAwardEXP"), object: nil, userInfo: ["amount": amount])
+                print("[Phone] Posted MorseModeAwardEXP notification (message path)")
+            }
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        print("[Phone] didReceiveApplicationContext: \(applicationContext)")
+        if let action = applicationContext["action"] as? String, action == "morseInput",
+           let pattern = applicationContext["pattern"] as? String {
+            print("[Phone] Received morseInput via context: \(pattern)")
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: ["action": action, "pattern": pattern])
+                print("[Phone] Posted MorseModeWatchInput notification (context path)")
+            }
+        }
+        if let action = applicationContext["action"] as? String, action == "awardEXP" {
+            let amount = applicationContext["amount"] as? Int ?? 100
+            print("[Phone] Received awardEXP via context: amount=\(amount)")
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("MorseModeAwardEXP"), object: nil, userInfo: ["amount": amount])
+                print("[Phone] Posted MorseModeAwardEXP notification (context path)")
+            }
+        }
+    }
+
+    // WCSessionDelegate logging
+    func sessionDidBecomeInactive(_ session: WCSession) {
+        print("[Phone] WCSession didBecomeInactive")
+    }
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        print("[Phone] WCSession didDeactivate")
+        WCSession.default.activate()
+        print("[Phone] WCSession re-activate after deactivation")
+    }
+
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        print("[Phone] WCSession reachability changed: isReachable=\(session.isReachable)")
+    }
+
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        print("[Phone] WCSession activationDidComplete: state=\(activationState.rawValue), error=\(String(describing: error))")
+        print("[Phone] isReachable after activation: \(session.isReachable)")
+    }
+}
+#endif
+
+/// SharedDefaults provides a tiny convenience API around the App Group UserDefaults
+/// so both iOS and watchOS targets can read/write shared values like EXP.
+struct SharedDefaults {
+    /// Update this to your actual App Group identifier in both targets' capabilities.
+    static let suiteName = "group.com.yourcompany.morsemode"
+    static let expKey = "sharedEXP"
+
+    /// Returns the shared UserDefaults for the App Group, or nil if misconfigured.
+    static var store: UserDefaults? {
+        UserDefaults(suiteName: suiteName)
+    }
+
+    /// Saves the EXP value to the shared store.
+    static func setEXP(_ value: Int) {
+        store?.set(value, forKey: expKey)
+        store?.synchronize()
+    }
+
+    /// Loads the EXP value from the shared store. Returns 0 if missing/unavailable.
+    static func getEXP() -> Int {
+        guard let store else { return 0 }
+        if store.object(forKey: expKey) == nil { return 0 }
+        return store.integer(forKey: expKey)
+    }
+}
+
+// You can also use @AppStorage with the shared store in SwiftUI like this:
+// @AppStorage(SharedDefaults.expKey, store: SharedDefaults.store) var sharedEXP: Int = 0
+// This works in both iOS and watchOS targets as long as the App Group is enabled.
+
+// MARK: - Persistence Model
+private struct PersistedProgress: Codable {
+    var level: Int
+    var currentEXP: Int
+    var expNeededForNextLevel: Int
+}
+
 class UserProgress: ObservableObject{
+    private let groupSuite = "group.com.yourcompany.morsemode" // Replace with your actual App Group ID
+    private let sharedEXPKey = "sharedEXP"
+    private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: groupSuite) }
+
+    private let storageKey = "UserProgress.persisted"
+    
     @Published var level: Int = 1
     @Published var currentEXP: Int = 0
     @Published var expNeededForNextLevel: Int = 100
     
+    init() {
+        load()
+        loadSharedEXPIfAvailable()
+    }
+    
     func addEXP(_ amount: Int) {
         currentEXP += amount
         checkLevelUp()
-        }
+        save()
+        saveSharedEXP()
+    }
+    
     func checkLevelUp() {
-        while currentEXP >= expNeededForNextLevel{
+        var leveled = false
+        while currentEXP >= expNeededForNextLevel {
             currentEXP -= expNeededForNextLevel
             level += 1
             expNeededForNextLevel = Int(Double(expNeededForNextLevel) * 1.5)
+            leveled = true
             print("Level Up! New Level: \(level)")
+        }
+        if leveled {
+            save()
+            saveSharedEXP()
+        }
+    }
+    
+    private func load() {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        if let decoded = try? JSONDecoder().decode(PersistedProgress.self, from: data) {
+            self.level = decoded.level
+            self.currentEXP = decoded.currentEXP
+            self.expNeededForNextLevel = decoded.expNeededForNextLevel
+        }
+    }
+    
+    private func save() {
+        let payload = PersistedProgress(level: level, currentEXP: currentEXP, expNeededForNextLevel: expNeededForNextLevel)
+        if let data = try? JSONEncoder().encode(payload) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+            // Mirror currentEXP to shared App Group so watch/iOS stay in sync
+            saveSharedEXP()
+        }
+    }
+
+    private func saveSharedEXP() {
+        sharedDefaults?.set(currentEXP, forKey: sharedEXPKey)
+        // synchronize is optional; modern UserDefaults is eventually consistent
+        sharedDefaults?.synchronize()
+    }
+
+    private func loadSharedEXPIfAvailable() {
+        guard let shared = sharedDefaults else { return }
+        // Only override if the key exists in the shared container
+        if shared.object(forKey: sharedEXPKey) != nil {
+            let sharedValue = shared.integer(forKey: sharedEXPKey)
+            self.currentEXP = sharedValue
         }
     }
 }
+
 #Preview {
     Learn2(incomingSelectedLetter: nil)
         .environmentObject(UserProgress())

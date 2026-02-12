@@ -85,6 +85,8 @@ class MorseModeConnectivity: NSObject, ObservableObject, WCSessionDelegate {
 struct MorseModeApp: App {
     init() {
         MorseModeConnectivity.shared.activate()
+        _ = _initializePhoneConnectivity()
+        print("[App] PhoneConnectivity initialized at launch")
     }
 
     @StateObject private var morseEngine = MorseEngine()

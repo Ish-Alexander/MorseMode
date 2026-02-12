@@ -40,7 +40,7 @@ struct Practice: View {
                                 if !letterToShow.isEmpty {
                                     Text(letterToShow)
                                         .font(.custom("berkelium bitmap", size: 200))
-                                        .foregroundStyle(.neonGreen)
+                                        .foregroundStyle(.neon)
                                 }
                             }
                         )
@@ -52,7 +52,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("A")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .a)
@@ -66,7 +66,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("B")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .b)
@@ -80,7 +80,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("C")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .c)
@@ -94,7 +94,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("D")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .d)
@@ -108,7 +108,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("E")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .e)
@@ -122,7 +122,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("F")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .f)
@@ -136,7 +136,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("G")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .g)
@@ -150,7 +150,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("H")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .h)
@@ -164,7 +164,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("I")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .i)
@@ -180,7 +180,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("J")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .j)
@@ -194,7 +194,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("K")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .k)
@@ -208,7 +208,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("L")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .l)
@@ -222,7 +222,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("M")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .m)
@@ -236,7 +236,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("N")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .n)
@@ -250,7 +250,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("O")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .o)
@@ -264,7 +264,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("P")
                             .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .p)
@@ -278,7 +278,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("Q")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .q)
@@ -292,7 +292,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("R")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .r)
@@ -308,7 +308,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("S")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .s)
@@ -322,7 +322,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("T")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .t)
@@ -336,7 +336,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("U")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .u)
@@ -350,7 +350,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("V")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .v)
@@ -364,7 +364,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("W")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .w)
@@ -378,7 +378,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("X")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .x)
@@ -392,7 +392,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("Y")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .y)
@@ -406,7 +406,7 @@ struct Practice: View {
                                 .scaledToFit()
                             Text("Z")
                                 .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                     }
                     .onTapGesture {
                         morseEngine.performHaptic(for: .z)

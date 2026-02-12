@@ -23,7 +23,7 @@ struct ContentView: View {
     @StateObject private var morseEngine = MorseEngine()
     @EnvironmentObject var userProgress: UserProgress
 
-    @StateObject private var connectivity = MorseModeConnectivity.shared
+    @StateObject private var connectivity = MorseModePhoneConnectivity.shared
     @State private var path = NavigationPath()
 
     var body: some View {
@@ -47,7 +47,7 @@ struct ContentView: View {
                             Text("Level: \(userProgress.level)")
                                 .font(.custom("Berkelium Bitmap", size: 18))
                                 .bold()
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                                 .offset(x: 33)
                         }
                     }
@@ -59,7 +59,7 @@ struct ContentView: View {
                                 .scaledToFit()
                             Text("The Daily Intercept")
                                 .font(.custom("berkelium bitmap", size: 22))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                         }
                     })
 
@@ -70,7 +70,7 @@ struct ContentView: View {
                                 .scaledToFit()
                             Text("Agency Academy")
                                 .font(.custom("berkelium bitmap", size: 24))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                         }
                     })
 
@@ -81,7 +81,7 @@ struct ContentView: View {
                                 .scaledToFit()
                             Text("The Warehouse")
                                 .font(.custom("berkelium bitmap", size: 24))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                         }
                     })
                 }
@@ -122,14 +122,7 @@ struct ContentView: View {
             return nil
         }
     }
-    
-    // MARK: - Haptics
     private func replayHaptics() {
-        // If your MorseEngine exposes a replay method, call it here.
-        // Uncomment and implement as needed:
-        // morseEngine.replayLastHaptics()
-
-        // Fallback: provide a quick haptic so the button has immediate feedback.
         #if canImport(UIKit)
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)

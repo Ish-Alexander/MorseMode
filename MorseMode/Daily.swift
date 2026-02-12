@@ -64,7 +64,7 @@ final class DailyMorseViewModel: ObservableObject {
 
     init(word: String = "") {
         self.targetWord = (word.isEmpty ? Self.wordForToday() : word).uppercased()
-        startTimer()
+        isActive = false // start after intro haptics
     }
 
     deinit {
@@ -122,7 +122,8 @@ final class DailyMorseViewModel: ObservableObject {
         if let newWord, !newWord.isEmpty {
             targetWord = newWord.uppercased()
         }
-        startTimer()
+        // Timer will be started after haptics replay
+        isActive = false
     }
     
     func resetForToday() {
@@ -135,9 +136,36 @@ struct Daily: View {
     @State private var currentGuess: String = ""
     @State private var isPlayingHaptics: Bool = false
     
+    // Watch Connectivity session
+    @State private var wcSessionActivated: Bool = false
+    
 #if canImport(CoreHaptics)
     @State private var hapticEngine: CHHapticEngine? = nil
 #endif
+    
+    private func activateWatchSessionIfNeeded() {
+    #if canImport(WatchConnectivity)
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        if session.activationState != .activated {
+            session.activate()
+        }
+    #endif
+    }
+    
+    private func sendMorseToWatch(_ morse: String) {
+    #if canImport(WatchConnectivity)
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        // Prefer immediate message if reachable; fall back to user info transfer
+        let payload: [String: Any] = ["morseClue": morse]
+        if session.isReachable {
+            session.sendMessage(payload, replyHandler: nil, errorHandler: nil)
+        } else {
+            session.transferUserInfo(payload)
+        }
+    #endif
+    }
     
     var body: some View {
         ZStack {
@@ -162,6 +190,23 @@ struct Daily: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
+                    
+                    // Status overlay on tube
+                    if vm.isSolved {
+                        Text("Solved! ✅")
+                            .font(.custom("berkelium bitmap", size: 16))
+                            .foregroundStyle(.neon)
+                            .padding(.top, 8)
+                            .transition(.opacity)
+                    } else if vm.timeRemaining == 0 {
+                        Text("Time's up! The word was \(vm.targetWord)")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.yellow)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+                            .transition(.opacity)
+                    }
                 }
                 
                 // Hangman blanks
@@ -169,10 +214,10 @@ struct Daily: View {
                     Text("Decode")
                         .font(.custom("berkelium bitmap", size: 24))
                         .font(.headline)
-                        .foregroundStyle(.neonGreen.opacity(0.8))
+                        .foregroundStyle(.neon.opacity(0.8))
                     Text(vm.displayBlanks)
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundStyle(.neonGreen)
+                        .foregroundStyle(.neon)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
@@ -182,7 +227,7 @@ struct Daily: View {
                     TextField("Guess a letter", text: $currentGuess)
                         .textInputAutocapitalization(.characters)
                         .disableAutocorrection(true)
-                        .foregroundStyle(.neonGreen)
+                        .foregroundStyle(.neon)
                         .tint(.white)
                         .padding(12)
                         .background(Color.white.opacity(0.08))
@@ -223,25 +268,11 @@ struct Daily: View {
                         ZStack {
                             Text("Replay Haptics")
                                 .font(.custom("berkelium bitmap", size: 16))
-                                .foregroundStyle(.neonGreen)
+                                .foregroundStyle(.neon)
                         }
                     }
                     .accessibilityLabel("Replay the last Morse haptics")
                     .disabled(isPlayingHaptics)
-                    
-                    // Status
-                    if vm.isSolved {
-                        Text("Solved! ✅")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .font(.title2.weight(.bold))
-                            .foregroundStyle(.neonGreen)
-                    } else if vm.timeRemaining == 0 {
-                        Text("Time's up! The word was \(vm.targetWord)")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.yellow)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 8)
-                    }
                     
                     Spacer(minLength: 0)
                 }
@@ -249,9 +280,11 @@ struct Daily: View {
             }
         }
         .onAppear {
+            activateWatchSessionIfNeeded()
+            sendMorseToWatch(vm.morseClue)
             // Small delay to ensure layout/haptic engine readiness
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                replayHaptics()
+                replayHaptics { vm.startTimer() }
             }
         }
     }
@@ -268,9 +301,9 @@ struct Daily: View {
         currentGuess = ""
     }
     
-    private func playMorseHaptics(for morse: String) {
+    private func playMorseHaptics(for morse: String, completion: @escaping () -> Void) {
 #if canImport(UIKit)
-        guard !isPlayingHaptics else { return }
+        guard !isPlayingHaptics else { completion(); return }
         isPlayingHaptics = true
 
         // Base timing unit (seconds)
@@ -328,6 +361,7 @@ struct Daily: View {
             // Stop flag after completion
             DispatchQueue.main.asyncAfter(deadline: .now() + relativeTime + unit) {
                 isPlayingHaptics = false
+                completion()
             }
             coreHapticsWorked = true
         } catch {
@@ -374,17 +408,19 @@ struct Daily: View {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay + unit) {
             isPlayingHaptics = false
+            completion()
         }
 #endif // UIKit
     }
-
-    // MARK: - Haptics
-    private func replayHaptics() {
+    private func replayHaptics(completion: (() -> Void)? = nil) {
 #if canImport(UIKit)
         let morse = vm.morseClue
-        playMorseHaptics(for: morse)
+        // Send to watch so it can play haptics too
+        activateWatchSessionIfNeeded()
+        sendMorseToWatch(morse)
+        playMorseHaptics(for: morse, completion: { completion?() })
 #else
-        // No UIKit haptics available
+        completion?()
 #endif
     }
 }

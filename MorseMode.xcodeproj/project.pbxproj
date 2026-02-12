@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		197D23812F226AF2003F8307 /* MorseMode Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 197D23802F226AF2003F8307 /* MorseMode Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		19DDB3C52F3CD37100E1C059 /* PhoneConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */; };
+		19DDB3C72F3CE73500E1C059 /* MorseModeConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +39,8 @@
 /* Begin PBXFileReference section */
 		197D23732F226AF2003F8307 /* MorseMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorseMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		197D23802F226AF2003F8307 /* MorseMode Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MorseMode Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneConnectivity.swift; sourceTree = "<group>"; };
+		19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseModeConnectivity.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -97,6 +101,8 @@
 				197D23752F226AF2003F8307 /* MorseMode */,
 				197D23842F226AF2003F8307 /* MorseMode Watch App */,
 				197D23742F226AF2003F8307 /* Products */,
+				19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */,
+				19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -218,6 +224,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				19DDB3C72F3CE73500E1C059 /* MorseModeConnectivity.swift in Sources */,
+				19DDB3C52F3CD37100E1C059 /* PhoneConnectivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,13 +380,13 @@
 				INFOPLIST_FILE = "MorseMode-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MorseMode;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseMode;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseModeTest;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseMode.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -406,13 +414,13 @@
 				INFOPLIST_FILE = "MorseMode-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MorseMode;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseMode;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseModeTest;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseMode.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -451,7 +459,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseMode;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -487,7 +495,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseMode;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

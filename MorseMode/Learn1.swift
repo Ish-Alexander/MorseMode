@@ -25,7 +25,7 @@ struct Learn1: View {
                                 Text(letter)
                             }
                             .font(.custom("berkelium bitmap", size: 20))
-                            .foregroundStyle(.neonGreen)
+                            .foregroundStyle(.neon)
                         }
                     }
                 }
