@@ -10,11 +10,12 @@ import WatchConnectivity
 import WatchKit
 
 struct ContentView: View {
+    @State private var showTapScreen = false
+    
     var body: some View {
         NavigationStack{
             ScrollView{
                 VStack {
-                    
                     Button(action: {
                         let payload: [String: Any] = ["action": "openView", "view": "Daily"]
                         if WCSession.default.isReachable {
@@ -31,26 +32,19 @@ struct ContentView: View {
                         }
                         WKInterfaceDevice.current().play(.click)
                     }) {
-                        ZStack{
-                            Image("Header")
-                                .resizable()
-                                .scaledToFit()
+                        VStack {
                             Text("Daily Intercept")
                                 .font(.custom("berkelium bitmap", size: 14))
+                                .foregroundStyle(Color(.neon))
                         }
                     }
                     
                     
-                    NavigationLink(destination: TapScreen(), label: {
-                        ZStack{
-                        Image("Header")
-                            .resizable()
-                            .scaledToFit()
-                            Text("Agency Academy")
-                                .font(.custom("berkelium bitmap", size: 12))
-                        }
-                    })
-                    .simultaneousGesture(TapGesture().onEnded {
+                    Button(action: {
+                        // Open locally on watch
+                        showTapScreen = true
+
+                        // Also request the phone to open Agency Academy
                         let payload: [String: Any] = ["action": "openView", "view": "Agency Academy"]
                         if WCSession.default.isReachable {
                             WCSession.default.sendMessage(payload, replyHandler: nil) { error in
@@ -64,20 +58,18 @@ struct ContentView: View {
                                 print("updateApplicationContext failed: \(error)")
                             }
                         }
+
                         WKInterfaceDevice.current().play(.click)
-                    })
-                    
-                    
-                    NavigationLink(destination: TapScreen(), label: {
-                        ZStack {
-                        Image("Header")
-                            .resizable()
-                            .scaledToFit()
-                            Text("Warehouse")
-                                .font(.custom("berkelium bitmap", size: 14))
+                    }) {
+                        VStack {
+                            Text("Agency Academy")
+                                .font(.custom("berkelium bitmap", size: 12))
+                                .foregroundStyle(Color(.neon))
                         }
-                    })
-                    .simultaneousGesture(TapGesture().onEnded {
+                    }
+                    
+                    
+                    Button(action: {
                         let payload: [String: Any] = ["action": "openView", "view": "Warehouse"]
                         if WCSession.default.isReachable {
                             WCSession.default.sendMessage(payload, replyHandler: nil) { error in
@@ -92,9 +84,18 @@ struct ContentView: View {
                             }
                         }
                         WKInterfaceDevice.current().play(.click)
-                    })
+                    }) {
+                        VStack {
+                            Text("Warehouse")
+                                .font(.custom("berkelium bitmap", size: 14))
+                                .foregroundStyle(Color(.neon))
+                        }
+                    }
                 }
             }
+        }
+        .navigationDestination(isPresented: $showTapScreen) {
+            TapScreen()
         }
         .padding()
     }

@@ -120,73 +120,80 @@ struct TapScreen: View {
     private let wcDelegate = WatchFeedbackSessionDelegate()
 
     var body: some View {
-        VStack(spacing: 12) {
-            // Current pattern preview
-            Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
-                .font(.custom("berkelium bitmap", size: 14))
-                .foregroundStyle(pattern.isEmpty ? .gray : .white)
+        ScrollView {
+            VStack(spacing: 12) {
+                // Current pattern preview
+                Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
+                    .font(.custom("berkelium bitmap", size: 14))
+                    .foregroundStyle(pattern.isEmpty ? .gray : .white)
 
-            // Dot / Dash controls
-            HStack(spacing: 12) {
-                Button {
-                    pattern.append(".")
-                    WKInterfaceDevice.current().play(.click)
-                } label: {
-                    Text("Dot ·")
-                        .font(.custom("berkelium bitmap", size: 16))
-                }
-
-                Button {
-                    pattern.append("-")
-                    WKInterfaceDevice.current().play(.click)
-                } label: {
-                    Text("Dash –")
-                        .font(.custom("berkelium bitmap", size: 16))
-                }
-            }
-
-            // Send / Clear controls
-            HStack(spacing: 12) {
-                Button {
-                    guard !pattern.isEmpty else { return }
-                    let payload: [String: Any] = [
-                        "action": "morseInput",
-                        "pattern": pattern
-                    ]
-                    if WCSession.isSupported() {
-                        let session = WCSession.default
-                        if session.isReachable {
-                            session.sendMessage(payload, replyHandler: nil, errorHandler: { error in
-                                print("[Watch] morseInput sendMessage error: \(error)")
-                            })
-                            print("[Watch] morseInput sent via sendMessage: \(pattern)")
-                        } else {
-                            do {
-                                try session.updateApplicationContext(payload)
-                                print("[Watch] morseInput sent via applicationContext: \(pattern)")
-                            } catch {
-                                print("[Watch] morseInput updateApplicationContext error: \(error)")
-                            }
-                        }
-                    } else {
-                        print("[Watch] WCSession not supported")
+                // Dot / Dash controls
+                HStack(spacing: 12) {
+                    Button {
+                        pattern.append(".")
+                        WKInterfaceDevice.current().play(.click)
+                    } label: {
+                        Text("Dot ·")
+                            .font(.custom("berkelium bitmap", size: 16))
+                            .foregroundStyle(Color(.neon))
                     }
-                    WKInterfaceDevice.current().play(.success)
-                    pattern.removeAll()
-                } label: {
-                    Text("Send")
-                        .font(.custom("berkelium bitmap", size: 16))
+
+                    Button {
+                        pattern.append("-")
+                        WKInterfaceDevice.current().play(.click)
+                    } label: {
+                        Text("Dash –")
+                            .font(.custom("berkelium bitmap", size: 16))
+                            .foregroundStyle(Color(.neon))
+                    }
                 }
 
-                Button {
-                    pattern.removeAll()
-                    WKInterfaceDevice.current().play(.click)
-                } label: {
-                    Text("Clear")
-                        .font(.custom("berkelium bitmap", size: 16))
+                // Send / Clear controls
+                HStack(spacing: 12) {
+                    Button {
+                        guard !pattern.isEmpty else { return }
+                        let payload: [String: Any] = [
+                            "action": "morseInput",
+                            "pattern": pattern
+                        ]
+                        if WCSession.isSupported() {
+                            let session = WCSession.default
+                            if session.isReachable {
+                                session.sendMessage(payload, replyHandler: nil, errorHandler: { error in
+                                    print("[Watch] morseInput sendMessage error: \(error)")
+                                })
+                                print("[Watch] morseInput sent via sendMessage: \(pattern)")
+                            } else {
+                                do {
+                                    try session.updateApplicationContext(payload)
+                                    print("[Watch] morseInput sent via applicationContext: \(pattern)")
+                                } catch {
+                                    print("[Watch] morseInput updateApplicationContext error: \(error)")
+                                }
+                            }
+                        } else {
+                            print("[Watch] WCSession not supported")
+                        }
+                        WKInterfaceDevice.current().play(.success)
+                        pattern.removeAll()
+                    } label: {
+                        Text("Send")
+                            .font(.custom("berkelium bitmap", size: 16))
+                            .foregroundStyle(Color(.neon))
+                    }
+
+                    Button {
+                        pattern.removeAll()
+                        WKInterfaceDevice.current().play(.click)
+                    } label: {
+                        Text("Clear")
+                            .font(.custom("berkelium bitmap", size: 16))
+                            .foregroundStyle(Color(.neon))
+                    }
                 }
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             if WCSession.isSupported() {
                 let session = WCSession.default

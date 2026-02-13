@@ -63,7 +63,7 @@ struct ContentView: View {
                         }
                     })
 
-                    NavigationLink(destination: Learn1(), label: {
+                    NavigationLink(destination: Learn2(incomingSelectedLetter: nil), label: {
                         ZStack{
                             Image("Header")
                                 .resizable()
@@ -102,7 +102,7 @@ struct ContentView: View {
                 case .daily:
                     Daily()
                 case .academy:
-                    Learn1()
+                    Learn2(incomingSelectedLetter: nil)
                 case .warehouse:
                     Practice(morseEngine: MorseEngine(), letter: .a)
                 }
@@ -134,3 +134,4 @@ struct ContentView: View {
     ContentView()
         .environmentObject(UserProgress())
 }
+

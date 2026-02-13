@@ -4,4 +4,10 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <FileRef
+      location = "group:WatchAudioPlayer.swift">
+   </FileRef>
+   <FileRef
+      location = "group:WatchMorseController.swift">
+   </FileRef>
 </Workspace>

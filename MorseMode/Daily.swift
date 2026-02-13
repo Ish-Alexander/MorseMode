@@ -8,6 +8,7 @@
 import SwiftUI
 import WatchConnectivity
 import Combine
+import AVFoundation
 
 #if canImport(UIKit)
 import UIKit
@@ -35,6 +36,15 @@ fileprivate func encodeMorse(_ text: String) -> String {
 }
 
 final class DailyMorseViewModel: ObservableObject {
+    
+    // Persist solved state per daily word using UserDefaults
+    private var solvedKey: String { "dailySolved_\(targetWord)" }
+    private func markSolved() {
+        UserDefaults.standard.set(true, forKey: solvedKey)
+    }
+    private var isAlreadySolved: Bool {
+        UserDefaults.standard.bool(forKey: solvedKey)
+    }
     
     private static let dailyWords: [String] = [
         "SWIFT", "APPLE", "MORSE", "CODE", "WATCH", "SIGNAL", "XCODE", "DECODE",
@@ -64,7 +74,14 @@ final class DailyMorseViewModel: ObservableObject {
 
     init(word: String = "") {
         self.targetWord = (word.isEmpty ? Self.wordForToday() : word).uppercased()
-        isActive = false // start after intro haptics
+        if isAlreadySolved {
+            // Reveal all unique letters and keep game inactive
+            revealed = Set(targetWord.filter { $0 != " " })
+            isActive = false
+            timeRemaining = 180
+        } else {
+            isActive = false // start after intro haptics
+        }
     }
 
     deinit {
@@ -113,6 +130,7 @@ final class DailyMorseViewModel: ObservableObject {
         if isSolved {
             isActive = false
             timer?.invalidate()
+            markSolved()
         }
     }
 
@@ -122,8 +140,15 @@ final class DailyMorseViewModel: ObservableObject {
         if let newWord, !newWord.isEmpty {
             targetWord = newWord.uppercased()
         }
-        // Timer will be started after haptics replay
-        isActive = false
+        // If already solved for this word, reveal and keep inactive
+        if isAlreadySolved {
+            revealed = Set(targetWord.filter { $0 != " " })
+            isActive = false
+            timeRemaining = 180
+        } else {
+            // Timer will be started after haptics replay
+            isActive = false
+        }
     }
     
     func resetForToday() {
@@ -135,6 +160,7 @@ struct Daily: View {
     @StateObject private var vm = DailyMorseViewModel()
     @State private var currentGuess: String = ""
     @State private var isPlayingHaptics: Bool = false
+    @State private var audioPlayer: AVAudioPlayer? = nil
     
     // Watch Connectivity session
     @State private var wcSessionActivated: Bool = false
@@ -158,7 +184,7 @@ struct Daily: View {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         // Prefer immediate message if reachable; fall back to user info transfer
-        let payload: [String: Any] = ["morseClue": morse]
+        let payload: [String: Any] = ["morseClue": morse, "word": vm.targetWord]
         if session.isReachable {
             session.sendMessage(payload, replyHandler: nil, errorHandler: nil)
         } else {
@@ -167,6 +193,43 @@ struct Daily: View {
     #endif
     }
     
+    private func playSound(for letter: Character) {
+        let upper = String(letter).uppercased()
+        guard let first = upper.first, first.isLetter else {
+            audioPlayer?.stop()
+            audioPlayer = nil
+            return
+        }
+        let baseName = "\(first)_morse_code"
+        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+        var foundURL: URL? = nil
+        for ext in candidateExtensions {
+            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
+                foundURL = url
+                break
+            }
+        }
+        guard let url = foundURL else {
+            if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
+            audioPlayer = nil
+            print("[Audio][Daily] No audio file for letter \(first). Tried: \(candidateExtensions.map { "\(baseName).\($0)" }.joined(separator: ", "))")
+            return
+        }
+        do {
+            if let player = audioPlayer, player.url == url {
+                player.currentTime = 0
+                player.play()
+            } else {
+                let player = try AVAudioPlayer(contentsOf: url)
+                player.prepareToPlay()
+                player.play()
+                audioPlayer = player
+            }
+        } catch {
+            print("[Audio][Daily] Failed to play \(url.lastPathComponent): \(error)")
+        }
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -183,29 +246,27 @@ struct Daily: View {
                 ZStack{
                     Image("Tube")
                     VStack(spacing: 8) {
-                        
+                        // Status above the clue
+                        if vm.isSolved {
+                            Text("Solved! ✅")
+                                .font(.custom("berkelium bitmap", size: 16))
+                                .foregroundStyle(.neon)
+                                .transition(.opacity)
+                        } else if vm.timeRemaining == 0 {
+                            Text("Time's up! The word was \(vm.targetWord)")
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(.yellow)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                                .transition(.opacity)
+                        }
+
+                        // Morse clue below
                         Text(vm.morseClue)
                             .font(.system(size: 28, weight: .medium, design: .monospaced))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                    }
-                    
-                    // Status overlay on tube
-                    if vm.isSolved {
-                        Text("Solved! ✅")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .foregroundStyle(.neon)
-                            .padding(.top, 8)
-                            .transition(.opacity)
-                    } else if vm.timeRemaining == 0 {
-                        Text("Time's up! The word was \(vm.targetWord)")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.yellow)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                            .transition(.opacity)
                     }
                 }
                 
@@ -281,10 +342,16 @@ struct Daily: View {
         }
         .onAppear {
             activateWatchSessionIfNeeded()
-            sendMorseToWatch(vm.morseClue)
-            // Small delay to ensure layout/haptic engine readiness
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                replayHaptics { vm.startTimer() }
+            // If today's word is already solved, don't play haptics or start timer
+            if vm.isSolved {
+                // Still send to watch in case it wants to show the clue
+                sendMorseToWatch(vm.morseClue)
+            } else {
+                sendMorseToWatch(vm.morseClue)
+                // Small delay to ensure layout/haptic engine readiness
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    replayHaptics { vm.startTimer() }
+                }
             }
         }
     }
@@ -313,6 +380,40 @@ struct Daily: View {
         let intraCharGap = unit
         let interCharGap = unit * 6 // between letters (increased for clearer separation)
         let wordGap = unit * 7 // between words ('/' separator)
+
+        // Schedule audio playback aligned to the Morse timing per letter
+        // Compute the start time for each letter based on its dot/dash pattern and configured gaps.
+        var audioStart: TimeInterval = 0
+        let letters = Array(vm.targetWord.uppercased())
+        for (i, ch) in letters.enumerated() {
+            if ch == " " {
+                audioStart += wordGap
+                continue
+            }
+
+            // Schedule audio at the start of this letter
+            DispatchQueue.main.asyncAfter(deadline: .now() + audioStart) {
+                playSound(for: ch)
+            }
+
+            // Advance by the duration of this letter’s Morse pattern (symbols + intra gaps)
+            if let pattern = morseMap[ch] {
+                var letterDuration: TimeInterval = 0
+                for (idx, sym) in pattern.enumerated() {
+                    letterDuration += (sym == "-" ? dash : dot)
+                    if idx < pattern.count - 1 {
+                        letterDuration += intraCharGap
+                    }
+                }
+                audioStart += letterDuration
+            }
+
+            // Add inter-letter gap unless next is a space or end
+            if i < letters.count - 1 {
+                let next = letters[i + 1]
+                audioStart += (next == " " ? wordGap : interCharGap)
+            }
+        }
 
 #if canImport(CoreHaptics)
         // Core Haptics path with precise durations
