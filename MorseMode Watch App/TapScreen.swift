@@ -120,7 +120,7 @@ struct TapScreen: View {
     private let wcDelegate = WatchFeedbackSessionDelegate()
 
     var body: some View {
-        ScrollView {
+        (ScrollView {
             VStack(spacing: 12) {
                 // Current pattern preview
                 Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
@@ -193,6 +193,9 @@ struct TapScreen: View {
                 }
             }
         }
+        .contentMargins(0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
         .ignoresSafeArea()
         .onAppear {
             if WCSession.isSupported() {
@@ -205,7 +208,6 @@ struct TapScreen: View {
                 print("[Watch] Activating WCSession...")
             }
         }
-        .padding()
     }
 }
 
