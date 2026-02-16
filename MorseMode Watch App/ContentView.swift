@@ -16,6 +16,11 @@ struct ContentView: View {
         NavigationStack{
             ScrollView{
                 VStack {
+                    NavigationLink(destination: TapScreen(), isActive: $showTapScreen) {
+                        EmptyView()
+                    }
+                    .hidden()
+                    
                     Button(action: {
                         let payload: [String: Any] = ["action": "openView", "view": "Daily"]
                         if WCSession.default.isReachable {
@@ -93,9 +98,6 @@ struct ContentView: View {
                     }
                 }
             }
-        }
-        .navigationDestination(isPresented: $showTapScreen) {
-            TapScreen()
         }
         .padding()
     }

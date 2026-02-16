@@ -33,19 +33,73 @@ fileprivate func encodeMorse(_ text: String) -> String {
         if ch == " " { return "/" }
         return morseMap[ch] ?? ""
     }.joined(separator: " ")
+    // Converts text to uppercase, looks up the morse code, and joins everything together
 }
 
 final class DailyMorseViewModel: ObservableObject {
+    // Updates screen automatically
     
-    // Persist solved state per daily word using UserDefaults
+    // Persistence keys per daily word
+    private var timeKey: String { "dailyTimeRemaining_\(targetWord)" }
+    private var wrongKey: String { "dailyWrongGuesses_\(targetWord)" }
+    
+    private var revealedKey: String { "dailyRevealed_\(targetWord)" }
+
+    private func saveTimeRemaining() {
+        UserDefaults.standard.set(timeRemaining, forKey: timeKey)
+    }
+
+    private func loadTimeRemaining() -> Int? {
+        let value = UserDefaults.standard.integer(forKey: timeKey)
+        // integer(forKey:) returns 0 if missing; distinguish missing by checking object(forKey:)
+        if UserDefaults.standard.object(forKey: timeKey) == nil { return nil }
+        return value
+    }
+
+    private func clearTimeRemaining() {
+        UserDefaults.standard.removeObject(forKey: timeKey)
+    }
+
+    private func saveWrongGuesses() {
+        let array = Array(wrongGuesses).map { String($0) }
+        UserDefaults.standard.set(array, forKey: wrongKey)
+    }
+
+    private func loadWrongGuesses() -> Set<Character> {
+        guard let array = UserDefaults.standard.array(forKey: wrongKey) as? [String] else { return [] }
+        return Set(array.compactMap { $0.first })
+    }
+
+    private func clearWrongGuesses() {
+        UserDefaults.standard.removeObject(forKey: wrongKey)
+    }
+    
+    private func saveRevealed() {
+        let array = Array(revealed).map { String($0) }
+        UserDefaults.standard.set(array, forKey: revealedKey)
+    }
+
+    private func loadRevealed() -> Set<Character> {
+        guard let array = UserDefaults.standard.array(forKey: revealedKey) as? [String] else { return [] }
+        return Set(array.compactMap { $0.first })
+    }
+
+    private func clearRevealed() {
+        UserDefaults.standard.removeObject(forKey: revealedKey)
+    }
+    
     private var solvedKey: String { "dailySolved_\(targetWord)" }
     private func markSolved() {
         UserDefaults.standard.set(true, forKey: solvedKey)
+        clearTimeRemaining()
+        clearWrongGuesses()
+        clearRevealed()
     }
     private var isAlreadySolved: Bool {
         UserDefaults.standard.bool(forKey: solvedKey)
     }
-    
+    // Remembers if the user solved today's puzzle
+
     private static let dailyWords: [String] = [
         "SWIFT", "APPLE", "MORSE", "CODE", "WATCH", "SIGNAL", "XCODE", "DECODE",
         "BITMAP", "NEON", "HAPTIC", "VIBRATE", "DOT", "DASH", "PUZZLE", "SECRET",
@@ -58,10 +112,12 @@ final class DailyMorseViewModel: ObservableObject {
         let startOfDay = cal.startOfDay(for: date)
         let daysSinceRef = cal.dateComponents([.day], from: Date(timeIntervalSince1970: 0), to: startOfDay).day ?? 0
         return abs(daysSinceRef) % max(1, dailyWords.count)
+        
     }
 
     static func wordForToday(on date: Date = Date()) -> String {
         dailyWords[dailyIndex(for: date)]
+        //Picks one word for the day, makes that word the same for everyone
     }
 
     @Published var targetWord: String
@@ -69,7 +125,8 @@ final class DailyMorseViewModel: ObservableObject {
     @Published var wrongGuesses: Set<Character> = []
     @Published var timeRemaining: Int = 180 // 3 minutes
     @Published var isActive: Bool = true
-
+// Updates UI when changes are made
+    
     private var timer: Timer?
 
     init(word: String = "") {
@@ -77,44 +134,66 @@ final class DailyMorseViewModel: ObservableObject {
         if isAlreadySolved {
             // Reveal all unique letters and keep game inactive
             revealed = Set(targetWord.filter { $0 != " " })
+            saveRevealed()
             isActive = false
             timeRemaining = 180
+            // Clear any leftover persisted state for a solved day
+            clearTimeRemaining()
+            clearWrongGuesses()
         } else {
+            // Try to restore persisted progress for this day's word
+            let restoredTime = loadTimeRemaining()
+            let restoredWrong = loadWrongGuesses()
+            if let t = restoredTime, t > 0 {
+                timeRemaining = t
+            } else {
+                timeRemaining = 180
+            }
+            wrongGuesses = restoredWrong
+            revealed = loadRevealed()
             isActive = false // start after intro haptics
         }
     }
 
     deinit {
+        saveTimeRemaining()
+        saveRevealed()
+        saveWrongGuesses()
         timer?.invalidate()
     }
 
     func startTimer() {
         timer?.invalidate()
         isActive = true
-        timeRemaining = 180
+        // timeRemaining = 180  // Removed this line as per instructions
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] t in
             guard let self else { return }
             if self.timeRemaining > 0 && self.isActive {
                 self.timeRemaining -= 1
+                self.saveTimeRemaining()
             } else {
                 t.invalidate()
                 self.isActive = false
+                self.saveTimeRemaining()
+                // Runs the timer
             }
         }
     }
 
     var morseClue: String {
         encodeMorse(targetWord)
+        // Converts the target word into Morse Code
     }
 
     var displayBlanks: String {
-        // Hangman-style: underscores for unrevealed letters, keep spaces
+        // Underscores for unrevealed letters, keeps spaces
         targetWord.map { ch -> String in
             if ch == " " { return "  " }
             return revealed.contains(ch) ? String(ch) : "_"
         }.joined(separator: " ")
     }
-
+// Includes underscores for unguessed letters
+    
     var isSolved: Bool {
         targetWord.allSatisfy { $0 == " " || revealed.contains($0) }
     }
@@ -124,43 +203,33 @@ final class DailyMorseViewModel: ObservableObject {
         guard isActive, timeRemaining > 0, upper.isLetter else { return }
         if targetWord.contains(upper) {
             revealed.insert(upper)
+            saveRevealed()
         } else {
             wrongGuesses.insert(upper)
+            saveWrongGuesses()
         }
+        // Adds letters to "Revealed" and "Wrong Guess" lines
         if isSolved {
             isActive = false
             timer?.invalidate()
             markSolved()
+            clearTimeRemaining()
+            clearWrongGuesses()
+            clearRevealed()
+            // Stops timer when word is solved
         }
-    }
-
-    func reset(with newWord: String? = nil) {
-        revealed.removeAll()
-        wrongGuesses.removeAll()
-        if let newWord, !newWord.isEmpty {
-            targetWord = newWord.uppercased()
-        }
-        // If already solved for this word, reveal and keep inactive
-        if isAlreadySolved {
-            revealed = Set(targetWord.filter { $0 != " " })
-            isActive = false
-            timeRemaining = 180
-        } else {
-            // Timer will be started after haptics replay
-            isActive = false
-        }
-    }
-    
-    func resetForToday() {
-        reset(with: Self.wordForToday())
     }
 }
 
 struct Daily: View {
     @StateObject private var vm = DailyMorseViewModel()
+    // Game logic object
     @State private var currentGuess: String = ""
+    // What the user types
     @State private var isPlayingHaptics: Bool = false
+    // Prevents overlapping haptics
     @State private var audioPlayer: AVAudioPlayer? = nil
+    // Plays morse code audio
     
     // Watch Connectivity session
     @State private var wcSessionActivated: Bool = false
@@ -171,6 +240,7 @@ struct Daily: View {
     
     private func activateWatchSessionIfNeeded() {
     #if canImport(WatchConnectivity)
+        // Makes sure watch and phone can communicate
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         if session.activationState != .activated {
@@ -194,11 +264,13 @@ struct Daily: View {
     }
     
     private func playSound(for letter: Character) {
+     
         let upper = String(letter).uppercased()
         guard let first = upper.first, first.isLetter else {
             audioPlayer?.stop()
             audioPlayer = nil
             return
+            
         }
         let baseName = "\(first)_morse_code"
         let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
@@ -227,6 +299,7 @@ struct Daily: View {
             }
         } catch {
             print("[Audio][Daily] Failed to play \(url.lastPathComponent): \(error)")
+            // Finds the audio file, plays the matching letter, sends error code if audio not found
         }
     }
 
@@ -242,6 +315,7 @@ struct Daily: View {
                     .monospacedDigit()
                     .foregroundStyle(vm.timeRemaining > 10 ? .green : .red)
                     .accessibilityLabel("Time remaining: \(timerString)")
+                // Shows timer, color changes when time gets low
                 
                 ZStack{
                     Image("Tube")
@@ -266,7 +340,11 @@ struct Daily: View {
                             .font(.system(size: 28, weight: .medium, design: .monospaced))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                            .lineLimit(nil)
+                            .minimumScaleFactor(0.4)
+                            .allowsTightening(true)
+                            .padding(.horizontal, 16)
+                            .frame(maxWidth: 300) // constrain to fit inside Tube image
                     }
                 }
                 
@@ -322,7 +400,6 @@ struct Daily: View {
                 
                 // Controls
                 HStack(spacing: 16) {
-                    // Replay Haptics Button
                     Button(action: {
                         replayHaptics()
                     }) {
@@ -334,8 +411,7 @@ struct Daily: View {
                     }
                     .accessibilityLabel("Replay the last Morse haptics")
                     .disabled(isPlayingHaptics)
-                    
-                    Spacer(minLength: 0)
+                    // Replays the morse code and haptics
                 }
                 .padding()
             }
@@ -350,7 +426,9 @@ struct Daily: View {
                 sendMorseToWatch(vm.morseClue)
                 // Small delay to ensure layout/haptic engine readiness
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    replayHaptics { vm.startTimer() }
+                    if vm.timeRemaining > 0 { // continue the remaining time
+                        replayHaptics { vm.startTimer() }
+                    }
                 }
             }
         }
@@ -374,12 +452,12 @@ struct Daily: View {
         isPlayingHaptics = true
 
         // Base timing unit (seconds)
-        let unit: TimeInterval = 0.08 // tweak to taste
+        let unit: TimeInterval = 0.08
         let dot = unit
         let dash = unit * 3 // dash lasts 3x as long as dot
         let intraCharGap = unit
-        let interCharGap = unit * 6 // between letters (increased for clearer separation)
-        let wordGap = unit * 7 // between words ('/' separator)
+        let interCharGap = unit * 6 // Space between letters
+        let wordGap = unit * 7 // Space between words
 
         // Schedule audio playback aligned to the Morse timing per letter
         // Compute the start time for each letter based on its dot/dash pattern and configured gaps.

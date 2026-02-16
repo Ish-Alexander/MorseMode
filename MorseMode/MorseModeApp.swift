@@ -11,28 +11,35 @@ import WatchConnectivity
 import Combine
 
 class MorseModeConnectivity: NSObject, ObservableObject, WCSessionDelegate {
+    // Handles communication between the phone and watch
     @Published var requestedView: String?
     let objectWillChange = ObservableObjectPublisher()
 
     static let shared = MorseModeConnectivity()
+    // Creates one instance across views
 
     override init() {
         super.init()
         activate()
+        // automaically starts connection to watch
     }
 
     func activate() {
+        // Sets up watch connection
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         session.delegate = self
         session.activate()
+        // Watches for devices that cannot connect to watch
     }
 
     func send(_ data: [String: Any]) {
+        // Sends a dictionary
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(data, replyHandler: nil)
         } else {
             print("Watch not reachable")
+            
         }
     }
 
@@ -88,15 +95,27 @@ struct MorseModeApp: App {
         _ = _initializePhoneConnectivity()
         print("[App] PhoneConnectivity initialized at launch")
     }
+    // Runs when app launches
 
     @StateObject private var morseEngine = MorseEngine()
+    // Creates one engine for whole app
     @StateObject private var userProgress = UserProgress()
+    // Tracks user level
+
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    // Checks if user has seen the onboarding page
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(morseEngine)
-                .environmentObject(userProgress)
+            if hasSeenOnboarding {
+                ContentView()
+                    .environmentObject(morseEngine)
+                    .environmentObject(userProgress)
+            } else {
+                OnboardingView(items: onboardingData) {
+                    hasSeenOnboarding = true
+                }
+            }
         }
     }
 }

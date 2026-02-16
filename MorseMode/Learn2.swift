@@ -14,19 +14,27 @@ import AVFoundation
 struct Learn2: View {
     var incomingSelectedLetter: String?
     @EnvironmentObject var userProgress: UserProgress
+    // Shared data across the app
     @Environment(MorseEngine.self) private var morseEngine
+    // Morse haptics system
     @State private var letter: String = ""
+    // Current Letter
     @AppStorage("Learn2_isPracticeMode") private var isPracticeMode: Bool = true
+    // Remembers practice mode between launches
     @State private var lastFeedback: String = ""
+    // Shows exp gained as feedback
     @State private var rotationAngle: Double = 0
+    // Rotates radar image
     @State private var lastExpAwardDate: Date? = nil
     @State private var audioPlayer: AVAudioPlayer? = nil
+    // Stores audio player
     #if canImport(WatchConnectivity)
         private let watchDelegate = Learn2WatchDelegate()
     #endif
 
     // Simple Morse map for validation
     private let morseMap: [Character: String] = [
+        // Checks if user inputs the correct morse code
         "A": ".-",   "B": "-...", "C": "-.-.", "D": "-..",  "E": ".",
         "F": "..-.", "G": "--.",  "H": "....", "I": "..",   "J": ".---",
         "K": "-.-",  "L": ".-..", "M": "--",   "N": "-.",  "O": "---",
@@ -38,16 +46,17 @@ struct Learn2: View {
     
     func createNewItem() {
         letter = String(Self.alphabet.randomElement() ?? " ")
+        // Picks a random letter
     }
     
     func playHapticsForCurrentLetter() {
         guard let letterEnum = Letter(string: letter) else { return }
         morseEngine.performHaptic(for: letterEnum)
+        // Converts letter into enum, asks the engine to play haptics for said letter
     }
     
     func playSoundForCurrentLetter() {
         // Generalized playback: expects files named like "A_morse_code.<ext>" for letters A-Z.
-        // We try multiple extensions to handle assets like "A_morse_code.ogg.mp3".
         let upper = letter.uppercased()
         guard let first = upper.first, first.isLetter else {
             audioPlayer?.stop()
@@ -130,6 +139,7 @@ struct Learn2: View {
                 "action": "feedback",
                 "result": "correct",
                 "amount": 10
+                // Checks morse input from watch, sends message if correct
             ]
             sendToWatch(feedbackPayload)
             // Move to a new challenge after a short delay
@@ -144,6 +154,7 @@ struct Learn2: View {
             let feedbackPayload: [String: Any] = [
                 "action": "feedback",
                 "result": "incorrect"
+                // With incorrect feedback from watch, sends a try again message.
             ]
             sendToWatch(feedbackPayload)
             // Fade the feedback after a moment
@@ -359,11 +370,6 @@ struct SharedDefaults {
     }
 }
 
-// You can also use @AppStorage with the shared store in SwiftUI like this:
-// @AppStorage(SharedDefaults.expKey, store: SharedDefaults.store) var sharedEXP: Int = 0
-// This works in both iOS and watchOS targets as long as the App Group is enabled.
-
-// MARK: - Persistence Model
 private struct PersistedProgress: Codable {
     var level: Int
     var currentEXP: Int
@@ -405,6 +411,7 @@ class UserProgress: ObservableObject{
         if leveled {
             save()
             saveSharedEXP()
+            // Level up system
         }
     }
     
@@ -442,8 +449,6 @@ class UserProgress: ObservableObject{
     }
 }
 
-// Ensure MorseEngine can be injected via the SwiftUI Environment API used here
-// The new `.environment(_:)` overload requires the type to conform to `Observable`.
 extension MorseEngine: Observable {}
 
 #Preview {

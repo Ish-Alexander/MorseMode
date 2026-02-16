@@ -13,7 +13,19 @@ import Combine
 import UIKit
 #endif
 
+private struct IsInOnboardingKey: EnvironmentKey {
+    static let defaultValue: Bool = false
+}
+
+extension EnvironmentValues {
+    var isInOnboarding: Bool {
+        get { self[IsInOnboardingKey.self] }
+        set { self[IsInOnboardingKey.self] = newValue }
+    }
+}
+
 private enum AppDestination: Hashable {
+    // Defines possible destinations
     case daily
     case academy
     case warehouse
@@ -21,10 +33,16 @@ private enum AppDestination: Hashable {
 
 struct ContentView: View {
     @StateObject private var morseEngine = MorseEngine()
+    // Manages Morse code logic
     @EnvironmentObject var userProgress: UserProgress
+    // Shared global data
 
     @StateObject private var connectivity = MorseModePhoneConnectivity.shared
+    // Connects phone to watch
     @State private var path = NavigationPath()
+    
+    // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
+    @State private var isInOnboarding: Bool = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -34,16 +52,18 @@ struct ContentView: View {
                 VStack {
                     HStack(alignment: .top){
                         ZStack{
+                            
                             Image("Level")
                                 .resizable()
                                 .scaledToFit()
                                 .font(.largeTitle)
+                            
                             Image("Icon")
-                                
                                 .resizable()
                                 .scaledToFit()
                                 .offset(x: -109, y: -10)
                                 .frame(width: 90)
+                            
                             Text("Level: \(userProgress.level)")
                                 .font(.custom("Berkelium Bitmap", size: 18))
                                 .bold()
@@ -88,7 +108,16 @@ struct ContentView: View {
                 .padding()
             }
             .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
+                // If onboarding is active, ignore watch-driven navigation changes
+                guard !isInOnboarding else {
+                    DispatchQueue.main.async { connectivity.requestedView = nil }
+                    return
+                }
+
                 if let destination = mapRequestedView(requested) {
+                    // Pop to root first so all screens return to ContentView
+                    path = NavigationPath()
+                    // Then navigate to the requested destination from root
                     path.append(destination)
                     DispatchQueue.main.async {
                         connectivity.requestedView = nil
@@ -98,6 +127,7 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(for: AppDestination.self) { destination in
+                //Shows matching view
                 switch destination {
                 case .daily:
                     Daily()
@@ -108,9 +138,12 @@ struct ContentView: View {
                 }
             }
         }
+        // Propagate onboarding flag so onboarding screens can opt out of watch-driven navigation
+        .environment(\.isInOnboarding, isInOnboarding)
     }
 
     private func mapRequestedView(_ view: String) -> AppDestination? {
+        // Converts strings into enum values
         switch view {
         case "Daily":
             return .daily
@@ -123,6 +156,7 @@ struct ContentView: View {
         }
     }
     private func replayHaptics() {
+        // Triggers haptic feedback
         #if canImport(UIKit)
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
@@ -133,5 +167,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(UserProgress())
+        .environment(\.isInOnboarding, false)
 }
 
