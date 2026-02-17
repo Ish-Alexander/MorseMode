@@ -192,22 +192,12 @@ struct TapScreen: View {
                     }
                 }
             }
+            .padding(.top, 75)
         }
         .contentMargins(0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         )
         .ignoresSafeArea()
-        .onAppear {
-            if WCSession.isSupported() {
-                let session = WCSession.default
-                if session.delegate == nil || !(session.delegate is WatchFeedbackSessionDelegate) {
-                    session.delegate = wcDelegate
-                    print("[Watch] WCSession delegate set: \(String(describing: type(of: session.delegate!)))")
-                }
-                session.activate()
-                print("[Watch] Activating WCSession...")
-            }
-        }
     }
 }
 

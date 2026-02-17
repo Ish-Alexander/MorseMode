@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 struct OnboardingItem: Identifiable, Hashable {
     let id = UUID()
     let imageName: String
@@ -15,6 +19,7 @@ struct OnboardingItem: Identifiable, Hashable {
 }
 
 let onboardingData: [OnboardingItem] = [
+    // Content Source
     OnboardingItem(
         imageName: "wave.3.right",
         title: "Welcome to MorseMode",
@@ -42,6 +47,13 @@ struct OnboardingView: View {
     let items: [OnboardingItem]
     let onFinish: () -> Void
 
+    private func triggerPageHaptic() {
+        #if canImport(UIKit)
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+        #endif
+    }
+
     var body: some View {
         VStack {
             TabView(selection: $selection) {
@@ -54,6 +66,9 @@ struct OnboardingView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .onChange(of: selection) { _, _ in
+                triggerPageHaptic()
+            }
             // Makes it swipe horizontally
 
             PageControl(currentIndex: selection, count: items.count)
@@ -64,6 +79,7 @@ struct OnboardingView: View {
                 if selection > 0 {
                     Button("Back") {
                         withAnimation { selection = max(0, selection - 1) }
+                        triggerPageHaptic()
                     }
                     .font(.custom("berkelium bitmap", size: 16))
                     .foregroundColor(.neon)
@@ -83,6 +99,7 @@ struct OnboardingView: View {
                 Button(selection == items.count - 1 ? "Get Started" : "Next") {
                     if selection < items.count - 1 {
                         withAnimation { selection += 1 }
+                        triggerPageHaptic()
                     } else {
                         onFinish()
                         // Closes onboarding after last page is cleared

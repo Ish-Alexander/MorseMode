@@ -13,8 +13,10 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
     }
     
     static let shared = WatchConnectivityManager()
+    // Creates one global instance
 
     @Published var isReachable: Bool = false
+    // Checks if watch is reachable
 
     private override init() {
         super.init()
@@ -46,6 +48,7 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
         let payload: [String: Any] = [
             "action": "openView",
             "view": viewName
+            // Tells watch to switch to a specific screen
         ]
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(payload, replyHandler: nil) { error in
@@ -60,7 +63,6 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
         }
     }
 
-    // MARK: - WCSessionDelegate
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         print("[WatchConnectivity] activationDidComplete: state=\(activationState.rawValue), error=\(String(describing: error))")
         DispatchQueue.main.async { [weak self] in
@@ -72,6 +74,7 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
         print("[WatchConnectivity] reachability changed: \(session.isReachable)")
         DispatchQueue.main.async { [weak self] in
             self?.isReachable = session.isReachable
+            // Watches for when the watch goes online/offline
         }
     }
     
@@ -86,6 +89,7 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
     }
     
     private func handleIncomingPayload(_ payload: [String: Any]) {
+        // Reads incoming commands
         guard let action = payload["action"] as? String else { return }
         switch action {
         case "playMorse":

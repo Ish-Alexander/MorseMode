@@ -83,7 +83,7 @@ struct Practice: View {
             return
         }
         let baseName = "\(first)_morse_code"
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+        let candidateExtensions = ["ogg.mp3", "mp3", "ogg"]
         var foundURL: URL? = nil
         for ext in candidateExtensions {
             if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
@@ -125,8 +125,6 @@ struct Practice: View {
         // For each symbol: dot=1 unit on, dash=3 units on, 1 unit off between symbols
         for (idx, symbol) in pattern.enumerated() {
             // Trigger haptic for the whole letter if engine only supports per-letter
-            // If your engine has per-symbol API, replace this with dot/dash specific calls
-            // For now, we reuse performHaptic(for:) to ensure a feel per letter
             if idx == 0, let l = letter(from: ch) {
                 morseEngine.performHaptic(for: l)
             }
@@ -168,11 +166,13 @@ struct Practice: View {
             isPlayingMessage = false
         }
     }
+    // Plays entire typed message
             
     private func sendToWatch(_ letter: Letter) {
         MorseModeConnectivity.shared.send([
             "action": "playMorse",
             "letter": String(describing: letter).uppercased()
+            // Sends message to apple watch
         ])
     }
             
@@ -185,6 +185,7 @@ struct Practice: View {
                 ZStack {
                     GeometryReader { geo in
                         let h = geo.size.height
+                        // Makes it so the image keeps its shape
                         Image("Tube")
                             .resizable()
                             .scaledToFit()

@@ -12,7 +12,6 @@ import WatchConnectivity
 import AVFoundation
 
 struct Learn2: View {
-    var incomingSelectedLetter: String?
     @EnvironmentObject var userProgress: UserProgress
     // Shared data across the app
     @Environment(MorseEngine.self) private var morseEngine
@@ -66,7 +65,7 @@ struct Learn2: View {
         let baseName = "\(first)_morse_code"
 
         // Try a list of possible extensions in order, including the exact "ogg.mp3" case.
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+        let candidateExtensions = ["ogg.mp3", "mp3", "ogg"]
 
         var foundURL: URL? = nil
         for ext in candidateExtensions {
@@ -139,7 +138,7 @@ struct Learn2: View {
                 "action": "feedback",
                 "result": "correct",
                 "amount": 10
-                // Checks morse input from watch, sends message if correct
+                // Checks morse input from watch, sends message if correct and awards EXP
             ]
             sendToWatch(feedbackPayload)
             // Move to a new challenge after a short delay
@@ -187,6 +186,7 @@ struct Learn2: View {
                     }
                     .tint(.neon)
                     .progressViewStyle(.linear)
+                    // Gives visual for earned EXP/EXP to next level
 
                     HStack {
                         Text("\(userProgress.currentEXP) / \(userProgress.expNeededForNextLevel) EXP")
@@ -246,6 +246,7 @@ struct Learn2: View {
                 sendToWatch([
                     "action": "playMorse",
                     "letter": letter
+                    // Runs when view first opens
                 ])
                 if WCSession.isSupported() {
                     let session = WCSession.default
@@ -286,6 +287,7 @@ struct Learn2: View {
                 print("[Phone] Awarding EXP amount: \(amount)")
                 userProgress.addEXP(amount)
                 lastFeedback = "Awarded +\(amount) EXP"
+                // Recieves input from watch, awards EXP for correct input. Prevents awarding double EXP.
             }
         }
     }
@@ -347,8 +349,7 @@ final class Learn2WatchDelegate: NSObject, WCSessionDelegate {
 /// SharedDefaults provides a tiny convenience API around the App Group UserDefaults
 /// so both iOS and watchOS targets can read/write shared values like EXP.
 struct SharedDefaults {
-    /// Update this to your actual App Group identifier in both targets' capabilities.
-    static let suiteName = "group.com.yourcompany.morsemode" // TODO: set your real App Group ID
+    static let suiteName = "com.Ishauna.MorseModeTest"
     static let expKey = "sharedEXP"
 
     /// Returns the shared UserDefaults for the App Group, or nil if misconfigured.
@@ -377,7 +378,7 @@ private struct PersistedProgress: Codable {
 }
 
 class UserProgress: ObservableObject{
-    private let groupSuite = "group.com.yourcompany.morsemode" // TODO: set your real App Group ID
+    private let groupSuite = "com.Ishauna.MorseModeTest"
     private let sharedEXPKey = "sharedEXP"
     private var sharedDefaults: UserDefaults? { UserDefaults(suiteName: groupSuite) }
 
@@ -452,7 +453,7 @@ class UserProgress: ObservableObject{
 extension MorseEngine: Observable {}
 
 #Preview {
-    Learn2(incomingSelectedLetter: nil)
+    Learn2()
         .environmentObject(UserProgress())
         .environment(MorseEngine())
 }
