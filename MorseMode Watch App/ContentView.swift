@@ -11,25 +11,14 @@ import WatchKit
 
 struct ContentView: View {
     @State private var showTapScreen = false
-    
+
     var body: some View {
         NavigationStack{
             ScrollView{
                 VStack {
                     Button(action: {
-                        let payload: [String: Any] = ["action": "openView", "view": "Daily"]
-                        if WCSession.default.isReachable {
-                            WCSession.default.sendMessage(payload, replyHandler: nil) { error in
-                                print("Send failed: \(error)")
-                                do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                    print("updateApplicationContext failed: \(error)")
-                                }
-                            }
-                        } else {
-                            do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                print("updateApplicationContext failed: \(error)")
-                            }
-                        }
+                        WatchConnectivityManager.shared.open(view: "Daily")
+                        WatchConnectivityManager.shared.resendMorse()
                         WKInterfaceDevice.current().play(.click)
                     }) {
                         VStack {
@@ -44,21 +33,7 @@ struct ContentView: View {
                         // Open locally on watch
                         showTapScreen = true
 
-                        // Also request the phone to open Agency Academy
-                        let payload: [String: Any] = ["action": "openView", "view": "Agency Academy"]
-                        if WCSession.default.isReachable {
-                            WCSession.default.sendMessage(payload, replyHandler: nil) { error in
-                                print("Send failed: \(error)")
-                                do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                    print("updateApplicationContext failed: \(error)")
-                                }
-                            }
-                        } else {
-                            do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                print("updateApplicationContext failed: \(error)")
-                            }
-                        }
-
+                        WatchConnectivityManager.shared.open(view: "Agency Academy")
                         WKInterfaceDevice.current().play(.click)
                     }) {
                         VStack {
@@ -70,19 +45,7 @@ struct ContentView: View {
                     
                     
                     Button(action: {
-                        let payload: [String: Any] = ["action": "openView", "view": "Warehouse"]
-                        if WCSession.default.isReachable {
-                            WCSession.default.sendMessage(payload, replyHandler: nil) { error in
-                                print("Send failed: \(error)")
-                                do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                    print("updateApplicationContext failed: \(error)")
-                                }
-                            }
-                        } else {
-                            do { try WCSession.default.updateApplicationContext(payload) } catch {
-                                print("updateApplicationContext failed: \(error)")
-                            }
-                        }
+                        WatchConnectivityManager.shared.open(view: "Warehouse")
                         WKInterfaceDevice.current().play(.click)
                     }) {
                         VStack {
@@ -97,6 +60,7 @@ struct ContentView: View {
                 TapScreen()
             }
         }
+        .onAppear { _ = WatchConnectivityManager.shared }
 //        .padding()
     }
 }

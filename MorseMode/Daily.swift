@@ -233,10 +233,12 @@ struct Daily: View {
     
     // Watch Connectivity session
     @State private var wcSessionActivated: Bool = false
-    
+
 #if canImport(CoreHaptics)
     @State private var hapticEngine: CHHapticEngine? = nil
 #endif
+
+    @Environment(\.scenePhase) private var scenePhase
     
     private func activateWatchSessionIfNeeded() {
     #if canImport(WatchConnectivity)
@@ -432,6 +434,16 @@ struct Daily: View {
                 }
             }
         }
+        .onDisappear {
+            stopFeedbackPlaybackOnly()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .inactive || newPhase == .background {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    stopFeedbackPlaybackOnly()
+                }
+            }
+        }
     }
     
     private var timerString: String {
@@ -444,6 +456,17 @@ struct Daily: View {
         guard let ch = currentGuess.trimmingCharacters(in: .whitespacesAndNewlines).first else { return }
         vm.guess(ch)
         currentGuess = ""
+    }
+    
+    private func stopFeedbackPlaybackOnly() {
+#if canImport(UIKit)
+    #if canImport(CoreHaptics)
+        do { try hapticEngine?.stop() } catch { /* ignore */ }
+    #endif
+        if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
+        audioPlayer = nil
+        isPlayingHaptics = false
+#endif
     }
     
     private func playMorseHaptics(for morse: String, completion: @escaping () -> Void) {
