@@ -461,7 +461,7 @@ struct Daily: View {
     private func stopFeedbackPlaybackOnly() {
 #if canImport(UIKit)
     #if canImport(CoreHaptics)
-        do { try hapticEngine?.stop() } catch { /* ignore */ }
+        hapticEngine?.stop()
     #endif
         if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
         audioPlayer = nil

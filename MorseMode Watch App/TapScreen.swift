@@ -38,7 +38,7 @@ private final class WatchFeedbackSessionDelegate: NSObject, WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) async {
         print("[Watch] didReceiveMessage: \(message)")
         if let action = message["action"] as? String, action == "feedback",
            let result = message["result"] as? String {
@@ -68,12 +68,12 @@ private final class WatchFeedbackSessionDelegate: NSObject, WCSessionDelegate {
         if let action = message["action"] as? String, action == "playMorse",
            let letter = message["letter"] as? String {
             print("[Watch] Play morse for letter: \(letter)")
-            playMorsePattern(for: letter)
+            await playMorsePattern(for: letter)
             return
         }
     }
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) async {
         print("[Watch] didReceiveApplicationContext: \(applicationContext)")
         if let action = applicationContext["action"] as? String, action == "feedback",
            let result = applicationContext["result"] as? String {
@@ -103,7 +103,7 @@ private final class WatchFeedbackSessionDelegate: NSObject, WCSessionDelegate {
         if let action = applicationContext["action"] as? String, action == "playMorse",
            let letter = applicationContext["letter"] as? String {
             print("[Watch] Play morse (context) for letter: \(letter)")
-            playMorsePattern(for: letter)
+            await playMorsePattern(for: letter)
             return
         }
     }
@@ -204,3 +204,4 @@ struct TapScreen: View {
 #Preview{
     TapScreen()
 }
+

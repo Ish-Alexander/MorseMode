@@ -32,7 +32,6 @@ struct ContentView: View {
                     Button(action: {
                         // Open locally on watch
                         showTapScreen = true
-
                         WatchConnectivityManager.shared.open(view: "Agency Academy")
                         WKInterfaceDevice.current().play(.click)
                     }) {
