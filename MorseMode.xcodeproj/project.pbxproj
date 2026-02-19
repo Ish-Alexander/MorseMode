@@ -59,6 +59,8 @@
 		196E30932F3F71FD00599E88 /* C_morse_code.ogg.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 196E304C2F3F6D5100599E88 /* C_morse_code.ogg.mp3 */; };
 		196E30942F3F71FD00599E88 /* B_morse_code.ogg.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 196E304A2F3F6D4800599E88 /* B_morse_code.ogg.mp3 */; };
 		196E30952F3F71FD00599E88 /* A_morse_code.ogg.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 196E30482F3F6D3E00599E88 /* A_morse_code.ogg.mp3 */; };
+		196E309B2F46037C00599E88 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 196E309A2F46037C00599E88 /* AppIcon.icon */; };
+		196E309C2F46037C00599E88 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 196E309A2F46037C00599E88 /* AppIcon.icon */; };
 		197D23812F226AF2003F8307 /* MorseMode Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 197D23802F226AF2003F8307 /* MorseMode Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		19DDB3C52F3CD37100E1C059 /* PhoneConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */; };
 		19DDB3C72F3CE73500E1C059 /* MorseModeConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */; };
@@ -115,6 +117,7 @@
 		196E30702F3F6E5700599E88 /* V_morse_code.ogg.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = V_morse_code.ogg.mp3; sourceTree = "<group>"; };
 		196E30712F3F6E5700599E88 /* U_morse_code.ogg.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = U_morse_code.ogg.mp3; sourceTree = "<group>"; };
 		196E30722F3F6E5700599E88 /* R_morse_code.ogg.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = R_morse_code.ogg.mp3; sourceTree = "<group>"; };
+		196E309A2F46037C00599E88 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		197D23732F226AF2003F8307 /* MorseMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorseMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		197D23802F226AF2003F8307 /* MorseMode Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MorseMode Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneConnectivity.swift; sourceTree = "<group>"; };
@@ -196,6 +199,7 @@
 				196E30502F3F6D7300599E88 /* E_morse_code.ogg.mp3 */,
 				196E30542F3F6D7300599E88 /* F_morse_code.ogg.mp3 */,
 				196E30512F3F6D7300599E88 /* G_morse_code.ogg.mp3 */,
+				196E309A2F46037C00599E88 /* AppIcon.icon */,
 				196E30522F3F6D7300599E88 /* H_morse_code.ogg.mp3 */,
 				196E30532F3F6D7300599E88 /* I_morse_code.ogg.mp3 */,
 				196E304E2F3F6D5B00599E88 /* D_morse_code.ogg.mp3 */,
@@ -313,6 +317,7 @@
 			files = (
 				196E30732F3F6E5700599E88 /* T_morse_code.ogg.mp3 in Resources */,
 				196E30742F3F6E5700599E88 /* X_morse_code.ogg.mp3 in Resources */,
+				196E309B2F46037C00599E88 /* AppIcon.icon in Resources */,
 				196E30752F3F6E5700599E88 /* Z_morse_code.ogg.mp3 in Resources */,
 				196E30762F3F6E5700599E88 /* W_morse_code.ogg.mp3 in Resources */,
 				196E30772F3F6E5700599E88 /* S_morse_code.ogg.mp3 in Resources */,
@@ -346,6 +351,7 @@
 			files = (
 				196E307C2F3F71FD00599E88 /* R_morse_code.ogg.mp3 in Resources */,
 				196E307D2F3F71FD00599E88 /* S_morse_code.ogg.mp3 in Resources */,
+				196E309C2F46037C00599E88 /* AppIcon.icon in Resources */,
 				196E307E2F3F71FD00599E88 /* T_morse_code.ogg.mp3 in Resources */,
 				196E307F2F3F71FD00599E88 /* U_morse_code.ogg.mp3 in Resources */,
 				196E30802F3F71FD00599E88 /* V_morse_code.ogg.mp3 in Resources */,
