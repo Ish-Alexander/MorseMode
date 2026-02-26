@@ -40,10 +40,22 @@ final class DailyMorseViewModel: ObservableObject {
     // Updates screen automatically
     
     // Persistence keys per daily word
-    private var timeKey: String { "dailyTimeRemaining_\(targetWord)" }
-    private var wrongKey: String { "dailyWrongGuesses_\(targetWord)" }
-    
-    private var revealedKey: String { "dailyRevealed_\(targetWord)" }
+
+    // Use a date-based suffix so repeats of the same word on different days are playable again
+    private var todayKeySuffix: String {
+        let cal = Calendar(identifier: .gregorian)
+        let startOfDay = cal.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.calendar = cal
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: startOfDay)
+    }
+
+    private var timeKey: String { "dailyTimeRemaining_\(todayKeySuffix)" }
+    private var wrongKey: String { "dailyWrongGuesses_\(todayKeySuffix)" }
+
+    private var revealedKey: String { "dailyRevealed_\(todayKeySuffix)" }
 
     private func saveTimeRemaining() {
         UserDefaults.standard.set(timeRemaining, forKey: timeKey)
@@ -88,7 +100,7 @@ final class DailyMorseViewModel: ObservableObject {
         UserDefaults.standard.removeObject(forKey: revealedKey)
     }
     
-    private var solvedKey: String { "dailySolved_\(targetWord)" }
+    private var solvedKey: String { "dailySolved_\(todayKeySuffix)" }
     private func markSolved() {
         UserDefaults.standard.set(true, forKey: solvedKey)
         clearTimeRemaining()
