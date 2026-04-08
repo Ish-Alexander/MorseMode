@@ -47,6 +47,13 @@ final class PhoneConnectivity: NSObject, WCSessionDelegate {
             }
             return
         }
+        if let action = message["action"] as? String, action == "resendMorse" {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: MorseModePhoneConnectivity.resendDailyMorseNotification, object: nil)
+                print("[PhoneConnectivity] Posted ResendDailyMorse notification (message path) payload=\(message)")
+            }
+            return
+        }
         // Catch-all
         print("[PhoneConnectivity] didReceiveMessage (unhandled): \(message)")
     }
@@ -66,6 +73,13 @@ final class PhoneConnectivity: NSObject, WCSessionDelegate {
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name("MorseModeAwardEXP"), object: nil, userInfo: ["amount": amount])
                 print("[PhoneConnectivity] Posted MorseModeAwardEXP notification (context path)")
+            }
+            return
+        }
+        if let action = applicationContext["action"] as? String, action == "resendMorse" {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: MorseModePhoneConnectivity.resendDailyMorseNotification, object: nil)
+                print("[PhoneConnectivity] Posted ResendDailyMorse notification (context path) payload=\(applicationContext)")
             }
             return
         }

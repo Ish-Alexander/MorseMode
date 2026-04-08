@@ -1,0 +1,89 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseMode Watch App-primary.dia",
+    "emit-module-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseMode Watch App-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseMode Watch App-primary-emit-module.dia",
+    "pch" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseMode Watch App-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseMode Watch App-primary.swiftdeps"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/ContentView.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/ContentView~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/MorseCharacter.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCharacter~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/MorseCode.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseCode~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/MorseEngine.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseEngine~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/MorseModeApp.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/MorseModeApp~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/TapScreen.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/TapScreen~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/WatchConnectivityManager.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Build/Intermediates.noindex/MorseMode.build/Debug-watchos/MorseMode Watch App.build/Objects-normal/arm64_32/WatchConnectivityManager~partial.swiftmodule"
+  }
+}

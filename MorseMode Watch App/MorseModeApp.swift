@@ -63,7 +63,7 @@ class MorseModeApp: NSObject, ObservableObject, WCSessionDelegate {
 @main
 struct MorseMode_Watch_AppApp: App {
     init() {
-        MorseModeApp.shared.activate()
+        _ = WatchConnectivityManager.shared
     }
     var body: some Scene {
         WindowGroup {

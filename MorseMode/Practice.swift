@@ -10,7 +10,6 @@ import WatchConnectivity
 import AVFoundation
 
 struct Practice: View {
-    
     @ObservedObject var morseEngine: MorseEngine
     
     @State private var letterToShow: String = ""
@@ -21,7 +20,7 @@ struct Practice: View {
     @State private var isPlayingMessage: Bool = false
     @State private var audioPlayer: AVAudioPlayer? = nil
     
-    let letter: Letter
+    let letter: Letter?
     
     // Morse code mapping and timing (units)
     private let morseMap: [Character: String] = [
@@ -175,7 +174,25 @@ struct Practice: View {
             // Sends message to apple watch
         ])
     }
-            
+
+    private func activateWatchSessionIfNeeded() {
+        guard WCSession.isSupported() else { return }
+        if WCSession.default.activationState != .activated {
+            MorseModeConnectivity.shared.activate()
+        }
+    }
+
+    private func playInitialLetter() {
+        guard let letter else { return }
+        let initialLetter = String(describing: letter).uppercased()
+        letterToShow = initialLetter
+        morseEngine.performHaptic(for: letter)
+        sendToWatch(letter)
+        if let character = initialLetter.first {
+            playSound(for: character)
+        }
+    }
+
     var body: some View {
         
         ZStack{
@@ -238,6 +255,10 @@ struct Practice: View {
                     }
                 }
                 .padding(.horizontal)
+                .onAppear {
+                    activateWatchSessionIfNeeded()
+                    playInitialLetter()
+                }
                 
                 HStack{
                     ZStack{
@@ -252,7 +273,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .a)
                         sendToWatch(.a)
                         self.letterToShow = "A"
-                        playSound(for: "A")
+                        playSound(for: "A".first!)
                     }
                     
                     ZStack{
@@ -267,7 +288,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .b)
                         sendToWatch(.b)
                         self.letterToShow = "B"
-                        playSound(for: "B")
+                        playSound(for: "B".first!)
                     }
                     
                     ZStack{
@@ -282,7 +303,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .c)
                         sendToWatch(.c)
                         self.letterToShow = "C"
-                        playSound(for: "C")
+                        playSound(for: "C".first!)
                     }
                     
                     ZStack{
@@ -297,7 +318,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .d)
                         sendToWatch(.d)
                         self.letterToShow = "D"
-                        playSound(for: "D")
+                        playSound(for: "D".first!)
                     }
                     
                     ZStack{
@@ -312,7 +333,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .e)
                         sendToWatch(.e)
                         self.letterToShow = "E"
-                        playSound(for: "E")
+                        playSound(for: "E".first!)
                     }
                     
                     ZStack{
@@ -327,7 +348,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .f)
                         sendToWatch(.f)
                         self.letterToShow = "F"
-                        playSound(for: "F")
+                        playSound(for: "F".first!)
                     }
                     
                     ZStack{
@@ -342,7 +363,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .g)
                         sendToWatch(.g)
                         self.letterToShow = "G"
-                        playSound(for: "G")
+                        playSound(for: "G".first!)
                     }
                     
                     ZStack{
@@ -357,7 +378,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .h)
                         sendToWatch(.h)
                         self.letterToShow = "H"
-                        playSound(for: "H")
+                        playSound(for: "H".first!)
                     }
                     
                     ZStack{
@@ -372,7 +393,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .i)
                         sendToWatch(.i)
                         self.letterToShow = "I"
-                        playSound(for: "I")
+                        playSound(for: "I".first!)
                     }
                 }
                 
@@ -389,7 +410,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .j)
                         sendToWatch(.j)
                         self.letterToShow = "J"
-                        playSound(for: "J")
+                        playSound(for: "J".first!)
                     }
                     
                     ZStack{
@@ -404,7 +425,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .k)
                         sendToWatch(.k)
                         self.letterToShow = "K"
-                        playSound(for: "K")
+                        playSound(for: "K".first!)
                     }
                     
                     ZStack{
@@ -419,7 +440,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .l)
                         sendToWatch(.l)
                         self.letterToShow = "L"
-                        playSound(for: "L")
+                        playSound(for: "L".first!)
                     }
                     
                     ZStack{
@@ -434,7 +455,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .m)
                         sendToWatch(.m)
                         self.letterToShow = "M"
-                        playSound(for: "M")
+                        playSound(for: "M".first!)
                     }
                     
                     ZStack{
@@ -449,7 +470,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .n)
                         sendToWatch(.n)
                         self.letterToShow = "N"
-                        playSound(for: "N")
+                        playSound(for: "N".first!)
                     }
                     
                     ZStack{
@@ -464,7 +485,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .o)
                         sendToWatch(.o)
                         self.letterToShow = "O"
-                        playSound(for: "O")
+                        playSound(for: "O".first!)
                     }
                     
                     ZStack{
@@ -479,7 +500,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .p)
                         sendToWatch(.p)
                         self.letterToShow = "P"
-                        playSound(for: "P")
+                        playSound(for: "P".first!)
                     }
                     
                     ZStack{
@@ -494,7 +515,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .q)
                         sendToWatch(.q)
                         self.letterToShow = "Q"
-                        playSound(for: "Q")
+                        playSound(for: "Q".first!)
                     }
                     
                     ZStack{
@@ -509,7 +530,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .r)
                         sendToWatch(.r)
                         self.letterToShow = "R"
-                        playSound(for: "R")
+                        playSound(for: "R".first!)
                     }
                 }
                 
@@ -526,7 +547,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .s)
                         sendToWatch(.s)
                         self.letterToShow = "S"
-                        playSound(for: "S")
+                        playSound(for: "S".first!)
                     }
                     
                     ZStack{
@@ -541,7 +562,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .t)
                         sendToWatch(.t)
                         self.letterToShow = "T"
-                        playSound(for: "T")
+                        playSound(for: "T".first!)
                     }
                     
                     ZStack{
@@ -556,7 +577,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .u)
                         sendToWatch(.u)
                         self.letterToShow = "U"
-                        playSound(for: "U")
+                        playSound(for: "U".first!)
                     }
                     
                     ZStack{
@@ -571,7 +592,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .v)
                         sendToWatch(.v)
                         self.letterToShow = "V"
-                        playSound(for: "V")
+                        playSound(for: "V".first!)
                     }
                     
                     ZStack{
@@ -586,7 +607,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .w)
                         sendToWatch(.w)
                         self.letterToShow = "W"
-                        playSound(for: "W")
+                        playSound(for: "W".first!)
                     }
                     
                     ZStack{
@@ -601,7 +622,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .x)
                         sendToWatch(.x)
                         self.letterToShow = "X"
-                        playSound(for: "X")
+                        playSound(for: "X".first!)
                     }
                     
                     ZStack{
@@ -616,7 +637,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .y)
                         sendToWatch(.y)
                         self.letterToShow = "Y"
-                        playSound(for: "Y")
+                        playSound(for: "Y".first!)
                     }
                     
                     ZStack{
@@ -631,7 +652,7 @@ struct Practice: View {
                         morseEngine.performHaptic(for: .z)
                         sendToWatch(.z)
                         self.letterToShow = "Z"
-                        playSound(for: "Z")
+                        playSound(for: "Z".first!)
                     }
                 }
             }
@@ -641,6 +662,5 @@ struct Practice: View {
 
 #Preview {
     let morseEngine = MorseEngine()
-    Practice(morseEngine: morseEngine, letter: .a)
+    Practice(morseEngine: morseEngine, letter: nil)
 }
-

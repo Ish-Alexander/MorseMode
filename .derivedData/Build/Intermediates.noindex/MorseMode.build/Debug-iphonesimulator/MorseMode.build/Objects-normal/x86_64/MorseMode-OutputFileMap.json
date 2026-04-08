@@ -1,0 +1,169 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseMode-primary.dia",
+    "emit-module-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseMode-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseMode-primary-emit-module.dia",
+    "pch" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseMode-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseMode-primary.swiftdeps"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/ContentView.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/ContentView~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/Daily.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Daily~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/DailyIntroLoadingView.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/DailyIntroLoadingView~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/Learn2.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Learn2~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/MorseCharacter.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCharacter~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/MorseCode.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseCode~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/MorseEngine.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseEngine~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/MorseModeApp.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeApp~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/Onboarding.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Onboarding~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/Practice.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/Practice~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/WatchConnectivityManager.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchConnectivityManager~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/WatchMorseInputView.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchMorseInputView~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseMode/WatchSessionManager.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/WatchSessionManager~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/MorseModeConnectivity.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/MorseModeConnectivity~partial.swiftmodule"
+  },
+  "/Users/ishyslappy/Desktop/MorseMode/PhoneConnectivity.swift" : {
+    "const-values" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.swiftconstvalues",
+    "dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.d",
+    "diagnostics" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.dia",
+    "index-unit-output-path" : "/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.o",
+    "llvm-bc" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.bc",
+    "object" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.o",
+    "swift-dependencies" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity.swiftdeps",
+    "swiftmodule" : "/Users/ishyslappy/Desktop/MorseMode/.derivedData/Build/Intermediates.noindex/MorseMode.build/Debug-iphonesimulator/MorseMode.build/Objects-normal/x86_64/PhoneConnectivity~partial.swiftmodule"
+  }
+}

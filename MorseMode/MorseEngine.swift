@@ -112,7 +112,7 @@ final class MorseEngine: ObservableObject {
         // Creates a list of vibrations and tells it when to happen
 
         for symbol in letter.morseRepresentation {
-            events.append(symbol.hapticEvent(relativeTime: time))
+            events.append(contentsOf: symbol.hapticEvents(relativeTime: time))
             // How each symbol knows how to generate its vibration
             time += symbol.duration + 0.15
             // adds a gap between symbols
@@ -134,4 +134,3 @@ final class MorseEngine: ObservableObject {
         }
     }
 }
-

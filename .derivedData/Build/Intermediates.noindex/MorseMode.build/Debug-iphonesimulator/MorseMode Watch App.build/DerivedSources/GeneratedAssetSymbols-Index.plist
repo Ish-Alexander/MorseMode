@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>colors</key>
+	<array>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameNeon</string>
+			<key>relativePath</key>
+			<string>./Neon.colorset</string>
+			<key>swiftSymbol</key>
+			<string>neon</string>
+		</dict>
+	</array>
+	<key>images</key>
+	<array>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameHeader</string>
+			<key>relativePath</key>
+			<string>./Header.imageset</string>
+			<key>swiftSymbol</key>
+			<string>header</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ishyslappy/Desktop/MorseMode/MorseMode Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameRadar</string>
+			<key>relativePath</key>
+			<string>./Radar.imageset</string>
+			<key>swiftSymbol</key>
+			<string>radar</string>
+		</dict>
+	</array>
+	<key>symbols</key>
+	<array/>
+</dict>
+</plist>

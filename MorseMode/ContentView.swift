@@ -30,17 +30,19 @@ private enum AppDestination: Hashable {
     case daily
     case academy
     case warehouse
+    case journey
 }
 
 struct ContentView: View {
-    @StateObject private var morseEngine = MorseEngine()
-    // Manages Morse code logic
+    @EnvironmentObject private var morseEngine: MorseEngine
+    // Shared Morse code logic
     @EnvironmentObject var userProgress: UserProgress
     // Shared global data
     
     @StateObject private var connectivity = MorseModePhoneConnectivity.shared
     // Connects phone to watch
-    @State private var path = NavigationPath()
+    @State private var path: [AppDestination] = []
+    @StateObject private var dailyViewModel = DailyMorseViewModel()
     
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
@@ -53,22 +55,21 @@ struct ContentView: View {
                         .fill(Color.black.opacity(0.72))
                         .overlay(
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(Color.green.opacity(0.28), lineWidth: 1)
+                                .stroke(Color.green.opacity(0.28), lineWidth: 0)
                         )
                         .shadow(color: Color.green.opacity(0.12), radius: 12)
-
+                    
                     Image("Level")
                         .resizable()
                         .scaledToFit()
                         .font(.largeTitle)
-                        .opacity(0.92)
-
+                    
                     Image("Icon")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 78)
                         .offset(x: -74, y: 0)
-
+                    
                     Text("Level: \(userProgress.level)")
                         .font(.custom("Berkelium Bitmap", size: 18))
                         .bold()
@@ -77,17 +78,21 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 92)
-
-                NavigationLink(destination: Daily()) {
+                
+                NavigationLink(value: AppDestination.daily) {
                     headerButton(title: "The Daily Intercept")
                 }
-
+                
                 NavigationLink(destination: Learn2()) {
                     headerButton(title: "Agency Academy", fontSize: 24)
                 }
-
-                NavigationLink(destination: Practice(morseEngine: MorseEngine(), letter: .a)) {
+                
+                NavigationLink(destination: Practice(morseEngine: morseEngine, letter: nil)) {
                     headerButton(title: "The Warehouse", fontSize: 24)
+                }
+                
+                NavigationLink(destination: Journey()) {
+                    headerButton(title: "Agents Journey")
                 }
             }
             .frame(maxWidth: 420)
@@ -103,39 +108,50 @@ struct ContentView: View {
                 }
                 .ignoresSafeArea()
             }
-            .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
-                // If onboarding is active, ignore watch-driven navigation changes.
-                guard !isInOnboarding else {
-                    DispatchQueue.main.async { connectivity.requestedView = nil }
-                    return
-                }
-
-                if let destination = mapRequestedView(requested) {
+                .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
+                    // If onboarding is active, ignore watch-driven navigation changes.
+                    guard !isInOnboarding else {
+                        DispatchQueue.main.async { connectivity.requestedView = nil }
+                        return
+                    }
+                
+                    if let destination = mapRequestedView(requested) {
                     // Pop to root first so all screens return to ContentView.
-                    path = NavigationPath()
+                    path.removeAll()
                     // Then navigate to the requested destination from root.
                     path.append(destination)
+                    if destination == .daily {
+                        connectivity.sendWatchHaptics(
+                            morse: dailyViewModel.morseClue,
+                            word: dailyViewModel.targetWord
+                        )
+                    }
                     DispatchQueue.main.async {
                         connectivity.requestedView = nil
                     }
                 } else {
-                    print("Unknown requested view: \(requested)")
+                        print("Unknown requested view: \(requested)")
+                    }
                 }
-            }
-            .navigationDestination(for: AppDestination.self) { destination in
-                switch destination {
-                case .daily:
-                    Daily()
+                .onReceive(NotificationCenter.default.publisher(for: MorseModePhoneConnectivity.resendDailyMorseNotification)) { _ in
+                    connectivity.sendWatchHaptics(
+                        morse: dailyViewModel.morseClue,
+                        word: dailyViewModel.targetWord
+                    )
+                }
+                .navigationDestination(for: AppDestination.self) { destination in
+                    switch destination {
+                    case .daily:
+                    DailyRoot(vm: dailyViewModel)
                 case .academy:
                     Learn2()
                 case .warehouse:
-                    Practice(morseEngine: MorseEngine(), letter: .a)
+                    Practice(morseEngine: morseEngine, letter: nil)
+                    case .journey:
+                        Journey()
                 }
             }
-            .toolbarBackground(.black.opacity(0.35), for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
         }
-        // Propagate onboarding flag so onboarding screens can opt out of watch-driven navigation.
         .environment(\.isInOnboarding, isInOnboarding)
         .preferredColorScheme(.dark)
     }
@@ -403,7 +419,7 @@ private extension Comparable {
 
 #Preview {
     ContentView()
+        .environmentObject(MorseEngine())
         .environmentObject(UserProgress())
         .environment(\.isInOnboarding, false)
 }
-

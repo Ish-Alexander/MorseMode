@@ -1,0 +1,1 @@
+@rpath/MorseMode Watch App.debug.dylib

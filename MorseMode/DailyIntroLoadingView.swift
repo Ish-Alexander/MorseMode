@@ -56,7 +56,7 @@ struct DailyIntroLoadingView: View {
                 }
                 showWarning1 = false
                 // After crossfade completes, wait briefly then finish
-                DispatchQueue.main.asyncAfter(deadline: .now() + crossfadeDuration + 0.6) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + crossfadeDuration + 3.0) {
                     onFinished()
                 }
                 return

@@ -21,9 +21,11 @@ private final class WatchFeedbackSessionDelegate: NSObject, WCSessionDelegate {
 
     private func playMorsePattern(for letter: String) {
         guard let char = letter.uppercased().first, let pattern = morseMap[char] else { return }
+        // Immediate haptic to signal new letter arrival
+        WKInterfaceDevice.current().play(.start)
         let unit: TimeInterval = 0.15
         let dot = unit
-        let dash = unit * 3
+        let dash = unit * 4
         let intra = unit
         var delay: TimeInterval = 0
         for s in pattern {
@@ -32,6 +34,9 @@ private final class WatchFeedbackSessionDelegate: NSObject, WCSessionDelegate {
                     WKInterfaceDevice.current().play(.click)
                 } else {
                     WKInterfaceDevice.current().play(.directionUp)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                        WKInterfaceDevice.current().play(.directionUp)
+                    }
                 }
             }
             delay += (s == "." ? dot : dash) + intra
@@ -120,7 +125,6 @@ struct TapScreen: View {
     private let wcDelegate = WatchFeedbackSessionDelegate()
 
     var body: some View {
-        (ScrollView {
             VStack(spacing: 12) {
                 // Current pattern preview
                 Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
@@ -140,7 +144,10 @@ struct TapScreen: View {
 
                     Button {
                         pattern.append("-")
-                        WKInterfaceDevice.current().play(.click)
+                        WKInterfaceDevice.current().play(.directionUp)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                            WKInterfaceDevice.current().play(.directionUp)
+                        }
                     } label: {
                         Text("Dash –")
                             .font(.custom("berkelium bitmap", size: 16))
@@ -193,10 +200,9 @@ struct TapScreen: View {
                 }
             }
             .padding(.top, 75)
-        }
+            
         .contentMargins(0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        )
         .ignoresSafeArea()
     }
 }
@@ -204,4 +210,3 @@ struct TapScreen: View {
 #Preview{
     TapScreen()
 }
-

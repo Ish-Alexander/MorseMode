@@ -63,24 +63,49 @@ final class WatchSessionManager: NSObject, ObservableObject {
             var events: [CHHapticEvent] = []
             var relativeTime: TimeInterval = 0
             
-            func addContinuous(_ duration: TimeInterval, intensity: Float) {
-                let intensityParam = CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity)
-                let sharpnessParam = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6)
-                let event = CHHapticEvent(eventType: .hapticContinuous,
-                                          parameters: [intensityParam, sharpnessParam],
-                                          relativeTime: relativeTime,
-                                          duration: duration)
+            func addDot() {
+                let event = CHHapticEvent(
+                    eventType: .hapticTransient,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
+                    ],
+                    relativeTime: relativeTime
+                )
                 events.append(event)
-                relativeTime += duration
+                relativeTime += dot
+            }
+
+            func addDash() {
+                let attack = CHHapticEvent(
+                    eventType: .hapticTransient,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.55)
+                    ],
+                    relativeTime: relativeTime
+                )
+                let body = CHHapticEvent(
+                    eventType: .hapticContinuous,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.2)
+                    ],
+                    relativeTime: relativeTime + 0.02,
+                    duration: max(dash - 0.02, unit * 2.5)
+                )
+                events.append(attack)
+                events.append(body)
+                relativeTime += dash
             }
             
             for ch in morse {
                 switch ch {
                 case ".":
-                    addContinuous(dot, intensity: 0.6)
+                    addDot()
                     relativeTime += intraCharGap
                 case "-":
-                    addContinuous(dash, intensity: 1.0)
+                    addDash()
                     relativeTime += intraCharGap
                 case " ":
                     relativeTime += (interCharGap - intraCharGap)
@@ -103,13 +128,20 @@ final class WatchSessionManager: NSObject, ObservableObject {
 #if os(watchOS)
         // WatchKit fallback: pulse discrete taps to suggest dots/dashes
         var delay: TimeInterval = 0
-        func scheduleTapBurst(duration: TimeInterval) {
-            // Fire taps roughly every unit/2
-            let step = max(unit / 2, 0.02)
+        func scheduleDotTap() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                WKInterfaceDevice.current().play(.click)
+            }
+            delay += dot
+        }
+
+        func scheduleDashBurst(duration: TimeInterval) {
+            // Fire stronger directional pulses so dashes feel heavier than dots.
+            let step = max(unit / 2, 0.04)
             var t: TimeInterval = 0
-            while t <= duration {
+            while t < duration {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay + t) {
-                    WKInterfaceDevice.current().play(.click)
+                    WKInterfaceDevice.current().play(.directionUp)
                 }
                 t += step
             }
@@ -119,10 +151,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
         for ch in morse {
             switch ch {
             case ".":
-                scheduleTapBurst(duration: dot)
+                scheduleDotTap()
                 delay += intraCharGap
             case "-":
-                scheduleTapBurst(duration: dash)
+                scheduleDashBurst(duration: dash)
                 delay += intraCharGap
             case " ":
                 delay += (interCharGap - intraCharGap)
@@ -159,4 +191,3 @@ extension WatchSessionManager: WCSessionDelegate {
         handle(payload: userInfo)
     }
 }
-

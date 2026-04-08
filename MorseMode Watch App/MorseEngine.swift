@@ -16,21 +16,17 @@ class MorseEngine: ObservableObject {
     private init() {}
 
     func performHaptic(for letter: Letter) {
-
         let pattern = letter.morsePattern
+        let symbolGap: TimeInterval = 0.1
+        var delay: TimeInterval = 0
 
         for symbol in pattern {
-
-            switch symbol {
-
-            case .dot:
-                WKInterfaceDevice.current().play(.click)
-
-            case .dash:
-                WKInterfaceDevice.current().play(.directionUp)
+            for offset in symbol.pulseOffsets {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay + offset) {
+                    symbol.playWatchHaptic()
+                }
             }
-            Thread.sleep(forTimeInterval: 0.2)
+            delay += symbol.duration + symbolGap
         }
     }
 }
-

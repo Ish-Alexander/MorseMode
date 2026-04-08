@@ -14,6 +14,7 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
         session.delegate = self
+        print("[WatchConnectivity] activateWatchConnectivityIfNeeded activationState=\(session.activationState.rawValue) reachable=\(session.isReachable)")
         if session.activationState != .activated {
             session.activate()
         }
@@ -38,30 +39,97 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
 
     func resendMorse() {
         let resend: [String: Any] = ["action": "resendMorse"]
+        print("[Watch->Phone] resendMorse tapped reachable=\(WCSession.default.isReachable)")
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(resend, replyHandler: nil) { error in
-                print("resendMorse send failed: \(error)")
+                print("[Watch->Phone] resendMorse sendMessage FAILED error=\(error)")
                 do { try WCSession.default.updateApplicationContext(resend) } catch {
-                    print("resendMorse updateApplicationContext failed: \(error)")
+                    print("[Watch->Phone] resendMorse updateApplicationContext FAILED error=\(error)")
                 }
             }
         } else {
             do { try WCSession.default.updateApplicationContext(resend) } catch {
-                print("resendMorse updateApplicationContext failed: \(error)")
+                print("[Watch->Phone] resendMorse updateApplicationContext FAILED error=\(error)")
             }
         }
     }
 
     // MARK: - WCSessionDelegate
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) { }
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        print("[WatchConnectivity] activationDidComplete state=\(activationState.rawValue) reachable=\(session.isReachable) error=\(String(describing: error))")
+    }
 
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        print("[Watch<-Phone] didReceiveMessage payload=\(message)")
         handleIncoming(dict: message)
     }
 
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        print("[Watch<-Phone] didReceiveApplicationContext payload=\(applicationContext)")
+        handleIncoming(dict: applicationContext)
+    }
+
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        print("[Watch<-Phone] didReceiveUserInfo payload=\(userInfo)")
         handleIncoming(dict: userInfo)
     }
+
+    private func playFeedback(result: String) {
+        print("[WatchHaptics] playFeedback result=\(result)")
+        DispatchQueue.main.async {
+            switch result {
+            case "correct":
+                WKInterfaceDevice.current().play(.success)
+            case "incorrect":
+                WKInterfaceDevice.current().play(.failure)
+            default:
+                break
+            }
+        }
+    }
+
+    private func playMorseClue(_ morse: String) {
+        print("[WatchHaptics] playMorseClue morse=\(morse)")
+        let unit: TimeInterval = 0.15
+        let dot = unit
+        let dash = unit * 4
+        let intraCharGap = unit
+        let interCharGap = unit * 3
+        let wordGap = unit * 7
+        var delay: TimeInterval = 0
+
+        DispatchQueue.main.async {
+            print("[WatchHaptics] start pulse")
+            WKInterfaceDevice.current().play(.start)
+        }
+
+        for ch in morse {
+            switch ch {
+            case ".":
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    print("[WatchHaptics] dot at delay=\(delay)")
+                    WKInterfaceDevice.current().play(.click)
+                }
+                delay += dot + intraCharGap
+            case "-":
+                let pulseOffsets: [TimeInterval] = [0, 0.08]
+                for offset in pulseOffsets {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay + offset) {
+                        print("[WatchHaptics] dash pulse at delay=\(delay + offset)")
+                        WKInterfaceDevice.current().play(.directionUp)
+                    }
+                }
+                delay += dash + intraCharGap
+            case " ":
+                delay += interCharGap
+            case "/":
+                delay += wordGap
+            default:
+                break
+            }
+        }
+    }
+
     private func playWord(_ word: String) {
 
         var delay: Double = 0
@@ -80,6 +148,40 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
 
 
     private func handleIncoming(dict: [String: Any]) {
+        print("[WatchConnectivity] handleIncoming dict=\(dict)")
+        if let action = dict["action"] as? String {
+            switch action {
+            case "feedback":
+                if let result = dict["result"] as? String {
+                    print("[WatchConnectivity] action=feedback result=\(result)")
+                    playFeedback(result: result)
+                    return
+                }
+            case "playWatchHaptics":
+                if let morse = dict["morse"] as? String {
+                    print("[WatchConnectivity] action=playWatchHaptics morse=\(morse)")
+                    playMorseClue(morse)
+                    return
+                }
+            case "playMorse":
+                print("[WatchConnectivity] action=playMorse letter=\(dict["letter"] as? String ?? "nil")")
+                break
+            default:
+                print("[WatchConnectivity] unhandled action=\(action)")
+                break
+            }
+        }
+
+        if let result = dict["result"] as? String {
+            playFeedback(result: result)
+            return
+        }
+
+        if let morse = dict["morseClue"] as? String {
+            playMorseClue(morse)
+            return
+        }
+
         // 1) Handle the modern payload shape: ["action": "playMorse", "letter": "A"]
         if let action = dict["action"] as? String, action == "playMorse",
            let letterString = dict["letter"] as? String {
@@ -126,10 +228,5 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
                 print("[Watch] playMorse: Unable to map letter=\(letterString) to a Letter")
             }
         }
-        // NEW: Play entire word sent from phone
-        if let word = dict["word"] as? String {
-            playWord(word)
-        }
     }
 }
-

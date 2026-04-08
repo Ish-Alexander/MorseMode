@@ -36,6 +36,44 @@ fileprivate func encodeMorse(_ text: String) -> String {
     // Converts text to uppercase, looks up the morse code, and joins everything together
 }
 
+struct DailyRoot: View {
+    @ObservedObject var vm: DailyMorseViewModel
+    @State private var showDaily: Bool = false
+
+    var body: some View {
+        Group {
+            if showDaily {
+                Daily(vm: vm)
+                    .transition(.opacity)
+            } else {
+                // If today's puzzle is already solved, skip the intro immediately
+                if vm.isSolved || UserDefaults.standard.bool(forKey: "dailySolved_\(currentDateKey())") {
+                    Daily(vm: vm)
+                        .transition(.opacity)
+                } else {
+                    DailyIntroLoadingView {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            showDaily = true
+                        }
+                    }
+                    .transition(.opacity)
+                }
+            }
+        }
+        .animation(.easeInOut, value: showDaily)
+    }
+}
+
+private func currentDateKey() -> String {
+    let cal = Calendar(identifier: .gregorian)
+    let startOfDay = cal.startOfDay(for: Date())
+    let formatter = DateFormatter()
+    formatter.calendar = cal
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.dateFormat = "yyyy-MM-dd"
+    return formatter.string(from: startOfDay)
+}
+
 final class DailyMorseViewModel: ObservableObject {
     // Updates screen automatically
     
@@ -54,8 +92,9 @@ final class DailyMorseViewModel: ObservableObject {
 
     private var timeKey: String { "dailyTimeRemaining_\(todayKeySuffix)" }
     private var wrongKey: String { "dailyWrongGuesses_\(todayKeySuffix)" }
-
     private var revealedKey: String { "dailyRevealed_\(todayKeySuffix)" }
+    private var lastSavedAtKey: String { "dailyLastSavedAt_\(todayKeySuffix)" }
+    private var activeKey: String { "dailyIsActive_\(todayKeySuffix)" }
 
     private func saveTimeRemaining() {
         UserDefaults.standard.set(timeRemaining, forKey: timeKey)
@@ -70,6 +109,33 @@ final class DailyMorseViewModel: ObservableObject {
 
     private func clearTimeRemaining() {
         UserDefaults.standard.removeObject(forKey: timeKey)
+    }
+
+    private func saveLastSavedAt(_ date: Date = Date()) {
+        UserDefaults.standard.set(date.timeIntervalSince1970, forKey: lastSavedAtKey)
+    }
+
+    private func loadLastSavedAt() -> Date? {
+        guard UserDefaults.standard.object(forKey: lastSavedAtKey) != nil else { return nil }
+        let timestamp = UserDefaults.standard.double(forKey: lastSavedAtKey)
+        return Date(timeIntervalSince1970: timestamp)
+    }
+
+    private func clearLastSavedAt() {
+        UserDefaults.standard.removeObject(forKey: lastSavedAtKey)
+    }
+
+    private func saveIsActive() {
+        UserDefaults.standard.set(isActive, forKey: activeKey)
+    }
+
+    private func loadIsActive() -> Bool? {
+        guard UserDefaults.standard.object(forKey: activeKey) != nil else { return nil }
+        return UserDefaults.standard.bool(forKey: activeKey)
+    }
+
+    private func clearIsActive() {
+        UserDefaults.standard.removeObject(forKey: activeKey)
     }
 
     private func saveWrongGuesses() {
@@ -106,6 +172,8 @@ final class DailyMorseViewModel: ObservableObject {
         clearTimeRemaining()
         clearWrongGuesses()
         clearRevealed()
+        clearLastSavedAt()
+        clearIsActive()
     }
     private var isAlreadySolved: Bool {
         UserDefaults.standard.bool(forKey: solvedKey)
@@ -141,6 +209,34 @@ final class DailyMorseViewModel: ObservableObject {
     
     private var timer: Timer?
 
+    private func persistGameplayState(at date: Date = Date()) {
+        saveTimeRemaining()
+        saveWrongGuesses()
+        saveRevealed()
+        saveIsActive()
+        saveLastSavedAt(date)
+    }
+
+    private func restoreElapsedTimeIfNeeded(referenceDate: Date = Date()) {
+        guard let wasActive = loadIsActive(), wasActive else {
+            if let restoredTime = loadTimeRemaining(), restoredTime > 0 {
+                timeRemaining = restoredTime
+            }
+            return
+        }
+
+        guard let savedAt = loadLastSavedAt() else { return }
+        let restoredTime = loadTimeRemaining() ?? timeRemaining
+        let elapsed = max(0, Int(referenceDate.timeIntervalSince(savedAt)))
+        let adjusted = max(0, restoredTime - elapsed)
+
+        timeRemaining = adjusted
+        isActive = adjusted > 0
+        saveTimeRemaining()
+        saveIsActive()
+        saveLastSavedAt(referenceDate)
+    }
+
     init(word: String = "") {
         self.targetWord = (word.isEmpty ? Self.wordForToday() : word).uppercased()
         if isAlreadySolved {
@@ -152,6 +248,8 @@ final class DailyMorseViewModel: ObservableObject {
             // Clear any leftover persisted state for a solved day
             clearTimeRemaining()
             clearWrongGuesses()
+            clearLastSavedAt()
+            clearIsActive()
         } else {
             // Try to restore persisted progress for this day's word
             let restoredTime = loadTimeRemaining()
@@ -163,32 +261,48 @@ final class DailyMorseViewModel: ObservableObject {
             }
             wrongGuesses = restoredWrong
             revealed = loadRevealed()
-            isActive = false // start after intro haptics
+            isActive = loadIsActive() ?? false // start after intro haptics
+            restoreElapsedTimeIfNeeded()
         }
     }
 
     deinit {
-        saveTimeRemaining()
-        saveRevealed()
-        saveWrongGuesses()
+        persistGameplayState()
         timer?.invalidate()
     }
 
     func startTimer() {
         timer?.invalidate()
         isActive = true
+        persistGameplayState()
         // timeRemaining = 180  // Removed this line as per instructions
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] t in
             guard let self else { return }
             if self.timeRemaining > 0 && self.isActive {
                 self.timeRemaining -= 1
-                self.saveTimeRemaining()
+                self.persistGameplayState()
             } else {
                 t.invalidate()
                 self.isActive = false
-                self.saveTimeRemaining()
+                self.persistGameplayState()
                 // Runs the timer
             }
+        }
+    }
+
+    func syncStateForScenePhase(_ phase: ScenePhase) {
+        switch phase {
+        case .active:
+            restoreElapsedTimeIfNeeded()
+            if isActive && timeRemaining > 0 && timer == nil {
+                startTimer()
+            }
+        case .inactive, .background:
+            timer?.invalidate()
+            timer = nil
+            persistGameplayState()
+        @unknown default:
+            persistGameplayState()
         }
     }
 
@@ -220,10 +334,12 @@ final class DailyMorseViewModel: ObservableObject {
             wrongGuesses.insert(upper)
             saveWrongGuesses()
         }
+        saveLastSavedAt()
         // Adds letters to "Revealed" and "Wrong Guess" lines
         if isSolved {
             isActive = false
             timer?.invalidate()
+            timer = nil
             markSolved()
             clearTimeRemaining()
             clearWrongGuesses()
@@ -234,10 +350,11 @@ final class DailyMorseViewModel: ObservableObject {
 }
 
 struct Daily: View {
-    @StateObject private var vm = DailyMorseViewModel()
+    @ObservedObject var vm: DailyMorseViewModel
     // Game logic object
     @State private var currentGuess: String = ""
     // What the user types
+    @FocusState private var isGuessFieldFocused: Bool
     @State private var isPlayingHaptics: Bool = false
     // Prevents overlapping haptics
     @State private var audioPlayer: AVAudioPlayer? = nil
@@ -265,15 +382,10 @@ struct Daily: View {
     
     private func sendMorseToWatch(_ morse: String) {
     #if canImport(WatchConnectivity)
-        guard WCSession.isSupported() else { return }
-        let session = WCSession.default
-        // Prefer immediate message if reachable; fall back to user info transfer
-        let payload: [String: Any] = ["morseClue": morse, "word": vm.targetWord]
-        if session.isReachable {
-            session.sendMessage(payload, replyHandler: nil, errorHandler: nil)
-        } else {
-            session.transferUserInfo(payload)
-        }
+        MorseModePhoneConnectivity.shared.sendWatchHaptics(
+            morse: morse,
+            word: vm.targetWord
+        )
     #endif
     }
     
@@ -320,117 +432,126 @@ struct Daily: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                // Header / Timer
-                Text(timerString)
-                    .font(.custom("berkelium bitmap", size: 36))
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(vm.timeRemaining > 10 ? .green : .red)
-                    .accessibilityLabel("Time remaining: \(timerString)")
-                // Shows timer, color changes when time gets low
-                
-                ZStack{
-                    Image("Tube")
-                    VStack(spacing: 8) {
-                        // Status above the clue
-                        if vm.isSolved {
-                            Text("Solved! ✅")
-                                .font(.custom("berkelium bitmap", size: 16))
+            GeometryReader { proxy in
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Header / Timer
+                        Text(timerString)
+                            .font(.custom("berkelium bitmap", size: 36))
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(vm.timeRemaining > 10 ? .green : .red)
+                            .accessibilityLabel("Time remaining: \(timerString)")
+                        // Shows timer, color changes when time gets low
+                        
+                        ZStack{
+                            Image("Tube")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: 240)
+                            VStack(spacing: 8) {
+                                // Status above the clue
+                                if vm.isSolved {
+                                    Text("Solved! ✅")
+                                        .font(.custom("berkelium bitmap", size: 16))
+                                        .foregroundStyle(.neon)
+                                        .transition(.opacity)
+                                } else if vm.timeRemaining == 0 {
+                                    Text("Time's up! The word was \(vm.targetWord)")
+                                        .font(.title3.weight(.semibold))
+                                        .foregroundStyle(.yellow)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal)
+                                        .transition(.opacity)
+                                }
+
+                                // Morse clue below
+                                Text(vm.morseClue)
+                                    .font(.system(size: 28, weight: .medium, design: .monospaced))
+                                    .foregroundStyle(.white)
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(nil)
+                                    .minimumScaleFactor(0.4)
+                                    .allowsTightening(true)
+                                    .padding(.horizontal, 16)
+                                    .frame(maxWidth: 220) // constrain to fit inside Tube image
+                            }
+                        }
+                        
+                        // Hangman blanks
+                        VStack(spacing: 8) {
+                            Text("Decode")
+                                .font(.custom("berkelium bitmap", size: 24))
+                                .font(.headline)
+                                .foregroundStyle(.neon.opacity(0.8))
+                            Text(vm.displayBlanks)
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.neon)
-                                .transition(.opacity)
-                        } else if vm.timeRemaining == 0 {
-                            Text("Time's up! The word was \(vm.targetWord)")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(.yellow)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
-                                .transition(.opacity)
                         }
 
-                        // Morse clue below
-                        Text(vm.morseClue)
-                            .font(.system(size: 28, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(nil)
-                            .minimumScaleFactor(0.4)
-                            .allowsTightening(true)
-                            .padding(.horizontal, 16)
-                            .frame(maxWidth: 300) // constrain to fit inside Tube image
-                    }
-                }
-                
-                // Hangman blanks
-                VStack(spacing: 8) {
-                    Text("Decode")
-                        .font(.custom("berkelium bitmap", size: 24))
-                        .font(.headline)
-                        .foregroundStyle(.neon.opacity(0.8))
-                    Text(vm.displayBlanks)
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundStyle(.neon)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                
-                // Input row
-                HStack(spacing: 12) {
-                    TextField("Guess a letter", text: $currentGuess)
-                        .textInputAutocapitalization(.characters)
-                        .disableAutocorrection(true)
-                        .foregroundStyle(.neon)
-                        .tint(.white)
-                        .padding(12)
-                        .background(Color.white.opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .frame(maxWidth: 220)
-                        .onSubmit(submitGuess)
-                    
-                    Button(action: submitGuess) {
-                        Text("Guess")
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(.white)
-                            .foregroundStyle(.black)
-                            .clipShape(Capsule())
-                    }
-                    .disabled(!vm.isActive || vm.timeRemaining == 0)
-                }
-                
-                // Wrong guesses
-                if !vm.wrongGuesses.isEmpty {
-                    VStack(spacing: 6) {
-                        Text("Wrong Guesses")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
-                        Text(vm.wrongGuesses.sorted().map(String.init).joined(separator: " "))
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundStyle(.red)
-                    }
-                }
-                
-                // Controls
-                HStack(spacing: 16) {
-                    Button(action: {
-                        replayHaptics()
-                    }) {
-                        ZStack {
-                            Text("Replay Haptics")
-                                .font(.custom("berkelium bitmap", size: 16))
-                                .foregroundStyle(.neon)
+                        HStack(spacing: 12) {
+                            TextField(text: $currentGuess, prompt: Text("Guess a letter! (Press Enter to guess)").foregroundStyle(.black)) {
+                            }
+                            .textInputAutocapitalization(.characters)
+                            .disableAutocorrection(true)
+                            .onChange(of: currentGuess) { _, newValue in
+                                let sanitized = sanitizeGuessInput(newValue)
+                                if sanitized != newValue {
+                                    currentGuess = sanitized
+                                }
+                            }
+                            .foregroundStyle(.neon)
+                            .tint(.white)
+                            .focused($isGuessFieldFocused)
+                            .padding(12)
+                            .background(Color.white.opacity(0.4))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onSubmit(submitGuess)
+                            
                         }
+                        
+                        // Wrong guesses
+                        if !vm.wrongGuesses.isEmpty {
+                            VStack(spacing: 6) {
+                                Text("Wrong Guesses")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.7))
+                                Text(vm.wrongGuesses.sorted().map(String.init).joined(separator: " "))
+                                    .font(.system(.body, design: .monospaced))
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                        
+                        // Controls
+                        HStack(spacing: 16) {
+                            Button(action: {
+                                replayHaptics()
+                            }) {
+                                ZStack {
+                                    Text("Replay Haptics")
+                                        .font(.custom("berkelium bitmap", size: 16))
+                                        .foregroundStyle(.neon)
+                                }
+                            }
+                            .accessibilityLabel("Replay the last Morse haptics")
+                            .disabled(isPlayingHaptics)
+                            // Replays the morse code and haptics
+                        }
+                        .padding()
                     }
-                    .accessibilityLabel("Replay the last Morse haptics")
-                    .disabled(isPlayingHaptics)
-                    // Replays the morse code and haptics
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: proxy.size.height, alignment: .top)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                    .padding(.bottom, 28)
                 }
-                .padding()
+                .scrollDismissesKeyboard(.interactively)
             }
         }
         .onAppear {
+            vm.syncStateForScenePhase(.active)
             activateWatchSessionIfNeeded()
             // If today's word is already solved, don't play haptics or start timer
             if vm.isSolved {
@@ -447,9 +568,11 @@ struct Daily: View {
             }
         }
         .onDisappear {
+            vm.syncStateForScenePhase(.inactive)
             stopFeedbackPlaybackOnly()
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
+            vm.syncStateForScenePhase(newPhase)
             if newPhase == .inactive || newPhase == .background {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     stopFeedbackPlaybackOnly()
@@ -464,10 +587,16 @@ struct Daily: View {
         return String(format: "%d:%02d", m, s)
     }
 
+    private func sanitizeGuessInput(_ value: String) -> String {
+        let lettersOnly = value.uppercased().filter(\.isLetter)
+        return lettersOnly.isEmpty ? "" : String(lettersOnly.prefix(1))
+    }
+
     private func submitGuess() {
         guard let ch = currentGuess.trimmingCharacters(in: .whitespacesAndNewlines).first else { return }
         vm.guess(ch)
         currentGuess = ""
+        isGuessFieldFocused = false
     }
     
     private func stopFeedbackPlaybackOnly() {
@@ -542,21 +671,49 @@ struct Daily: View {
             var events: [CHHapticEvent] = []
             var relativeTime: TimeInterval = 0
 
-            func addContinuous(_ duration: TimeInterval, intensity: Float) {
-                let intensityParam = CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity)
-                let sharpnessParam = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
-                let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [intensityParam, sharpnessParam], relativeTime: relativeTime, duration: duration)
+            func addDot() {
+                let event = CHHapticEvent(
+                    eventType: .hapticTransient,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
+                    ],
+                    relativeTime: relativeTime
+                )
                 events.append(event)
-                relativeTime += duration
+                relativeTime += dot
+            }
+
+            func addDash() {
+                let attack = CHHapticEvent(
+                    eventType: .hapticTransient,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.55)
+                    ],
+                    relativeTime: relativeTime
+                )
+                let body = CHHapticEvent(
+                    eventType: .hapticContinuous,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.2)
+                    ],
+                    relativeTime: relativeTime + 0.02,
+                    duration: max(dash - 0.02, unit * 2.5)
+                )
+                events.append(attack)
+                events.append(body)
+                relativeTime += dash
             }
 
             for ch in morse {
                 switch ch {
                 case ".":
-                    addContinuous(dot, intensity: 0.6)
+                    addDot()
                     relativeTime += intraCharGap
                 case "-":
-                    addContinuous(dash, intensity: 1.0)
+                    addDash()
                     relativeTime += intraCharGap
                 case " ":
                     // letter gap: replace last intraChar with interChar by adding the delta
@@ -587,17 +744,26 @@ struct Daily: View {
         }
 #endif // CoreHaptics
         // UIKit fallback: simulate duration by repeating impacts over the desired interval
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.prepare()
+        let dotImpact = UIImpactFeedbackGenerator(style: .rigid)
+        let dashImpact = UIImpactFeedbackGenerator(style: .heavy)
+        dotImpact.prepare()
+        dashImpact.prepare()
 
         var delay: TimeInterval = 0
-        func scheduleImpactBurst(duration: TimeInterval, intensity: CGFloat) {
-            // Fire small impacts every ~unit/2 to simulate continuous feel
-            let step = max(unit / 2, 0.02)
+        func scheduleDotImpact() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                dotImpact.impactOccurred(intensity: 1.0)
+            }
+            delay += dot
+        }
+
+        func scheduleDashBurst(duration: TimeInterval) {
+            // Fire heavier impacts more frequently so dashes feel fuller than dots.
+            let step = max(unit / 3, 0.02)
             var t: TimeInterval = 0
-            while t <= duration {
+            while t < duration {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay + t) {
-                    impact.impactOccurred(intensity: intensity)
+                    dashImpact.impactOccurred(intensity: 1.0)
                 }
                 t += step
             }
@@ -607,10 +773,10 @@ struct Daily: View {
         for ch in morse {
             switch ch {
             case ".":
-                scheduleImpactBurst(duration: dot, intensity: 0.6)
+                scheduleDotImpact()
                 delay += intraCharGap
             case "-":
-                scheduleImpactBurst(duration: dash, intensity: 1.0)
+                scheduleDashBurst(duration: dash)
                 delay += intraCharGap
             case " ":
                 delay += (interCharGap - intraCharGap)
@@ -640,6 +806,5 @@ struct Daily: View {
 }
 
 #Preview {
-    Daily()
+    Daily(vm: DailyMorseViewModel())
 }
-

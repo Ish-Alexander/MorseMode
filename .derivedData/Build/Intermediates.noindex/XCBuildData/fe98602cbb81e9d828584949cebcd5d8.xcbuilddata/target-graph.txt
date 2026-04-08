@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'MorseMode' in project 'MorseMode'
+➜ Explicit dependency on target 'MorseMode Watch App' in project 'MorseMode'
+Target 'MorseMode Watch App' in project 'MorseMode' (no dependencies)

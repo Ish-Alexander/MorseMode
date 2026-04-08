@@ -18,7 +18,6 @@ struct ContentView: View {
                 VStack {
                     Button(action: {
                         WatchConnectivityManager.shared.open(view: "Daily")
-                        WatchConnectivityManager.shared.resendMorse()
                         WKInterfaceDevice.current().play(.click)
                     }) {
                         VStack {
