@@ -16,8 +16,18 @@ struct Journey: View {
     @State private var showLevelAN: Bool = false
     @State private var showLevelIM: Bool = false
     @State private var showLevelSO: Bool = false
+    @State private var showLevelDU: Bool = false
+    @State private var showLevelRK: Bool = false
+    @State private var showLevelCP: Bool = false
+    @State private var showLevelBG: Bool = false
+    @State private var showLevelWL: Bool = false
+    @State private var showLevelQH: Bool = false
+    @State private var showLevelZV: Bool = false
+    @State private var showLevelXJ: Bool = false
+    @State private var showLevelFY: Bool = false
+    @State private var showLevelAlphabet: Bool = false
 
-    private let levels = Array(1...13)
+    private let levels = Array(1...14)
 
     var body: some View {
         ZStack {
@@ -70,6 +80,36 @@ struct Journey: View {
         }
         .fullScreenCover(isPresented: $showLevelSO) {
             LevelSO()
+        }
+        .fullScreenCover(isPresented: $showLevelDU) {
+            LevelDU()
+        }
+        .fullScreenCover(isPresented: $showLevelRK) {
+            LevelRK()
+        }
+        .fullScreenCover(isPresented: $showLevelCP) {
+            LevelCP()
+        }
+        .fullScreenCover(isPresented: $showLevelBG) {
+            LevelBG()
+        }
+        .fullScreenCover(isPresented: $showLevelWL) {
+            LevelWL()
+        }
+        .fullScreenCover(isPresented: $showLevelQH) {
+            LevelQH()
+        }
+        .fullScreenCover(isPresented: $showLevelZV) {
+            LevelZV()
+        }
+        .fullScreenCover(isPresented: $showLevelXJ) {
+            LevelXJ()
+        }
+        .fullScreenCover(isPresented: $showLevelFY) {
+            LevelFY()
+        }
+        .fullScreenCover(isPresented: $showLevelAlphabet) {
+            LevelAlphabet()
         }
         .onAppear {
             let highestUnlocked = levels.last(where: { userProgress.isLevelUnlocked($0) }) ?? 1
@@ -160,6 +200,76 @@ struct Journey: View {
                     showLevelSO = true
                 } label: {
                     actionLabel(title: "Start Level 4", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 5 && isUnlocked {
+                Button {
+                    showLevelDU = true
+                } label: {
+                    actionLabel(title: "Start Level 5", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 6 && isUnlocked {
+                Button {
+                    showLevelRK = true
+                } label: {
+                    actionLabel(title: "Start Level 6", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 7 && isUnlocked {
+                Button {
+                    showLevelCP = true
+                } label: {
+                    actionLabel(title: "Start Level 7", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 8 && isUnlocked {
+                Button {
+                    showLevelBG = true
+                } label: {
+                    actionLabel(title: "Start Level 8", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 9 && isUnlocked {
+                Button {
+                    showLevelWL = true
+                } label: {
+                    actionLabel(title: "Start Level 9", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 10 && isUnlocked {
+                Button {
+                    showLevelQH = true
+                } label: {
+                    actionLabel(title: "Start Level 10", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 11 && isUnlocked {
+                Button {
+                    showLevelZV = true
+                } label: {
+                    actionLabel(title: "Start Level 11", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 12 && isUnlocked {
+                Button {
+                    showLevelXJ = true
+                } label: {
+                    actionLabel(title: "Start Level 12", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 13 && isUnlocked {
+                Button {
+                    showLevelFY = true
+                } label: {
+                    actionLabel(title: "Start Level 13", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 14 && isUnlocked {
+                Button {
+                    showLevelAlphabet = true
+                } label: {
+                    actionLabel(title: "Start Level 14", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else {
