@@ -235,7 +235,7 @@ struct LevelAN: View {
                         .scaledToFit()
 
                     Text(letter)
-                        .font(.custom("berkelium bitmap", size: 180))
+                        .font(.custom("berkelium bitmap", size: 160))
                         .foregroundStyle(.neon)
                 }
                 .frame(maxHeight: 310)

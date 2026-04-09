@@ -14,6 +14,8 @@ struct Journey: View {
     @State private var selectedLevel: Int = 1
     @State private var showLevelET: Bool = false
     @State private var showLevelAN: Bool = false
+    @State private var showLevelIM: Bool = false
+    @State private var showLevelSO: Bool = false
 
     private let levels = Array(1...13)
 
@@ -62,6 +64,12 @@ struct Journey: View {
         }
         .fullScreenCover(isPresented: $showLevelAN) {
             LevelAN()
+        }
+        .fullScreenCover(isPresented: $showLevelIM) {
+            LevelIM()
+        }
+        .fullScreenCover(isPresented: $showLevelSO) {
+            LevelSO()
         }
         .onAppear {
             let highestUnlocked = levels.last(where: { userProgress.isLevelUnlocked($0) }) ?? 1
@@ -138,6 +146,20 @@ struct Journey: View {
                     showLevelAN = true
                 } label: {
                     actionLabel(title: "Start Level 2", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 3 && isUnlocked {
+                Button {
+                    showLevelIM = true
+                } label: {
+                    actionLabel(title: "Start Level 3", isUnlocked: isUnlocked)
+                }
+                .buttonStyle(.plain)
+            } else if selectedLevel == 4 && isUnlocked {
+                Button {
+                    showLevelSO = true
+                } label: {
+                    actionLabel(title: "Start Level 4", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else {

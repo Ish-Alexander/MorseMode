@@ -1,15 +1,15 @@
 //
-//  LevelET.swift
+//  LevelSO.swift
 //  MorseMode
 //
-//  Created by Ishauna Marie Alexander on 4/7/26.
+//  Created by Ishauna Marie Alexander on 4/9/26.
 //
 
 import SwiftUI
 import WatchConnectivity
 import AVFoundation
 
-struct LevelET: View {
+struct LevelSO: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userProgress: UserProgress
     @EnvironmentObject private var morseEngine: MorseEngine
@@ -20,8 +20,8 @@ struct LevelET: View {
     @State private var rotationAngle: Double = 0
     @State private var audioPlayer: AVAudioPlayer? = nil
     @State private var correctCounts: [String: Int] = [
-        "E": 0,
-        "T": 0
+        "S": 0,
+        "O": 0
     ]
     @State private var isLevelComplete: Bool = false
 
@@ -29,15 +29,15 @@ struct LevelET: View {
         private let watchDelegate = Learn2WatchDelegate()
     #endif
 
-    private let targetLetters = ["E", "T"]
+    private let targetLetters = ["S", "O"]
     private let morseMap: [Character: String] = [
-        "E": ".",
-        "T": "-"
+        "S": "...",
+        "O": "---"
     ]
 
     @discardableResult
     private func createNewItem() -> String {
-        let newLetter = targetLetters.randomElement() ?? "E"
+        let newLetter = targetLetters.randomElement() ?? "S"
         letter = newLetter
         inputPattern.removeAll()
         return newLetter
@@ -70,7 +70,7 @@ struct LevelET: View {
         guard let url = foundURL else {
             if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
             audioPlayer = nil
-            print("[Audio][LevelET] No audio file found for letter \(first)")
+            print("[Audio][LevelSO] No audio file found for letter \(first)")
             return
         }
 
@@ -85,7 +85,7 @@ struct LevelET: View {
                 audioPlayer = player
             }
         } catch {
-            print("[Audio][LevelET] Failed to play \(url.lastPathComponent): \(error)")
+            print("[Audio][LevelSO] Failed to play \(url.lastPathComponent): \(error)")
         }
     }
 
@@ -135,7 +135,7 @@ struct LevelET: View {
             let hasCompletedLevel = targetLetters.allSatisfy { correctCounts[$0, default: 0] >= 5 }
             if hasCompletedLevel {
                 isLevelComplete = true
-                userProgress.completeLevel(1)
+                userProgress.completeLevel(4)
                 lastFeedback = "Level Complete!"
             } else {
                 lastFeedback = "Correct! \(completedLetter) \(updatedCount)/5"
@@ -197,23 +197,23 @@ struct LevelET: View {
                     Spacer()
                 }
 
-                Text("LEVEL E/T")
+                Text("LEVEL S/O")
                     .font(.custom("berkelium bitmap", size: 24))
                     .foregroundStyle(.neon)
 
-                Text("Listen, then tap the Morse code for E or T.")
+                Text("Listen, then tap the Morse code for S or O.")
                     .font(.custom("berkelium bitmap", size: 12))
                     .foregroundStyle(Color.white.opacity(0.82))
                     .multilineTextAlignment(.center)
 
                 HStack(spacing: 18) {
-                    Text("E: \(correctCounts["E", default: 0])/5")
-                    Text("T: \(correctCounts["T", default: 0])/5")
+                    Text("S: \(correctCounts["S", default: 0])/5")
+                    Text("O: \(correctCounts["O", default: 0])/5")
                 }
                 .foregroundStyle(.neon)
                 .font(.custom("berkelium bitmap", size: 14))
 
-                Text("Letters in play: E  T")
+                Text("Letters in play: S  O")
                     .font(.custom("berkelium bitmap", size: 12))
                     .foregroundStyle(Color.white.opacity(0.72))
 
@@ -340,7 +340,7 @@ struct LevelET: View {
 }
 
 #Preview {
-    LevelET()
+    LevelSO()
         .environmentObject(UserProgress())
         .environmentObject(MorseEngine())
 }

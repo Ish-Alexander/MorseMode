@@ -36,10 +36,15 @@ let onboardingData: [OnboardingItem] = [
         description: "Learn morse code one random letter at a time. Use your Apple Watch to input the correct morse code pattern and earn EXP."
     ),
     OnboardingItem(
-        imageName: "house.fill",
+        imageName: "archivebox",
         title: "The Warehouse",
         description: "A place to pratice how you want. Type in a message and listen to it play, or just focus on learning one specific letter."
-    )
+    ),
+    OnboardingItem(
+        imageName: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath",
+        title: "Agents Journey",
+        description: "A level based learning system where you master Morse Code two letters at a time. This is the best starting place for beginners."
+        )
 ]
 struct OnboardingView: View {
     @State private var selection: Int = 0
