@@ -10,9 +10,9 @@ import WatchConnectivity
 import AVFoundation
 
 struct LevelAN: View {
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userProgress: UserProgress
     @EnvironmentObject private var morseEngine: MorseEngine
+    @EnvironmentObject private var levelFlow: LevelFlow
 
     @State private var letter: String = ""
     @State private var inputPattern: String = ""
@@ -180,7 +180,7 @@ struct LevelAN: View {
             VStack(spacing: 14) {
                 HStack {
                     Button {
-                        dismiss()
+                        levelFlow.exitToLevelSelect()
                     } label: {
                         Text("Back")
                             .font(.custom("berkelium bitmap", size: 12))
@@ -282,6 +282,15 @@ struct LevelAN: View {
                 }
 
                 Spacer(minLength: 0)
+
+                if isLevelComplete {
+                    Button {
+                        levelFlow.goToNextLevel()
+                    } label: {
+                        actionButtonLabel("Continue to Next Level", fill: Color.neon, textColor: .black)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .padding()
         }
@@ -343,4 +352,5 @@ struct LevelAN: View {
     LevelAN()
         .environmentObject(UserProgress())
         .environmentObject(MorseEngine())
+        .environmentObject(LevelFlow())
 }

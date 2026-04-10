@@ -10,22 +10,9 @@ import SwiftUI
 struct Journey: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userProgress: UserProgress
+    @StateObject private var levelFlow = LevelFlow()
 
     @State private var selectedLevel: Int = 1
-    @State private var showLevelET: Bool = false
-    @State private var showLevelAN: Bool = false
-    @State private var showLevelIM: Bool = false
-    @State private var showLevelSO: Bool = false
-    @State private var showLevelDU: Bool = false
-    @State private var showLevelRK: Bool = false
-    @State private var showLevelCP: Bool = false
-    @State private var showLevelBG: Bool = false
-    @State private var showLevelWL: Bool = false
-    @State private var showLevelQH: Bool = false
-    @State private var showLevelZV: Bool = false
-    @State private var showLevelXJ: Bool = false
-    @State private var showLevelFY: Bool = false
-    @State private var showLevelAlphabet: Bool = false
 
     private let levels = Array(1...14)
 
@@ -69,47 +56,18 @@ struct Journey: View {
             }
         }
         .preferredColorScheme(.dark)
-        .fullScreenCover(isPresented: $showLevelET) {
-            LevelET()
-        }
-        .fullScreenCover(isPresented: $showLevelAN) {
-            LevelAN()
-        }
-        .fullScreenCover(isPresented: $showLevelIM) {
-            LevelIM()
-        }
-        .fullScreenCover(isPresented: $showLevelSO) {
-            LevelSO()
-        }
-        .fullScreenCover(isPresented: $showLevelDU) {
-            LevelDU()
-        }
-        .fullScreenCover(isPresented: $showLevelRK) {
-            LevelRK()
-        }
-        .fullScreenCover(isPresented: $showLevelCP) {
-            LevelCP()
-        }
-        .fullScreenCover(isPresented: $showLevelBG) {
-            LevelBG()
-        }
-        .fullScreenCover(isPresented: $showLevelWL) {
-            LevelWL()
-        }
-        .fullScreenCover(isPresented: $showLevelQH) {
-            LevelQH()
-        }
-        .fullScreenCover(isPresented: $showLevelZV) {
-            LevelZV()
-        }
-        .fullScreenCover(isPresented: $showLevelXJ) {
-            LevelXJ()
-        }
-        .fullScreenCover(isPresented: $showLevelFY) {
-            LevelFY()
-        }
-        .fullScreenCover(isPresented: $showLevelAlphabet) {
-            LevelAlphabet()
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { levelFlow.activeLevel != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        levelFlow.exitToLevelSelect()
+                    }
+                }
+            )
+        ) {
+            ActiveLevelScreen()
+                .environmentObject(levelFlow)
         }
         .onAppear {
             let highestUnlocked = levels.last(where: { userProgress.isLevelUnlocked($0) }) ?? 1
@@ -176,98 +134,98 @@ struct Journey: View {
 
             if selectedLevel == 1 && isUnlocked {
                 Button {
-                    showLevelET = true
+                    levelFlow.open(1)
                 } label: {
                     actionLabel(title: "Start Level 1", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 2 && isUnlocked {
                 Button {
-                    showLevelAN = true
+                    levelFlow.open(2)
                 } label: {
                     actionLabel(title: "Start Level 2", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 3 && isUnlocked {
                 Button {
-                    showLevelIM = true
+                    levelFlow.open(3)
                 } label: {
                     actionLabel(title: "Start Level 3", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 4 && isUnlocked {
                 Button {
-                    showLevelSO = true
+                    levelFlow.open(4)
                 } label: {
                     actionLabel(title: "Start Level 4", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 5 && isUnlocked {
                 Button {
-                    showLevelDU = true
+                    levelFlow.open(5)
                 } label: {
                     actionLabel(title: "Start Level 5", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 6 && isUnlocked {
                 Button {
-                    showLevelRK = true
+                    levelFlow.open(6)
                 } label: {
                     actionLabel(title: "Start Level 6", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 7 && isUnlocked {
                 Button {
-                    showLevelCP = true
+                    levelFlow.open(7)
                 } label: {
                     actionLabel(title: "Start Level 7", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 8 && isUnlocked {
                 Button {
-                    showLevelBG = true
+                    levelFlow.open(8)
                 } label: {
                     actionLabel(title: "Start Level 8", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 9 && isUnlocked {
                 Button {
-                    showLevelWL = true
+                    levelFlow.open(9)
                 } label: {
                     actionLabel(title: "Start Level 9", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 10 && isUnlocked {
                 Button {
-                    showLevelQH = true
+                    levelFlow.open(10)
                 } label: {
                     actionLabel(title: "Start Level 10", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 11 && isUnlocked {
                 Button {
-                    showLevelZV = true
+                    levelFlow.open(11)
                 } label: {
                     actionLabel(title: "Start Level 11", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 12 && isUnlocked {
                 Button {
-                    showLevelXJ = true
+                    levelFlow.open(12)
                 } label: {
                     actionLabel(title: "Start Level 12", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 13 && isUnlocked {
                 Button {
-                    showLevelFY = true
+                    levelFlow.open(13)
                 } label: {
                     actionLabel(title: "Start Level 13", isUnlocked: isUnlocked)
                 }
                 .buttonStyle(.plain)
             } else if selectedLevel == 14 && isUnlocked {
                 Button {
-                    showLevelAlphabet = true
+                    levelFlow.open(14)
                 } label: {
                     actionLabel(title: "Start Level 14", isUnlocked: isUnlocked)
                 }
