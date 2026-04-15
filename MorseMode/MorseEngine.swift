@@ -133,4 +133,19 @@ final class MorseEngine: ObservableObject {
             print("❌ Playback error:", error)
         }
     }
+
+    func performInputHaptic(for symbol: MorseCharacter) {
+        guard let engine else { return }
+
+        do {
+            let pattern = try CHHapticPattern(
+                events: symbol.hapticEvents(relativeTime: 0),
+                parameters: []
+            )
+            let player = try engine.makePlayer(with: pattern)
+            try player.start(atTime: 0)
+        } catch {
+            print("❌ Input haptic playback error:", error)
+        }
+    }
 }

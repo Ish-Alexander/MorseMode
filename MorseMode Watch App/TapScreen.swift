@@ -124,81 +124,91 @@ struct TapScreen: View {
     @State private var pattern: String = ""
     private let wcDelegate = WatchFeedbackSessionDelegate()
 
+    private func sendPatternPayload(action: String, pattern: String) {
+        let payload: [String: Any] = [
+            "action": action,
+            "pattern": pattern
+        ]
+
+        guard WCSession.isSupported() else {
+            print("[Watch] WCSession not supported")
+            return
+        }
+
+        let session = WCSession.default
+        if session.isReachable {
+            session.sendMessage(payload, replyHandler: nil) { error in
+                print("[Watch] \(action) sendMessage error: \(error)")
+            }
+            print("[Watch] \(action) sent via sendMessage: \(pattern)")
+        } else {
+            do {
+                try session.updateApplicationContext(payload)
+                print("[Watch] \(action) sent via applicationContext: \(pattern)")
+            } catch {
+                print("[Watch] \(action) updateApplicationContext error: \(error)")
+            }
+        }
+    }
+
     var body: some View {
-            VStack(spacing: 12) {
-                // Current pattern preview
-                Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
-                    .font(.custom("berkelium bitmap", size: 14))
-                    .foregroundStyle(pattern.isEmpty ? .gray : .white)
-
-                // Dot / Dash controls
-                HStack(spacing: 12) {
-                    Button {
-                        pattern.append(".")
-                        WKInterfaceDevice.current().play(.click)
-                    } label: {
-                        Text("Dot ·")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .foregroundStyle(Color(.neon))
-                    }
-
-                    Button {
-                        pattern.append("-")
-                        WKInterfaceDevice.current().play(.directionUp)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-                            WKInterfaceDevice.current().play(.directionUp)
-                        }
-                    } label: {
-                        Text("Dash –")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .foregroundStyle(Color(.neon))
-                    }
+        VStack(spacing: 12) {
+            // Current pattern preview
+            Text(pattern.isEmpty ? "Tap Dot / Dash" : pattern)
+                .font(.custom("berkelium bitmap", size: 14))
+                .foregroundStyle(pattern.isEmpty ? .gray : .white)
+            
+            // Dot / Dash controls
+            HStack(spacing: 12) {
+                Button {
+                    pattern.append(".")
+                    sendPatternPayload(action: "morsePreview", pattern: pattern)
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Text("Dot ·")
+                        .font(.custom("berkelium bitmap", size: 16))
+                        .foregroundStyle(Color(.neon))
                 }
-
-                // Send / Clear controls
-                HStack(spacing: 12) {
-                    Button {
-                        guard !pattern.isEmpty else { return }
-                        let payload: [String: Any] = [
-                            "action": "morseInput",
-                            "pattern": pattern
-                        ]
-                        if WCSession.isSupported() {
-                            let session = WCSession.default
-                            if session.isReachable {
-                                session.sendMessage(payload, replyHandler: nil, errorHandler: { error in
-                                    print("[Watch] morseInput sendMessage error: \(error)")
-                                })
-                                print("[Watch] morseInput sent via sendMessage: \(pattern)")
-                            } else {
-                                do {
-                                    try session.updateApplicationContext(payload)
-                                    print("[Watch] morseInput sent via applicationContext: \(pattern)")
-                                } catch {
-                                    print("[Watch] morseInput updateApplicationContext error: \(error)")
-                                }
-                            }
-                        } else {
-                            print("[Watch] WCSession not supported")
-                        }
-                        WKInterfaceDevice.current().play(.success)
-                        pattern.removeAll()
-                    } label: {
-                        Text("Send")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .foregroundStyle(Color(.neon))
+                
+                Button {
+                    pattern.append("-")
+                    sendPatternPayload(action: "morsePreview", pattern: pattern)
+                    WKInterfaceDevice.current().play(.directionUp)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                        WKInterfaceDevice.current().play(.directionUp)
                     }
-
-                    Button {
-                        pattern.removeAll()
-                        WKInterfaceDevice.current().play(.click)
-                    } label: {
-                        Text("Clear")
-                            .font(.custom("berkelium bitmap", size: 16))
-                            .foregroundStyle(Color(.neon))
-                    }
+                } label: {
+                    Text("Dash –")
+                        .font(.custom("berkelium bitmap", size: 16))
+                        .foregroundStyle(Color(.neon))
                 }
             }
+            
+            // Send / Clear controls
+            HStack(spacing: 12) {
+                Button {
+                    guard !pattern.isEmpty else { return }
+                    sendPatternPayload(action: "morseInput", pattern: pattern)
+                    WKInterfaceDevice.current().play(.click)
+                    pattern.removeAll()
+                    sendPatternPayload(action: "morsePreview", pattern: pattern)
+                } label: {
+                    Text("Send")
+                        .font(.custom("berkelium bitmap", size: 16))
+                        .foregroundStyle(Color(.neon))
+                }
+                
+                Button {
+                    pattern.removeAll()
+                    sendPatternPayload(action: "morsePreview", pattern: pattern)
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Text("Clear")
+                        .font(.custom("berkelium bitmap", size: 16))
+                        .foregroundStyle(Color(.neon))
+                }
+            }
+        }
             .padding(.top, 75)
             
         .contentMargins(0)

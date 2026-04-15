@@ -7,6 +7,7 @@ struct DailyIntroLoadingView: View {
     @State private var warning1Opacity: Double = 1.0
     @State private var showWarning2: Bool = false
     @State private var hasStarted: Bool = false
+    @State private var hasFinished: Bool = false
 
     private let flashInterval: TimeInterval = 0.2
     private let totalFlashDuration: TimeInterval = 1.2
@@ -35,6 +36,25 @@ struct DailyIntroLoadingView: View {
                     .opacity(showWarning1 ? warning1Opacity : 0)
                     .frame(maxWidth: 280)
             }
+
+            VStack {
+                HStack {
+                    Spacer()
+
+                    Button("Skip") {
+                        finish()
+                    }
+                    .font(.custom("berkelium bitmap", size: 14))
+                    .foregroundStyle(.neon)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.black.opacity(0.55))
+                    .clipShape(Capsule())
+                }
+
+                Spacer()
+            }
+            .padding()
         }
         .onAppear {
             startSequence()
@@ -57,7 +77,7 @@ struct DailyIntroLoadingView: View {
                 showWarning1 = false
                 // After crossfade completes, wait briefly then finish
                 DispatchQueue.main.asyncAfter(deadline: .now() + crossfadeDuration + 3.0) {
-                    onFinished()
+                    finish()
                 }
                 return
             }
@@ -70,6 +90,12 @@ struct DailyIntroLoadingView: View {
             }
         }
         scheduleNextFlash()
+    }
+
+    private func finish() {
+        guard !hasFinished else { return }
+        hasFinished = true
+        onFinished()
     }
 }
 

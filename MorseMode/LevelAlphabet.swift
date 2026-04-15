@@ -24,7 +24,7 @@ struct LevelAlphabet: View {
     @State private var isLevelComplete: Bool = false
 
     #if canImport(WatchConnectivity)
-        private let watchDelegate = Learn2WatchDelegate()
+        private let watchDelegate = MorseWatchInputDelegate()
     #endif
 
     private let targetLetters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map { String($0) }
@@ -178,6 +178,11 @@ struct LevelAlphabet: View {
     private func appendSymbol(_ symbol: String) {
         guard inputPattern.count < 4 else { return }
         guard incorrectGuesses < 10 else { return }
+        if symbol == "." {
+            morseEngine.performInputHaptic(for: .dot)
+        } else if symbol == "-" {
+            morseEngine.performInputHaptic(for: .dash)
+        }
         inputPattern.append(symbol)
     }
 
@@ -209,7 +214,7 @@ struct LevelAlphabet: View {
                     Spacer()
                 }
 
-                Text("LEVEL ALPHABET")
+                Text("LEVEL 14")
                     .font(.custom("berkelium bitmap", size: 24))
                     .foregroundStyle(.neon)
 
@@ -254,7 +259,9 @@ struct LevelAlphabet: View {
                         .scaledToFit()
 
                     Text(letter)
-                        .font(.custom("berkelium bitmap", size: 160))
+                        .font(.custom("berkelium bitmap", size: isLevelComplete ? 108 : 160))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
                         .foregroundStyle(.neon)
                 }
                 .frame(maxHeight: 310)
@@ -267,6 +274,10 @@ struct LevelAlphabet: View {
                             .resizable()
                             .frame(width: 78, height: 78)
                             .scaledToFit()
+                            .rotationEffect(.degrees(rotationAngle))
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.neon)
                             .rotationEffect(.degrees(rotationAngle))
                     }
                 }
@@ -283,21 +294,24 @@ struct LevelAlphabet: View {
                     }
 
                     HStack(spacing: 12) {
-                        Button {
-                            inputPattern.removeAll()
-                        } label: {
-                            actionButtonLabel("Clear", fill: Color.white.opacity(0.12), textColor: .white)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(incorrectGuesses >= 10)
 
                         Button {
                             submitPattern(inputPattern)
                         } label: {
-                            actionButtonLabel("Send", fill: inputPattern.isEmpty || incorrectGuesses >= 10 ? Color.gray.opacity(0.35) : Color.neon, textColor: inputPattern.isEmpty || incorrectGuesses >= 10 ? .white.opacity(0.7) : .black)
+                            actionButtonLabel("Send", fill: Color.neon.opacity(0.12), textColor: .neon)
                         }
                         .buttonStyle(.plain)
                         .disabled(inputPattern.isEmpty || incorrectGuesses >= 10)
+                        .opacity(inputPattern.isEmpty || incorrectGuesses >= 10 ? 0.45 : 1)
+                        
+                        Button {
+                            inputPattern.removeAll()
+                        } label: {
+                            actionButtonLabel("Clear", fill: Color.yellow.opacity(0.12), textColor: .yellow)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(incorrectGuesses >= 10)
+                        .opacity(inputPattern.isEmpty || incorrectGuesses >= 10 ? 0.45 : 1)
                     }
                 }
 
@@ -317,8 +331,12 @@ struct LevelAlphabet: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MorseModeWatchInput"))) { notification in
             guard let userInfo = notification.userInfo as? [String: Any],
                   let action = userInfo["action"] as? String,
-                  action == "morseInput",
                   let pattern = userInfo["pattern"] as? String else { return }
+            if action == "morsePreview" {
+                inputPattern = pattern
+                return
+            }
+            guard action == "morseInput" else { return }
             submitPattern(pattern)
         }
     }
@@ -327,21 +345,13 @@ struct LevelAlphabet: View {
         Button {
             appendSymbol(symbol)
         } label: {
-            VStack(spacing: 8) {
-                Text(symbol)
-                    .font(.custom("berkelium bitmap", size: 28))
-                    .foregroundStyle(.black)
-
-                Text(title)
-                    .font(.custom("berkelium bitmap", size: 10))
-                    .foregroundStyle(.black.opacity(0.78))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 96)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(incorrectGuesses >= 10 ? Color.white.opacity(0.2) : Color.neon)
-            )
+            Text(title == "DOT" ? "Dot ·" : "Dash -")
+                .font(.custom("berkelium bitmap", size: 18))
+                .foregroundStyle(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(incorrectGuesses >= 10 ? Color.white.opacity(0.2) : Color.neon)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .disabled(incorrectGuesses >= 10)
@@ -349,14 +359,16 @@ struct LevelAlphabet: View {
 
     private func actionButtonLabel(_ title: String, fill: Color, textColor: Color) -> some View {
         Text(title)
-            .font(.custom("berkelium bitmap", size: 12))
+            .font(.custom("berkelium bitmap", size: 18))
             .foregroundStyle(textColor)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(
+            .background(fill)
+            .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(fill)
-            )
+                    .stroke(fill == Color.yellow.opacity(0.12) ? Color.yellow : Color.neon, lineWidth: 1.5)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 

@@ -105,6 +105,9 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
         case "morseInput":
             print("[PhoneConnectivity] handleIncomingPayload morseInput pattern=\(payload["pattern"] as? String ?? "nil")")
             NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: payload)
+        case "morsePreview":
+            print("[PhoneConnectivity] handleIncomingPayload morsePreview pattern=\(payload["pattern"] as? String ?? "nil")")
+            NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: payload)
         case "awardEXP":
             print("[PhoneConnectivity] handleIncomingPayload awardEXP amount=\(payload["amount"] as? Int ?? 1)")
             NotificationCenter.default.post(name: Notification.Name("MorseModeAwardEXP"), object: nil, userInfo: payload)

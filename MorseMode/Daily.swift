@@ -95,6 +95,7 @@ final class DailyMorseViewModel: ObservableObject {
     private var revealedKey: String { "dailyRevealed_\(todayKeySuffix)" }
     private var lastSavedAtKey: String { "dailyLastSavedAt_\(todayKeySuffix)" }
     private var activeKey: String { "dailyIsActive_\(todayKeySuffix)" }
+    private var completionTimeKey: String { "dailyCompletionTime_\(todayKeySuffix)" }
 
     private func saveTimeRemaining() {
         UserDefaults.standard.set(timeRemaining, forKey: timeKey)
@@ -136,6 +137,15 @@ final class DailyMorseViewModel: ObservableObject {
 
     private func clearIsActive() {
         UserDefaults.standard.removeObject(forKey: activeKey)
+    }
+
+    private func saveCompletionTime(_ seconds: Int) {
+        UserDefaults.standard.set(seconds, forKey: completionTimeKey)
+    }
+
+    private func loadCompletionTime() -> Int? {
+        guard UserDefaults.standard.object(forKey: completionTimeKey) != nil else { return nil }
+        return UserDefaults.standard.integer(forKey: completionTimeKey)
     }
 
     private func saveWrongGuesses() {
@@ -200,6 +210,19 @@ final class DailyMorseViewModel: ObservableObject {
         //Picks one word for the day, makes that word the same for everyone
     }
 
+    static func completionSecondsForToday() -> Int? {
+        let cal = Calendar(identifier: .gregorian)
+        let startOfDay = cal.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.calendar = cal
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let suffix = formatter.string(from: startOfDay)
+        let key = "dailyCompletionTime_\(suffix)"
+        guard UserDefaults.standard.object(forKey: key) != nil else { return nil }
+        return UserDefaults.standard.integer(forKey: key)
+    }
+
     @Published var targetWord: String
     @Published var revealed: Set<Character> = []
     @Published var wrongGuesses: Set<Character> = []
@@ -245,6 +268,9 @@ final class DailyMorseViewModel: ObservableObject {
             saveRevealed()
             isActive = false
             timeRemaining = 180
+            if let completionTime = loadCompletionTime() {
+                timeRemaining = max(0, 180 - completionTime)
+            }
             // Clear any leftover persisted state for a solved day
             clearTimeRemaining()
             clearWrongGuesses()
@@ -340,6 +366,9 @@ final class DailyMorseViewModel: ObservableObject {
             isActive = false
             timer?.invalidate()
             timer = nil
+            let completionSeconds = max(0, 180 - timeRemaining)
+            saveCompletionTime(completionSeconds)
+            GameCenterManager.shared.submitDailyInterceptTime(seconds: completionSeconds)
             markSolved()
             clearTimeRemaining()
             clearWrongGuesses()
@@ -356,12 +385,10 @@ struct Daily: View {
     // What the user types
     @FocusState private var isGuessFieldFocused: Bool
     @State private var isPlayingHaptics: Bool = false
+    @State private var replayRotationAngle: Double = 0
     // Prevents overlapping haptics
     @State private var audioPlayer: AVAudioPlayer? = nil
     // Plays morse code audio
-    
-    // Watch Connectivity session
-    @State private var wcSessionActivated: Bool = false
 
 #if canImport(CoreHaptics)
     @State private var hapticEngine: CHHapticEngine? = nil
@@ -509,7 +536,18 @@ struct Daily: View {
                             .background(Color.white.opacity(0.4))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .onSubmit(submitGuess)
-                            
+
+                            Button(action: submitGuess) {
+                                Text("Guess")
+                                    .font(.custom("berkelium bitmap", size: 14))
+                                    .foregroundStyle(.black)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .background(Color.neon)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .disabled(currentGuess.isEmpty || vm.timeRemaining == 0 || vm.isSolved)
+                            .opacity(currentGuess.isEmpty || vm.timeRemaining == 0 || vm.isSolved ? 0.45 : 1)
                         }
                         
                         // Wrong guesses
@@ -530,13 +568,27 @@ struct Daily: View {
                                 replayHaptics()
                             }) {
                                 ZStack {
-                                    Text("Replay Haptics")
-                                        .font(.custom("berkelium bitmap", size: 16))
+                                    Image("Radar")
+                                        .resizable()
+                                        .frame(width: 75, height: 75)
+                                        .scaledToFit()
+                                        .ignoresSafeArea()
+                                        .rotationEffect(.degrees(replayRotationAngle))
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 18, weight: .bold))
                                         .foregroundStyle(.neon)
+                                        .rotationEffect(.degrees(replayRotationAngle))
+                                        .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
+                                        .onAppear {
+                                            withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
+                                                replayRotationAngle = 360
+                                            }
+                                        }
                                 }
                             }
                             .accessibilityLabel("Replay the last Morse haptics")
                             .disabled(isPlayingHaptics)
+                            .opacity(isPlayingHaptics ? 0.5 : 1)
                             // Replays the morse code and haptics
                         }
                         .padding()

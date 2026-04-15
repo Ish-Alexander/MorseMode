@@ -26,7 +26,7 @@ struct LevelWL: View {
     @State private var isLevelComplete: Bool = false
 
     #if canImport(WatchConnectivity)
-        private let watchDelegate = Learn2WatchDelegate()
+        private let watchDelegate = MorseWatchInputDelegate()
     #endif
 
     private let targetLetters = ["W", "L"]
@@ -37,7 +37,8 @@ struct LevelWL: View {
 
     @discardableResult
     private func createNewItem() -> String {
-        let newLetter = targetLetters.randomElement() ?? "W"
+        let remainingLetters = targetLetters.filter { correctCounts[$0, default: 0] < 5 }
+        let newLetter = remainingLetters.randomElement() ?? targetLetters.randomElement() ?? "W"
         letter = newLetter
         inputPattern.removeAll()
         return newLetter
@@ -170,6 +171,11 @@ struct LevelWL: View {
 
     private func appendSymbol(_ symbol: String) {
         guard inputPattern.count < 4 else { return }
+        if symbol == "." {
+            morseEngine.performInputHaptic(for: .dot)
+        } else if symbol == "-" {
+            morseEngine.performInputHaptic(for: .dash)
+        }
         inputPattern.append(symbol)
     }
 
@@ -197,7 +203,7 @@ struct LevelWL: View {
                     Spacer()
                 }
 
-                Text("LEVEL W/L")
+                Text("LEVEL 9")
                     .font(.custom("berkelium bitmap", size: 24))
                     .foregroundStyle(.neon)
 
@@ -235,7 +241,9 @@ struct LevelWL: View {
                         .scaledToFit()
 
                     Text(letter)
-                        .font(.custom("berkelium bitmap", size: 160))
+                        .font(.custom("berkelium bitmap", size: isLevelComplete ? 108 : 160))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
                         .foregroundStyle(.neon)
                 }
                 .frame(maxHeight: 310)
@@ -248,6 +256,10 @@ struct LevelWL: View {
                             .resizable()
                             .frame(width: 78, height: 78)
                             .scaledToFit()
+                            .rotationEffect(.degrees(rotationAngle))
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.neon)
                             .rotationEffect(.degrees(rotationAngle))
                     }
                 }
@@ -264,20 +276,23 @@ struct LevelWL: View {
                     }
 
                     HStack(spacing: 12) {
-                        Button {
-                            inputPattern.removeAll()
-                        } label: {
-                            actionButtonLabel("Clear", fill: Color.white.opacity(0.12), textColor: .white)
-                        }
-                        .buttonStyle(.plain)
-
+                        
                         Button {
                             submitPattern(inputPattern)
                         } label: {
-                            actionButtonLabel("Send", fill: inputPattern.isEmpty ? Color.gray.opacity(0.35) : Color.neon, textColor: inputPattern.isEmpty ? .white.opacity(0.7) : .black)
+                            actionButtonLabel("Send", fill: Color.neon.opacity(0.12), textColor: .neon)
                         }
                         .buttonStyle(.plain)
                         .disabled(inputPattern.isEmpty)
+                        .opacity(inputPattern.isEmpty ? 0.45 : 1)
+                        
+                        Button {
+                                                    inputPattern.removeAll()
+                                                } label: {
+                                                    actionButtonLabel("Clear", fill: Color.yellow.opacity(0.12), textColor: .yellow)
+                                                }
+                                                .buttonStyle(.plain)
+                                                .opacity(inputPattern.isEmpty ? 0.45 : 1)
                     }
                 }
 
@@ -306,8 +321,12 @@ struct LevelWL: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MorseModeWatchInput"))) { notification in
             guard let userInfo = notification.userInfo as? [String: Any],
                   let action = userInfo["action"] as? String,
-                  action == "morseInput",
                   let pattern = userInfo["pattern"] as? String else { return }
+            if action == "morsePreview" {
+                inputPattern = pattern
+                return
+            }
+            guard action == "morseInput" else { return }
             submitPattern(pattern)
         }
     }
@@ -316,35 +335,29 @@ struct LevelWL: View {
         Button {
             appendSymbol(symbol)
         } label: {
-            VStack(spacing: 8) {
-                Text(symbol)
-                    .font(.custom("berkelium bitmap", size: 28))
-                    .foregroundStyle(.black)
-
-                Text(title)
-                    .font(.custom("berkelium bitmap", size: 10))
-                    .foregroundStyle(.black.opacity(0.78))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 96)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.neon)
-            )
+            Text(title == "DOT" ? "Dot ·" : "Dash -")
+                .font(.custom("berkelium bitmap", size: 18))
+                .foregroundStyle(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.neon)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
     }
 
     private func actionButtonLabel(_ title: String, fill: Color, textColor: Color) -> some View {
         Text(title)
-            .font(.custom("berkelium bitmap", size: 12))
+            .font(.custom("berkelium bitmap", size: 18))
             .foregroundStyle(textColor)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(
+            .background(fill)
+            .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(fill)
-            )
+                    .stroke(fill == Color.yellow.opacity(0.12) ? Color.yellow : Color.neon, lineWidth: 1.5)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 

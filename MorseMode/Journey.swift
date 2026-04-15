@@ -13,8 +13,17 @@ struct Journey: View {
     @StateObject private var levelFlow = LevelFlow()
 
     @State private var selectedLevel: Int = 1
+    @State private var hasHandledInitialLaunch = false
+
+    private let openCurrentLevelOnAppear: Bool
+    private let initialSelectedLevel: Int?
 
     private let levels = Array(1...14)
+
+    init(openCurrentLevelOnAppear: Bool = false, initialSelectedLevel: Int? = nil) {
+        self.openCurrentLevelOnAppear = openCurrentLevelOnAppear
+        self.initialSelectedLevel = initialSelectedLevel
+    }
 
     var body: some View {
         ZStack {
@@ -70,8 +79,12 @@ struct Journey: View {
                 .environmentObject(levelFlow)
         }
         .onAppear {
-            let highestUnlocked = levels.last(where: { userProgress.isLevelUnlocked($0) }) ?? 1
-            selectedLevel = min(max(highestUnlocked, 1), levels.count)
+            let currentLevel = currentJourneyLevel()
+            selectedLevel = min(max(initialSelectedLevel ?? currentLevel, 1), levels.count)
+
+            guard openCurrentLevelOnAppear, !hasHandledInitialLaunch else { return }
+            hasHandledInitialLaunch = true
+            levelFlow.open(currentLevel)
         }
     }
 
@@ -80,6 +93,13 @@ struct Journey: View {
             Text("Current Level: \(userProgress.level)")
                 .font(.custom("berkelium bitmap", size: 14))
                 .foregroundStyle(Color.white.opacity(0.9))
+
+            Text("\(userProgress.currentEXP) / \(userProgress.expNeededForNextLevel) EXP")
+                .font(.custom("berkelium bitmap", size: 12))
+                .foregroundStyle(.neon)
+
+            ProgressView(value: min(max(Double(userProgress.currentEXP) / Double(max(userProgress.expNeededForNextLevel, 1)), 0), 1))
+                .tint(.neon)
         }
     }
 
@@ -313,6 +333,15 @@ struct Journey: View {
             return CGPoint(x: x, y: y)
         }
     }
+
+    private func currentJourneyLevel() -> Int {
+        let currentUnlocked = levels.first(where: { level in
+            userProgress.isLevelUnlocked(level) && !userProgress.isLevelCompleted(level)
+        })
+
+        let fallbackLevel = levels.last(where: { userProgress.isLevelUnlocked($0) }) ?? 1
+        return min(max(currentUnlocked ?? fallbackLevel, 1), levels.count)
+    }
 }
 
 private struct LevelTab: View {
@@ -343,13 +372,6 @@ private struct LevelTab: View {
                     .foregroundStyle(.black)
             }
 
-            if isCompleted {
-                Image(systemName: "checkmark.circle")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Color.black)
-                    .offset(x: 20, y: 4)
-            }
-
             if !isUnlocked {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 50, weight: .bold))
@@ -358,7 +380,23 @@ private struct LevelTab: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.75))
-                    )
+                )
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if isCompleted {
+                ZStack {
+                    Circle()
+                        .fill(Color.black)
+                    Circle()
+                        .stroke(Color.neon, lineWidth: 2)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundStyle(Color.neon)
+                }
+                .frame(width: 24, height: 24)
+                    .padding(.top, 10)
+                    .padding(.trailing, 8)
             }
         }
         .scaleEffect(isSelected ? 1.06 : 1)

@@ -31,11 +31,6 @@ let onboardingData: [OnboardingItem] = [
         description: "A 3 minute decoding challenge of morse code knowledge. Words are changed daily, and only shown as dots and dashes."
     ),
     OnboardingItem(
-        imageName: "character.book.closed.fill",
-        title: "Agency Academy",
-        description: "Learn morse code one random letter at a time. Use your Apple Watch to input the correct morse code pattern and earn EXP."
-    ),
-    OnboardingItem(
         imageName: "archivebox",
         title: "The Warehouse",
         description: "A place to pratice how you want. Type in a message and listen to it play, or just focus on learning one specific letter."
@@ -43,7 +38,7 @@ let onboardingData: [OnboardingItem] = [
     OnboardingItem(
         imageName: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath",
         title: "Agents Journey",
-        description: "A level based learning system where you master Morse Code two letters at a time. This is the best starting place for beginners."
+        description: "A level based learning system where you master Morse code two letters at a time, clear missions, and earn EXP as you move forward."
         )
 ]
 struct OnboardingView: View {
@@ -182,4 +177,3 @@ private struct PageControl: View {
     OnboardingView(items: onboardingData) { }
         .preferredColorScheme(.dark)
 }
-

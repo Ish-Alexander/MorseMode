@@ -31,6 +31,8 @@ private enum AppDestination: Hashable {
     case academy
     case warehouse
     case journey
+    case journeyResume
+    case journeyLevel(Int)
 }
 
 struct ContentView: View {
@@ -46,58 +48,45 @@ struct ContentView: View {
     
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
+    
+    private let contentCardSpacing: CGFloat = 24
+    
+    private var progressFraction: Double {
+        let needed = max(userProgress.expNeededForNextLevel, 1)
+        return min(max(Double(userProgress.currentEXP) / Double(needed), 0), 1)
+    }
+    
+    private var currentJourneyLevel: Int {
+        (1...14).first(where: {
+            userProgress.isLevelUnlocked($0) && !userProgress.isLevelCompleted($0)
+        }) ?? ((1...14).last(where: { userProgress.isLevelUnlocked($0) }) ?? 1)
+    }
+
+    private var visibleJourneyLevels: [Int] {
+        let totalLevels = 14
+        let previewCount = 5
+        let highestStart = max(1, totalLevels - previewCount + 1)
+        let startLevel = min(currentJourneyLevel, highestStart)
+        let endLevel = min(startLevel + previewCount - 1, totalLevels)
+        return Array(startLevel...endLevel)
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 18) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color.black.opacity(0.72))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(Color.green.opacity(0.28), lineWidth: 0)
-                        )
-                        .shadow(color: Color.green.opacity(0.12), radius: 12)
-                    
-                    Image("Level")
-                        .resizable()
-                        .scaledToFit()
-                        .font(.largeTitle)
-                    
-                    Image("Icon")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 78)
-                        .offset(x: -74, y: 0)
-                    
-                    Text("Level: \(userProgress.level)")
-                        .font(.custom("Berkelium Bitmap", size: 18))
-                        .bold()
-                        .foregroundStyle(.neon)
-                        .offset(x: 24)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: contentCardSpacing) {
+                    topStatusRow
+                    dailyMissionCard
+                    journeyCard
+                    warehouseCard
+                        .padding(.top, 20)
                 }
+                .frame(maxWidth: 420)
                 .frame(maxWidth: .infinity)
-                .frame(height: 92)
-                
-                NavigationLink(value: AppDestination.daily) {
-                    headerButton(title: "The Daily Intercept")
-                }
-                
-                NavigationLink(destination: Learn2()) {
-                    headerButton(title: "Agency Academy", fontSize: 24)
-                }
-                
-                NavigationLink(destination: Practice(morseEngine: morseEngine, letter: nil)) {
-                    headerButton(title: "The Warehouse", fontSize: 24)
-                }
-                
-                NavigationLink(destination: Journey()) {
-                    headerButton(title: "Agents Journey")
-                }
+                .padding(.horizontal, contentCardSpacing)
+                .padding(.vertical, contentCardSpacing)
             }
-            .frame(maxWidth: 420)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background {
                 ZStack {
                     if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
@@ -142,45 +131,387 @@ struct ContentView: View {
                 .navigationDestination(for: AppDestination.self) { destination in
                     switch destination {
                     case .daily:
-                    DailyRoot(vm: dailyViewModel)
-                case .academy:
-                    Learn2()
-                case .warehouse:
-                    Practice(morseEngine: morseEngine, letter: nil)
+                        DailyRoot(vm: dailyViewModel)
+                    case .academy:
+                        LeaderboardView()
+                    case .warehouse:
+                        Practice(morseEngine: morseEngine, letter: nil)
                     case .journey:
                         Journey()
+                    case .journeyResume:
+                        Journey(openCurrentLevelOnAppear: true)
+                    case .journeyLevel(let level):
+                        Journey(initialSelectedLevel: level)
+                    }
                 }
-            }
         }
         .environment(\.isInOnboarding, isInOnboarding)
         .preferredColorScheme(.dark)
     }
 
-    @ViewBuilder
-    private func headerButton(title: String, fontSize: CGFloat = 22) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.black.opacity(0.78))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color.green.opacity(0.24), lineWidth: 1)
-                )
-                .shadow(color: Color.green.opacity(0.1), radius: 10)
+    private var topStatusRow: some View {
+        HStack(alignment: .top, spacing: contentCardSpacing) {
+            dashboardButton {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(red: 0.97, green: 0.23, blue: 0.20), Color(red: 1.0, green: 0.88, blue: 0.12)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                            Circle()
+                                .stroke(Color.neon, lineWidth: 4)
+                                .padding(1)
+                            Image("Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .padding(8)
+                        }
+                        .frame(width: 72, height: 72)
 
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Rank: Field Operative")
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .foregroundStyle(Color.white.opacity(0.95))
+                            Text("LVL: \(userProgress.level)")
+                                .font(.system(size: 14, weight: .black, design: .rounded))
+                                .foregroundStyle(Color.white.opacity(0.95))
+                        }
+
+                        Spacer(minLength: 0)
+                    }
+
+                    expBar
+                }
+                .padding(16)
+            } destination: {
+                path.append(.journeyResume)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 148)
+
+            dashboardButton {
+                VStack(spacing: 10) {
+                    Spacer(minLength: 0)
+                    Image(systemName: "trophy.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(.neon)
+                        .shadow(color: Color.neon.opacity(0.25), radius: 10)
+                    Text("Leaderboard")
+                        .font(.custom("berkelium bitmap", size: 12))
+                        .foregroundStyle(Color.neon.opacity(0.92))
+                    Spacer(minLength: 0)
+                }
+            } destination: {
+                path.append(.academy)
+            }
+            .frame(width: 122)
+            .frame(height: 124)
+        }
+    }
+    
+    private var expBar: some View {
+        GeometryReader { proxy in
+            let width = max(proxy.size.width, 1)
+            let fillWidth = max(42, width * progressFraction)
+            
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(red: 0.09, green: 0.21, blue: 0.31).opacity(0.96))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color.neon.opacity(0.32), lineWidth: 2)
+                    )
+                
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.neon)
+                    .frame(width: fillWidth)
+                
+                HStack(spacing: 5) {
+                    ForEach(0..<10, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 3, style: .continuous)
+                            .stroke(Color(red: 0.20, green: 0.33, blue: 0.45), lineWidth: 1)
+                            .background(
+                                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                                    .fill(Color.clear)
+                            )
+                            .frame(height: 22)
+                            .opacity(index < Int((progressFraction * 10).rounded(.down)) ? 0 : 1)
+                    }
+                }
+                .padding(.horizontal, 10)
+            }
+        }
+        .frame(height: 34)
+    }
+    
+    private var dailyMissionCard: some View {
+        VStack(spacing: 18) {
+            cardTitle("Daily Intercept")
+
+            Text(dailyMissionSummary)
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.96))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 18)
+
+            Button {
+                path.append(.daily)
+            } label: {
+                Text(dailyViewModel.isSolved ? "Mission Complete" : "Start Mission")
+                    .font(.custom("berkelium bitmap", size: 28))
+                    .foregroundStyle(.neon)
+                    .shadow(color: Color.black.opacity(0.75), radius: 1)
+                    .minimumScaleFactor(0.7)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 24)
+        .padding(.horizontal, 14)
+        .background(cardBackground)
+        .frame(height: 320)
+    }
+    
+    private var journeyCard: some View {
+        VStack(spacing: 18) {
+            journeyCardTitle
+
+            GeometryReader { proxy in
+                let points = journeyPoints(in: proxy.size)
+
+                ZStack {
+                    journeyConnectorPath(in: proxy.size)
+                        .stroke(
+                            Color.neon,
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [10, 9])
+                        )
+                        .opacity(0.95)
+
+                    ForEach(Array(visibleJourneyLevels.enumerated()), id: \.element) { index, level in
+                        let point = points[index]
+
+                        if userProgress.isLevelUnlocked(level) {
+                            Button(action: { path.append(.journeyLevel(level)) }) {
+                                journeyNode(level)
+                            }
+                            .buttonStyle(.plain)
+                            .position(point)
+                        } else {
+                            journeyNode(level)
+                                .position(point)
+                        }
+                    }
+                }
+            }
+            .frame(height: 220)
+            
+            Button(action: { path.append(.journeyResume) }) {
+                Text("Start Level \(currentJourneyLevel)")
+                    .font(.custom("berkelium bitmap", size: 22))
+                    .foregroundStyle(Color.neon)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.neon.opacity(0.12))
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 22)
+        .padding(.horizontal, 16)
+        .background(cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .frame(height: 360)
+    }
+    
+    private var warehouseCard: some View {
+        dashboardButton {
+            HStack(spacing: 16) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.neon)
+                        .frame(width: 42, height: 42)
+                    Image(systemName: "archivebox.fill")
+                        .font(.system(size: 22, weight: .black))
+                        .foregroundStyle(Color(red: 0.06, green: 0.19, blue: 0.27))
+                }
+
+                Text("Enter Warehouse")
+                    .font(.custom("berkelium bitmap", size: 20))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 20)
+        } destination: {
+            path.append(.warehouse)
+        }
+        .frame(height: 106)
+    }
+    
+    private var dailyMissionSummary: String {
+        if dailyViewModel.isSolved {
+            return "Today's intercept has been decrypted. Re-open the file and review the solved signal."
+        }
+        return "Incoming signal detected. Your daily objective is ready. Initiate decryption?"
+    }
+    
+    private var morsePrompt: String {
+        let clue = dailyViewModel.morseClue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return clue.isEmpty ? "..." : clue
+    }
+    
+    private func dashboardButton<Label: View>(
+        @ViewBuilder _ label: () -> Label,
+        destination: @escaping () -> Void
+    ) -> some View {
+        Button(action: destination) {
+            label()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(cardBackground)
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .fill(Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94))
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(Color.neon, lineWidth: 2.8)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    .padding(6)
+            )
+            .shadow(color: Color.neon.opacity(0.12), radius: 12)
+    }
+    
+    private func cardTitle(
+        _ text: String,
+        maxWidth: CGFloat = 305,
+        horizontalPadding: CGFloat = 46,
+        imageHorizontalPadding: CGFloat = 0,
+        imageScale: CGFloat = 1
+    ) -> some View {
+        ZStack {
             Image("Header")
                 .resizable()
                 .scaledToFit()
-                .opacity(0.92)
+                .frame(maxWidth: maxWidth)
+                .opacity(0.96)
+                .padding(.horizontal, imageHorizontalPadding)
+                .scaleEffect(imageScale)
 
-            Text(title)
-                .font(.custom("berkelium bitmap", size: fontSize))
-                .foregroundStyle(.neon)
+            Text(text)
+                .font(.custom("berkelium bitmap", size: 18))
+                .foregroundStyle(.white)
                 .shadow(color: Color.black.opacity(0.85), radius: 1)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.bottom, 4)
         }
-        .compositingGroup()
-        .frame(maxWidth: .infinity)
-        .frame(height: 96)
     }
+
+    private var journeyCardTitle: some View {
+        ZStack {
+            Image("Header")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 315, height: 78)
+                .opacity(0.96)
+
+            Text("Agents Journey")
+                .font(.custom("berkelium bitmap", size: 18))
+                .foregroundStyle(.white)
+                .shadow(color: Color.black.opacity(0.85), radius: 1)
+                .padding(.horizontal, 42)
+                .padding(.bottom, 4)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, -8)
+    }
+    
+    private func journeyConnectorPath(in size: CGSize) -> Path {
+        Path { path in
+            let points = journeyPoints(in: size)
+            guard points.count == 5 else { return }
+
+            let p1 = points[0]
+            let p2 = points[1]
+            let p3 = points[2]
+            let p4 = points[3]
+            let p5 = points[4]
+            let exitPoint = CGPoint(x: size.width * 0.18, y: size.height - 20)
+            let arrowPoint = CGPoint(x: exitPoint.x + 14, y: exitPoint.y + 14)
+
+            path.move(to: p1)
+            path.addLine(to: p2)
+            path.addLine(to: p3)
+            path.addCurve(
+                to: p4,
+                control1: CGPoint(x: p3.x + (size.width * 0.14), y: p3.y + 26),
+                control2: CGPoint(x: p4.x + (size.width * 0.24), y: p4.y - 24)
+            )
+            path.addLine(to: p5)
+            path.addCurve(
+                to: exitPoint,
+                control1: CGPoint(x: p5.x - (size.width * 0.28), y: p5.y + 6),
+                control2: CGPoint(x: size.width * 0.06, y: p5.y + 40)
+            )
+            path.addLine(to: arrowPoint)
+            path.move(to: CGPoint(x: exitPoint.x - 6, y: exitPoint.y - 4))
+            path.addLine(to: arrowPoint)
+            path.addLine(to: CGPoint(x: arrowPoint.x - 11, y: arrowPoint.y))
+        }
+    }
+    
+    private func journeyPoints(in size: CGSize) -> [CGPoint] {
+        let insetX = max(40, size.width * 0.14)
+        let topY = size.height * 0.34
+        let bottomY = size.height * 0.74
+        let topSpacing = (size.width - (insetX * 2)) / 2
+
+        return [
+            CGPoint(x: insetX, y: topY),
+            CGPoint(x: insetX + topSpacing, y: topY),
+            CGPoint(x: size.width - insetX, y: topY),
+            CGPoint(x: size.width - insetX, y: bottomY),
+            CGPoint(x: insetX, y: bottomY)
+        ]
+    }
+    
+    private func journeyNode(_ level: Int) -> some View {
+        let unlocked = userProgress.isLevelUnlocked(level)
+        let active = currentJourneyLevel == level
+        
+        return ZStack {
+            Image("Tab")
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
+                .frame(width: 78, height: 78)
+                .foregroundStyle(unlocked ? Color.neon : Color.white.opacity(0.18))
+                .shadow(color: unlocked ? Color.neon.opacity(active ? 0.55 : 0.28) : .clear, radius: 12)
+
+            Text("\(level)")
+                .font(.custom("berkelium bitmap", size: 24))
+                .foregroundStyle(Color.black)
+        }
+    }
+}
 
     @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public struct DigitalRainBackground: View {
@@ -228,10 +559,10 @@ struct ContentView: View {
                 switch view {
                 case "Daily":
                     return .daily
-                case "Agency Academy":
-                    return .academy
                 case "Warehouse":
                     return .warehouse
+                case "Agents Journey":
+                    return .journeyResume
                 default:
                     return nil
                 }
@@ -243,7 +574,7 @@ struct ContentView: View {
                 generator.notificationOccurred(.success)
 #endif
             }
-}
+
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct RainColumn: View {

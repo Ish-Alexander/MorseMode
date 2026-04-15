@@ -52,6 +52,17 @@ struct ContentView: View {
                                 .foregroundStyle(Color(.neon))
                         }
                     }
+
+                    Button(action: {
+                        WatchConnectivityManager.shared.open(view: "Agents Journey")
+                        WKInterfaceDevice.current().play(.click)
+                    }) {
+                        VStack {
+                            Text("Agents Journey")
+                                .font(.custom("berkelium bitmap", size: 14))
+                                .foregroundStyle(Color(.neon))
+                        }
+                    }
                 }
             }
             .navigationDestination(isPresented: $showTapScreen) {
