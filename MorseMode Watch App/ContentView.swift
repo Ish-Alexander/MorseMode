@@ -26,22 +26,6 @@ struct ContentView: View {
                                 .foregroundStyle(Color(.neon))
                         }
                     }
-                    
-                    
-                    Button(action: {
-                        // Open locally on watch
-                        showTapScreen = true
-                        WatchConnectivityManager.shared.open(view: "Agency Academy")
-                        WKInterfaceDevice.current().play(.click)
-                    }) {
-                        VStack {
-                            Text("Agency Academy")
-                                .font(.custom("berkelium bitmap", size: 12))
-                                .foregroundStyle(Color(.neon))
-                        }
-                    }
-                    
-                    
                     Button(action: {
                         WatchConnectivityManager.shared.open(view: "Warehouse")
                         WKInterfaceDevice.current().play(.click)
@@ -54,6 +38,7 @@ struct ContentView: View {
                     }
 
                     Button(action: {
+                        showTapScreen = true
                         WatchConnectivityManager.shared.open(view: "Agents Journey")
                         WKInterfaceDevice.current().play(.click)
                     }) {
