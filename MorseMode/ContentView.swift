@@ -48,8 +48,10 @@ struct ContentView: View {
     
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
+    @State private var isShowingOnboardingReplay: Bool = false
     
     private let contentCardSpacing: CGFloat = 24
+    private let topSectionSpacing: CGFloat = 2
     
     private var progressFraction: Double {
         let needed = max(userProgress.expNeededForNextLevel, 1)
@@ -76,10 +78,11 @@ struct ContentView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: contentCardSpacing) {
                     topStatusRow
+                        .padding(.bottom, -(contentCardSpacing - topSectionSpacing))
                     dailyMissionCard
                     journeyCard
                     warehouseCard
-                        .padding(.top, 20)
+                        .padding(.top, 30)
                 }
                 .frame(maxWidth: 420)
                 .frame(maxWidth: .infinity)
@@ -96,6 +99,11 @@ struct ContentView: View {
                     }
                 }
                 .ignoresSafeArea()
+            }
+            .overlay(alignment: .topTrailing) {
+                replayOnboardingButton
+                    .padding(.top, 1)
+                    .padding(.trailing, contentCardSpacing)
             }
                 .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
                     // If onboarding is active, ignore watch-driven navigation changes.
@@ -145,8 +153,38 @@ struct ContentView: View {
                     }
                 }
         }
+        .fullScreenCover(isPresented: $isShowingOnboardingReplay, onDismiss: {
+            isInOnboarding = false
+        }) {
+            OnboardingView(items: onboardingData) {
+                isShowingOnboardingReplay = false
+                isInOnboarding = false
+            }
+            .onAppear {
+                isInOnboarding = true
+            }
+        }
         .environment(\.isInOnboarding, isInOnboarding)
         .preferredColorScheme(.dark)
+    }
+
+    private var replayOnboardingButton: some View {
+        Button {
+            replayHaptics()
+            isShowingOnboardingReplay = true
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.neon)
+                .padding(12)
+                .background(Color.black.opacity(0.55))
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.neon.opacity(0.9), lineWidth: 1.5)
+                )
+        }
+        .accessibilityLabel("Replay onboarding")
     }
 
     private var topStatusRow: some View {
@@ -213,6 +251,7 @@ struct ContentView: View {
             }
             .frame(width: 122)
             .frame(height: 124)
+            .padding(.top, 28)
         }
     }
     

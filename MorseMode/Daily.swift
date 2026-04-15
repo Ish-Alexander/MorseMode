@@ -368,7 +368,11 @@ final class DailyMorseViewModel: ObservableObject {
             timer = nil
             let completionSeconds = max(0, 180 - timeRemaining)
             saveCompletionTime(completionSeconds)
-            GameCenterManager.shared.submitDailyInterceptTime(seconds: completionSeconds)
+            NotificationCenter.default.post(
+                name: .dailyInterceptCompleted,
+                object: nil,
+                userInfo: ["seconds": completionSeconds]
+            )
             markSolved()
             clearTimeRemaining()
             clearWrongGuesses()

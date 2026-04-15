@@ -81,8 +81,10 @@ struct OnboardingView: View {
                         withAnimation { selection = max(0, selection - 1) }
                         triggerPageHaptic()
                     }
-                    .font(.custom("berkelium bitmap", size: 16))
+                    .font(.custom("berkelium bitmap", size: 18))
                     .foregroundColor(.neon)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(.neon, lineWidth: 1)
@@ -105,15 +107,16 @@ struct OnboardingView: View {
                         // Closes onboarding after last page is cleared
                     }
                 }
-                .font(.custom("berkelium bitmap", size: 16))
+                .font(.custom("berkelium bitmap", size: 18))
                 .foregroundColor(Color.black)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
                 .background(.neon)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
+            .padding(.bottom, 28)
         }
         .foregroundColor(.neon)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

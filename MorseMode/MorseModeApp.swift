@@ -204,6 +204,10 @@ struct GameCenterLeaderboardRow: Identifiable {
     let isCurrentPlayer: Bool
 }
 
+extension Notification.Name {
+    static let dailyInterceptCompleted = Notification.Name("DailyInterceptCompleted")
+}
+
 final class GameCenterManager: NSObject, ObservableObject {
     static let shared = GameCenterManager()
     static let dailyInterceptLeaderboardID = "daily_intercept_time"
@@ -214,8 +218,20 @@ final class GameCenterManager: NSObject, ObservableObject {
     @Published private(set) var lastErrorMessage: String?
     @Published private(set) var isLoadingLeaderboard = false
 
+    private var pendingCompletionSeconds: Int?
+
     private override init() {
         super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDailyInterceptCompleted(_:)),
+            name: .dailyInterceptCompleted,
+            object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     func authenticate() {
@@ -239,14 +255,21 @@ final class GameCenterManager: NSObject, ObservableObject {
             }
 
             if GKLocalPlayer.local.isAuthenticated {
-                self.submitTodayIfAvailable()
+                if let pendingCompletionSeconds = self.pendingCompletionSeconds {
+                    self.submitDailyInterceptTime(seconds: pendingCompletionSeconds)
+                } else {
+                    self.submitTodayIfAvailable()
+                }
                 self.loadDailyInterceptLeaderboard()
             }
         }
     }
 
     func submitDailyInterceptTime(seconds: Int) {
+        pendingCompletionSeconds = seconds
         guard GKLocalPlayer.local.isAuthenticated else { return }
+
+        optimisticallyUpdateLocalPlayerRow(seconds: seconds)
 
         GKLeaderboard.submitScore(
             seconds,
@@ -259,6 +282,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                     self.lastErrorMessage = error.localizedDescription
                     return
                 }
+                self.pendingCompletionSeconds = nil
                 self.lastErrorMessage = nil
                 self.loadDailyInterceptLeaderboard()
             }
@@ -344,6 +368,40 @@ final class GameCenterManager: NSObject, ObservableObject {
                 }
             }
         }
+    }
+
+    @objc
+    private func handleDailyInterceptCompleted(_ notification: Notification) {
+        guard let seconds = notification.userInfo?["seconds"] as? Int else { return }
+        DispatchQueue.main.async {
+            self.submitDailyInterceptTime(seconds: seconds)
+        }
+    }
+
+    private func optimisticallyUpdateLocalPlayerRow(seconds: Int) {
+        guard GKLocalPlayer.local.isAuthenticated else { return }
+
+        let playerID = GKLocalPlayer.local.gamePlayerID
+        let displayName = GKLocalPlayer.local.displayName
+
+        if let existingIndex = leaderboardRows.firstIndex(where: { $0.id == playerID }) {
+            let existing = leaderboardRows[existingIndex]
+            leaderboardRows[existingIndex] = GameCenterLeaderboardRow(
+                id: existing.id,
+                rank: existing.rank,
+                displayName: existing.displayName,
+                score: seconds,
+                isCurrentPlayer: true
+            )
+        }
+
+        localPlayerRow = GameCenterLeaderboardRow(
+            id: playerID,
+            rank: localPlayerRow?.rank ?? leaderboardRows.first(where: { $0.id == playerID })?.rank ?? 0,
+            displayName: displayName.isEmpty ? "You" : displayName,
+            score: seconds,
+            isCurrentPlayer: true
+        )
     }
 
     #if canImport(UIKit)

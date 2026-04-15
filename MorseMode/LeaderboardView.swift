@@ -100,7 +100,7 @@ struct LeaderboardView: View {
                     .fill(entry.isCurrentPlayer ? Color.neon : Color.white.opacity(0.12))
                     .frame(width: 46, height: 46)
 
-                Text("#\(entry.rank)")
+                Text(entry.rank > 0 ? "#\(entry.rank)" : "...")
                     .font(.custom("berkelium bitmap", size: 12))
                     .foregroundStyle(entry.isCurrentPlayer ? Color.black : .white)
             }
@@ -117,7 +117,7 @@ struct LeaderboardView: View {
 
             Spacer(minLength: 0)
 
-            if entry.rank <= 3 {
+            if entry.rank > 0 && entry.rank <= 3 {
                 Image(systemName: "crown.fill")
                     .foregroundStyle(.yellow)
             } else if entry.isCurrentPlayer {
