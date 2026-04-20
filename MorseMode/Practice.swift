@@ -9,6 +9,25 @@ import SwiftUI
 import WatchConnectivity
 import AVFoundation
 
+private enum WarehouseSavedWordsStore {
+    static let storageKey = "Warehouse.savedMessages"
+    static let maxSavedMessages = 20
+
+    static func load() -> [String] {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let savedMessages = try? JSONDecoder().decode([String].self, from: data) else {
+            return []
+        }
+        return Array(savedMessages.prefix(maxSavedMessages))
+    }
+
+    static func save(_ messages: [String]) {
+        let trimmedMessages = Array(messages.prefix(maxSavedMessages))
+        guard let data = try? JSONEncoder().encode(trimmedMessages) else { return }
+        UserDefaults.standard.set(data, forKey: storageKey)
+    }
+}
+
 struct Practice: View {
     @ObservedObject var morseEngine: MorseEngine
     
@@ -17,6 +36,9 @@ struct Practice: View {
     @State private var tappedImageName: String = "ImageA"
     
     @State private var message: String = ""
+    @State private var savedMessages: [String] = WarehouseSavedWordsStore.load()
+    @State private var warehouseStatusMessage: String?
+    @State private var isShowingSavedWordsPopup: Bool = false
     @State private var isPlayingMessage: Bool = false
     @State private var audioPlayer: AVAudioPlayer? = nil
     
@@ -37,6 +59,21 @@ struct Practice: View {
     
     private let interLetterUnits: UInt64 = 4  // delay between letters
     private let wordGapUnits: UInt64 = 7      // delay between words (spaces)
+
+    private var normalizedMessage: String {
+        message
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+            .joined(separator: " ")
+    }
+
+    private var canSaveMessage: Bool {
+        !normalizedMessage.isEmpty
+    }
+
+    private var canPlayMessage: Bool {
+        !normalizedMessage.isEmpty
+    }
     
     private func lowercaseCharacter(_ ch: Character) -> Character? {
         return ch.lowercased().first
@@ -139,8 +176,13 @@ struct Practice: View {
     
     private func playMessage(_ text: String) {
         guard !isPlayingMessage else { return }
+        let normalizedText = text
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+            .joined(separator: " ")
+        guard !normalizedText.isEmpty else { return }
         morseEngine.startMorseAudio()
-        let characters = Array(text)
+        let characters = Array(normalizedText)
         isPlayingMessage = true
         Task { @MainActor in
             for (idx, ch) in characters.enumerated() {
@@ -164,6 +206,32 @@ struct Practice: View {
             morseEngine.stopMorseAudioPlayback()
             isPlayingMessage = false
         }
+    }
+
+    private func saveCurrentMessage() {
+        let candidate = normalizedMessage
+        guard !candidate.isEmpty else {
+            warehouseStatusMessage = "Type a word to save."
+            return
+        }
+
+        savedMessages.removeAll { $0.caseInsensitiveCompare(candidate) == .orderedSame }
+        savedMessages.insert(candidate, at: 0)
+
+        if savedMessages.count > WarehouseSavedWordsStore.maxSavedMessages {
+            savedMessages = Array(savedMessages.prefix(WarehouseSavedWordsStore.maxSavedMessages))
+        }
+
+        WarehouseSavedWordsStore.save(savedMessages)
+        warehouseStatusMessage = savedMessages.count == WarehouseSavedWordsStore.maxSavedMessages
+            ? "Saved. Warehouse is holding 20 words."
+            : "Saved to warehouse."
+    }
+
+    private func deleteSavedMessage(_ savedMessage: String) {
+        savedMessages.removeAll { $0 == savedMessage }
+        WarehouseSavedWordsStore.save(savedMessages)
+        warehouseStatusMessage = "Removed from warehouse."
     }
     // Plays entire typed message
             
@@ -193,12 +261,110 @@ struct Practice: View {
         }
     }
 
+    private var savedWordsPopup: some View {
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(spacing: 0) {
+                        HStack(spacing: 10) {
+                            Text("Word")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            Text("Actions")
+                                .frame(width: 120, alignment: .center)
+                        }
+                        .font(.custom("berkelium bitmap", size: 11))
+                        .foregroundStyle(Color.white.opacity(0.7))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(Color.white.opacity(0.08))
+
+                        if savedMessages.isEmpty {
+                            Text("Save up to 20 custom words to replay.")
+                                .font(.custom("berkelium bitmap", size: 12))
+                                .foregroundStyle(Color.white.opacity(0.7))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 14)
+                                .background(Color.white.opacity(0.04))
+                        } else {
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    ForEach(Array(savedMessages.enumerated()), id: \.element) { index, savedMessage in
+                                        HStack(spacing: 10) {
+                                            Text(savedMessage)
+                                                .font(.custom("berkelium bitmap", size: 12))
+                                                .foregroundStyle(.white)
+                                                .lineLimit(1)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                                            HStack(spacing: 8) {
+                                                Button(action: {
+                                                    message = savedMessage
+                                                    isShowingSavedWordsPopup = false
+                                                    playMessage(savedMessage)
+                                                }) {
+                                                    Text("Replay")
+                                                        .font(.custom("berkelium bitmap", size: 11))
+                                                        .foregroundStyle(.neon)
+                                                        .padding(.horizontal, 10)
+                                                        .padding(.vertical, 6)
+                                                        .background(Color.white.opacity(0.08))
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                                .disabled(isPlayingMessage)
+
+                                                Button(action: {
+                                                    deleteSavedMessage(savedMessage)
+                                                }) {
+                                                    Image(systemName: "trash")
+                                                        .foregroundStyle(Color.red.opacity(0.9))
+                                                        .padding(8)
+                                                        .background(Color.white.opacity(0.06))
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                }
+                                            }
+                                            .frame(width: 120, alignment: .center)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 10)
+                                        .background(index.isMultiple(of: 2) ? Color.white.opacity(0.03) : Color.white.opacity(0.06))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+
+                    Spacer(minLength: 0)
+                }
+                .padding()
+            }
+            .navigationTitle("Saved Words")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        isShowingSavedWordsPopup = false
+                    }
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+
     var body: some View {
         
         ZStack{
                 Color.black
                     .ignoresSafeArea()
-            VStack{
+            VStack(spacing: 30){
                 ZStack {
                     GeometryReader { geo in
                         let h = geo.size.height
@@ -242,7 +408,7 @@ struct Practice: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .foregroundStyle(.neon)
                         Button(action: {
-                            playMessage(message)
+                            playMessage(normalizedMessage)
                         }) {
                             Text(isPlayingMessage ? "Playing…" : "Play")
                                 .font(.headline)
@@ -251,13 +417,54 @@ struct Practice: View {
                                 .background(isPlayingMessage ? Color.gray.opacity(0.3) : Color.blue.opacity(0.6))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
-                        .disabled(isPlayingMessage || message.isEmpty)
+                        .disabled(isPlayingMessage || !canPlayMessage)
                     }
+
+                    HStack(spacing: 12) {
+                        Button(action: saveCurrentMessage) {
+                            Text("Save")
+                                .font(.headline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(canSaveMessage ? Color.neon.opacity(0.25) : Color.gray.opacity(0.2))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .disabled(isPlayingMessage || !canSaveMessage)
+
+                        Text("\(savedMessages.count)/\(WarehouseSavedWordsStore.maxSavedMessages) saved")
+                            .font(.custom("berkelium bitmap", size: 12))
+                            .foregroundStyle(Color.white.opacity(0.75))
+
+                        Button(action: {
+                            isShowingSavedWordsPopup = true
+                        }) {
+                            Text("Saved Words")
+                                .font(.custom("berkelium bitmap", size: 12))
+                                .foregroundStyle(.neon)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.white.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+
+                        Spacer()
+                    }
+
+                    if let warehouseStatusMessage {
+                        Text(warehouseStatusMessage)
+                            .font(.custom("berkelium bitmap", size: 12))
+                            .foregroundStyle(.neon)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
                 }
                 .padding(.horizontal)
                 .onAppear {
                     activateWatchSessionIfNeeded()
                     playInitialLetter()
+                }
+                .sheet(isPresented: $isShowingSavedWordsPopup) {
+                    savedWordsPopup
                 }
                 
                 HStack{
@@ -657,6 +864,7 @@ struct Practice: View {
                 }
             }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 

@@ -31,15 +31,25 @@ let onboardingData: [OnboardingItem] = [
         description: "A 3 minute decoding challenge of morse code knowledge. Words are changed daily, and only shown as dots and dashes."
     ),
     OnboardingItem(
-        imageName: "archivebox",
-        title: "The Warehouse",
-        description: "A place to pratice how you want. Type in a message and listen to it play, or just focus on learning one specific letter."
+        imageName: "trophy",
+        title: "The Leaderboard",
+        description: "The Leaderboard for the Daily Intercept. The fastest time for the day is shown at the top of the leaderboard."
     ),
     OnboardingItem(
         imageName: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath",
         title: "Agents Journey",
         description: "A level based learning system where you master Morse code two letters at a time, clear missions, and earn EXP as you move forward."
-        )
+        ),
+    OnboardingItem(
+        imageName: "archivebox",
+        title: "The Warehouse",
+        description: "A place to pratice how you want. Type in a message and listen to it play, or just focus on learning one specific letter."
+    ),
+    OnboardingItem(
+        imageName: "applewatch.watchface",
+        title: "Apple Watch",
+        description: "This app was built with the Apple Watch in mind. It is best Experienced with the Apple Watch, but can be played without it."
+    )
 ]
 struct OnboardingView: View {
     @State private var selection: Int = 0

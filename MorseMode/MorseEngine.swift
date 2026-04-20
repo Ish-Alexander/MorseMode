@@ -12,6 +12,7 @@ import Combine
 
 final class MorseEngine: ObservableObject {
     // This is the only view that can use this
+    private let interSymbolGap: TimeInterval = 0.24
 
     // Supported audio candidates (base name, extension) in priority order
     private let audioCandidates: [(name: String, ext: String)] = [
@@ -114,7 +115,7 @@ final class MorseEngine: ObservableObject {
         for symbol in letter.morseRepresentation {
             events.append(contentsOf: symbol.hapticEvents(relativeTime: time))
             // How each symbol knows how to generate its vibration
-            time += symbol.duration + 0.15
+            time += symbol.duration + interSymbolGap
             // adds a gap between symbols
         }
 

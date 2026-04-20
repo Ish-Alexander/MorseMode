@@ -170,6 +170,7 @@ struct LevelWL: View {
     }
 
     private func appendSymbol(_ symbol: String) {
+        guard !isLevelComplete else { return }
         guard inputPattern.count < 4 else { return }
         if symbol == "." {
             morseEngine.performInputHaptic(for: .dot)
@@ -344,6 +345,8 @@ struct LevelWL: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+        .disabled(isLevelComplete)
+        .opacity(isLevelComplete ? 0.45 : 1)
     }
 
     private func actionButtonLabel(_ title: String, fill: Color, textColor: Color) -> some View {

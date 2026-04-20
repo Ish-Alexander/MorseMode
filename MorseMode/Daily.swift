@@ -36,6 +36,19 @@ fileprivate func encodeMorse(_ text: String) -> String {
     // Converts text to uppercase, looks up the morse code, and joins everything together
 }
 
+private func displayMorseClue(_ morse: String) -> String {
+    let wordJoiner = "\u{2060}"
+
+    return morse
+        .split(separator: " ", omittingEmptySubsequences: false)
+        .map { token in
+            let value = String(token)
+            guard value.count > 1 else { return value }
+            return value.map(String.init).joined(separator: wordJoiner)
+        }
+        .joined(separator: " ")
+}
+
 struct DailyRoot: View {
     @ObservedObject var vm: DailyMorseViewModel
     @State private var showDaily: Bool = false
@@ -190,12 +203,30 @@ final class DailyMorseViewModel: ObservableObject {
     }
     // Remembers if the user solved today's puzzle
 
-    private static let dailyWords: [String] = [
+    private static let dailyWordPool: [String] = [
         "SWIFT", "APPLE", "MORSE", "CODE", "WATCH", "SIGNAL", "XCODE", "DECODE",
         "BITMAP", "NEON", "HAPTIC", "VIBRATE", "DOT", "DASH", "PUZZLE", "SECRET",
-        "RADIO", "TELEGRAPH", "MESSAGE", "ENCODE", "DECODE", "SENDER", "RECEIVER",
-        "FREQUENCY", "PATTERN", "RHYTHM", "SPEED", "TIMER", "TARGET", "LETTER"
+        "RADIO", "TELEGRAPH", "MESSAGE", "ENCODE", "SENDER", "RECEIVER",
+        "FREQUENCY", "PATTERN", "RHYTHM", "SPEED", "TIMER", "TARGET", "LETTER",
+        "BEACON", "SUNRISE", "THUNDER", "MEADOW", "CANDLE", "RIVER", "MOUNTAIN",
+        "GARDEN", "LANTERN", "ORANGE", "WINTER", "SUMMER", "AUTUMN", "SPRING",
+        "SHADOW", "BREEZE", "HARBOR", "MARBLE", "VELVET", "POCKET", "MARKET",
+        "FOREST", "CASTLE", "SILVER", "GOLDEN", "PILLOW", "ROCKET", "CLOUD",
+        "OCEAN", "DESERT", "ISLAND", "PLANET", "COMET", "GALAXY", "SATURN",
+        "TUNNEL", "BRIDGE", "CIRCLE", "SPIRAL", "WINDOW", "BUTTON", "PENCIL",
+        "PAPER", "COFFEE", "COOKIE", "CINNAMON", "BLOSSOM", "SUNSET", "MORNING",
+        "MIDNIGHT", "SPARK", "FLAME", "CRYSTAL", "BOTTLE", "JACKET", "MIRROR",
+        "BALLOON", "DRAGON", "TIGER", "RABBIT", "FALCON", "WHALE", "OTTER",
+        "DOLPHIN", "PARADE", "MUSEUM", "MELODY", "GUITAR", "PIANO", "POETRY",
+        "STUDIO", "VOYAGE", "JOURNEY", "HORIZON", "TRAIL", "CANYON", "GLACIER",
+        "PRAIRIE", "WATERFALL", "RAINBOW", "TROPHY", "ANCHOR", "COMPASS", "PICNIC",
+        "POPCORN", "CAMPFIRE", "NOTEBOOK", "KITCHEN", "VILLAGE", "LIBRARY", "THEATER"
     ]
+
+    private static let dailyWords: [String] = {
+        var seen: Set<String> = []
+        return dailyWordPool.filter { seen.insert($0).inserted }
+    }()
 
     private static func dailyIndex(for date: Date = Date()) -> Int {
         let cal = Calendar(identifier: .gregorian)
@@ -241,20 +272,16 @@ final class DailyMorseViewModel: ObservableObject {
     }
 
     private func restoreElapsedTimeIfNeeded(referenceDate: Date = Date()) {
-        guard let wasActive = loadIsActive(), wasActive else {
-            if let restoredTime = loadTimeRemaining(), restoredTime > 0 {
-                timeRemaining = restoredTime
-            }
-            return
+        if let restoredTime = loadTimeRemaining() {
+            timeRemaining = restoredTime
         }
 
-        guard let savedAt = loadLastSavedAt() else { return }
-        let restoredTime = loadTimeRemaining() ?? timeRemaining
-        let elapsed = max(0, Int(referenceDate.timeIntervalSince(savedAt)))
-        let adjusted = max(0, restoredTime - elapsed)
+        if let wasActive = loadIsActive() {
+            isActive = wasActive && timeRemaining > 0
+        } else {
+            isActive = false
+        }
 
-        timeRemaining = adjusted
-        isActive = adjusted > 0
         saveTimeRemaining()
         saveIsActive()
         saveLastSavedAt(referenceDate)
@@ -489,15 +516,19 @@ struct Daily: View {
                                         .transition(.opacity)
                                 } else if vm.timeRemaining == 0 {
                                     Text("Time's up! The word was \(vm.targetWord)")
-                                        .font(.title3.weight(.semibold))
+                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                                         .foregroundStyle(.yellow)
                                         .multilineTextAlignment(.center)
-                                        .padding(.horizontal)
+                                        .lineLimit(3)
+                                        .minimumScaleFactor(0.7)
+                                        .allowsTightening(true)
+                                        .padding(.horizontal, 16)
+                                        .frame(maxWidth: 200)
                                         .transition(.opacity)
                                 }
 
                                 // Morse clue below
-                                Text(vm.morseClue)
+                                Text(displayMorseClue(vm.morseClue))
                                     .font(.system(size: 28, weight: .medium, design: .monospaced))
                                     .foregroundStyle(.white)
                                     .multilineTextAlignment(.center)

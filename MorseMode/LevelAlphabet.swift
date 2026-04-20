@@ -176,6 +176,7 @@ struct LevelAlphabet: View {
     }
 
     private func appendSymbol(_ symbol: String) {
+        guard !isLevelComplete else { return }
         guard inputPattern.count < 4 else { return }
         guard incorrectGuesses < 10 else { return }
         if symbol == "." {
@@ -354,7 +355,8 @@ struct LevelAlphabet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
-        .disabled(incorrectGuesses >= 10)
+        .disabled(isLevelComplete || incorrectGuesses >= 10)
+        .opacity(isLevelComplete || incorrectGuesses >= 10 ? 0.45 : 1)
     }
 
     private func actionButtonLabel(_ title: String, fill: Color, textColor: Color) -> some View {
