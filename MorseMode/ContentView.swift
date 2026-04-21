@@ -28,7 +28,7 @@ extension EnvironmentValues {
 private enum AppDestination: Hashable {
     // Defines possible destinations
     case daily
-    case academy
+    case leaderboard
     case warehouse
     case journey
     case journeyResume
@@ -140,7 +140,7 @@ struct ContentView: View {
                     switch destination {
                     case .daily:
                         DailyRoot(vm: dailyViewModel)
-                    case .academy:
+                    case .leaderboard:
                         LeaderboardView()
                     case .warehouse:
                         Practice(morseEngine: morseEngine, letter: nil)
@@ -242,12 +242,12 @@ struct ContentView: View {
                         .foregroundStyle(.neon)
                         .shadow(color: Color.neon.opacity(0.25), radius: 10)
                     Text("Leaderboard")
-                        .font(.custom("berkelium bitmap", size: 12))
+                        .font(.custom("berkelium bitmap", size: 10))
                         .foregroundStyle(Color.neon.opacity(0.92))
                     Spacer(minLength: 0)
                 }
             } destination: {
-                path.append(.academy)
+                path.append(.leaderboard)
             }
             .frame(width: 122)
             .frame(height: 124)

@@ -9,35 +9,54 @@ import SwiftUI
 import WatchConnectivity
 import AVFoundation
 
+@MainActor
 private enum WarehouseSavedWordsStore {
     static let storageKey = "Warehouse.savedMessages"
     static let maxSavedMessages = 20
+
+    static func sanitized(_ text: String) -> String {
+        let filtered = text.filter { character in
+            character == " " || character.isASCII && character.isLetter
+        }
+        return filtered
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+            .joined(separator: " ")
+    }
 
     static func load() -> [String] {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
               let savedMessages = try? JSONDecoder().decode([String].self, from: data) else {
             return []
         }
-        return Array(savedMessages.prefix(maxSavedMessages))
+        let cleanedMessages = savedMessages
+            .map(sanitized)
+            .filter { !$0.isEmpty }
+        return Array(cleanedMessages.prefix(maxSavedMessages))
     }
 
     static func save(_ messages: [String]) {
-        let trimmedMessages = Array(messages.prefix(maxSavedMessages))
+        let trimmedMessages = Array(
+            messages
+                .map(sanitized)
+                .filter { !$0.isEmpty }
+                .prefix(maxSavedMessages)
+        )
         guard let data = try? JSONEncoder().encode(trimmedMessages) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)
     }
 }
 
+@MainActor
 struct Practice: View {
     @ObservedObject var morseEngine: MorseEngine
     
     @State private var letterToShow: String = ""
-            
-    @State private var tappedImageName: String = "ImageA"
     
     @State private var message: String = ""
     @State private var savedMessages: [String] = WarehouseSavedWordsStore.load()
     @State private var warehouseStatusMessage: String?
+    @State private var warehouseStatusDismissTask: Task<Void, Never>?
     @State private var isShowingSavedWordsPopup: Bool = false
     @State private var isPlayingMessage: Bool = false
     @State private var audioPlayer: AVAudioPlayer? = nil
@@ -57,14 +76,18 @@ struct Practice: View {
     // Base time unit for Morse (adjust to taste)
     private let unitDuration: UInt64 = 120_000_000 // 0.12s per unit
     
-    private let interLetterUnits: UInt64 = 4  // delay between letters
+    private let interLetterUnits: UInt64 = 3  // delay between letters
     private let wordGapUnits: UInt64 = 7      // delay between words (spaces)
+    private let keyboardLetterFontSize: CGFloat = 20
+    private let keyboardCircleScale: CGFloat = 2.0
+    private let letterRows: [[Letter]] = [
+        [.q, .w, .e, .r, .t, .y, .u, .i, .o, .p],
+        [.a, .s, .d, .f, .g, .h, .j, .k, .l],
+        [.z, .x, .c, .v, .b, .n, .m]
+    ]
 
     private var normalizedMessage: String {
-        message
-            .split(whereSeparator: \.isWhitespace)
-            .map(String.init)
-            .joined(separator: " ")
+        WarehouseSavedWordsStore.sanitized(message)
     }
 
     private var canSaveMessage: Bool {
@@ -73,6 +96,10 @@ struct Practice: View {
 
     private var canPlayMessage: Bool {
         !normalizedMessage.isEmpty
+    }
+
+    private var messageDisplayText: String {
+        normalizedMessage.isEmpty ? "Tap letters below" : normalizedMessage
     }
     
     private func lowercaseCharacter(_ ch: Character) -> Character? {
@@ -176,10 +203,7 @@ struct Practice: View {
     
     private func playMessage(_ text: String) {
         guard !isPlayingMessage else { return }
-        let normalizedText = text
-            .split(whereSeparator: \.isWhitespace)
-            .map(String.init)
-            .joined(separator: " ")
+        let normalizedText = WarehouseSavedWordsStore.sanitized(text)
         guard !normalizedText.isEmpty else { return }
         morseEngine.startMorseAudio()
         let characters = Array(normalizedText)
@@ -192,7 +216,7 @@ struct Practice: View {
                     continue
                 }
                 // Skip unsupported characters
-                guard let lower = lowercaseCharacter(ch), morseMap[lower] != nil else { continue }
+                guard lowercaseCharacter(ch).flatMap({ morseMap[$0] }) != nil else { continue }
                 await playLetterMorse(ch)
                 // Inter-letter gap = 3 units, unless next char is space or end
                 if idx < characters.count - 1 {
@@ -211,7 +235,7 @@ struct Practice: View {
     private func saveCurrentMessage() {
         let candidate = normalizedMessage
         guard !candidate.isEmpty else {
-            warehouseStatusMessage = "Type a word to save."
+            showWarehouseStatus("Type a word to save.")
             return
         }
 
@@ -223,16 +247,83 @@ struct Practice: View {
         }
 
         WarehouseSavedWordsStore.save(savedMessages)
-        warehouseStatusMessage = savedMessages.count == WarehouseSavedWordsStore.maxSavedMessages
+        showWarehouseStatus(savedMessages.count == WarehouseSavedWordsStore.maxSavedMessages
             ? "Saved. Warehouse is holding 20 words."
-            : "Saved to warehouse."
+            : "Saved to Warehouse")
     }
 
     private func deleteSavedMessage(_ savedMessage: String) {
         savedMessages.removeAll { $0 == savedMessage }
         WarehouseSavedWordsStore.save(savedMessages)
-        warehouseStatusMessage = "Removed from warehouse."
+        showWarehouseStatus("Removed from Warehouse")
     }
+
+    private func showWarehouseStatus(_ message: String) {
+        warehouseStatusDismissTask?.cancel()
+        warehouseStatusMessage = message
+        warehouseStatusDismissTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            warehouseStatusMessage = nil
+            warehouseStatusDismissTask = nil
+        }
+    }
+
+    private func inputLetter(_ letter: Letter) {
+        let character = String(describing: letter).uppercased()
+        message += character
+        warehouseStatusMessage = nil
+        morseEngine.performHaptic(for: letter)
+        sendToWatch(letter)
+        letterToShow = character
+        if let first = character.first {
+            playSound(for: first)
+        }
+    }
+
+    private func inputSpace() {
+        guard !message.isEmpty, !message.hasSuffix(" ") else { return }
+        message += " "
+        warehouseStatusMessage = nil
+        letterToShow = ""
+    }
+
+    private func deleteLastInput() {
+        guard !message.isEmpty else { return }
+        message.removeLast()
+        warehouseStatusMessage = nil
+    }
+
+    private func clearInput() {
+        guard !message.isEmpty else { return }
+        message = ""
+        warehouseStatusMessage = nil
+        letterToShow = ""
+    }
+
+    private func label(for letter: Letter) -> String {
+        String(describing: letter).uppercased()
+    }
+
+    private func letterInputButton(for letter: Letter) -> some View {
+        let label = label(for: letter)
+        let circleSize = keyboardLetterFontSize * keyboardCircleScale
+        return Button(action: {
+            inputLetter(letter)
+        }) {
+            ZStack {
+                Image("Circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: circleSize, height: circleSize)
+                Text(label)
+                    .font(.custom("berkelium bitmap", size: keyboardLetterFontSize))
+                    .foregroundStyle(.neon)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
     // Plays entire typed message
             
     private func sendToWatch(_ letter: Letter) {
@@ -267,6 +358,10 @@ struct Practice: View {
                 Color.black.ignoresSafeArea()
 
                 VStack(alignment: .leading, spacing: 16) {
+                    Text("\(savedMessages.count)/\(WarehouseSavedWordsStore.maxSavedMessages) saved")
+                        .font(.custom("berkelium bitmap", size: 12))
+                        .foregroundStyle(Color.white.opacity(0.75))
+
                     VStack(spacing: 0) {
                         HStack(spacing: 10) {
                             Text("Word")
@@ -307,7 +402,7 @@ struct Practice: View {
                                                     playMessage(savedMessage)
                                                 }) {
                                                     Text("Replay")
-                                                        .font(.custom("berkelium bitmap", size: 11))
+                                                        .font(.custom("berkelium bitmap", size: 8))
                                                         .foregroundStyle(.neon)
                                                         .padding(.horizontal, 10)
                                                         .padding(.vertical, 6)
@@ -359,6 +454,46 @@ struct Practice: View {
         .preferredColorScheme(.dark)
     }
 
+    private var topToolbar: some View {
+        ZStack {
+            HStack {
+                Spacer(minLength: 0)
+
+                Button(action: {
+                    isShowingSavedWordsPopup = true
+                }) {
+                    Text("Saved Words")
+                        .font(.custom("berkelium bitmap", size: 12))
+                        .foregroundStyle(.neon)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+            }
+
+            Button(action: saveCurrentMessage) {
+                Text("Save")
+                    .font(.custom("berkelium bitmap", size: 12))
+                    .foregroundStyle(canSaveMessage && !isPlayingMessage ? .neon : Color.white.opacity(0.45))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(canSaveMessage && !isPlayingMessage ? Color.white.opacity(0.08) : Color.white.opacity(0.04))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .disabled(isPlayingMessage || !canSaveMessage)
+            .offset(x: -28)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(Color.black.opacity(0.96))
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 1)
+        }
+    }
+
     var body: some View {
         
         ZStack{
@@ -372,6 +507,8 @@ struct Practice: View {
                         Image("Tube")
                             .resizable()
                             .scaledToFit()
+                            .frame(width: 380, height: 320)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                             .overlay(
                                 Group {
                                     if !letterToShow.isEmpty {
@@ -397,64 +534,72 @@ struct Practice: View {
                             )
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .frame(height: 320)
                 
                 VStack(spacing: 12) {
-                    HStack {
-                        TextField("Type a message", text: $message)
-                            .textInputAutocapitalization(.never)
-                            .disableAutocorrection(true)
-                            .padding(10)
+                    HStack(spacing: 12) {
+                        Text(messageDisplayText)
+                            .font(.custom("berkelium bitmap", size: 14))
+                            .foregroundStyle(canPlayMessage ? Color.neon : Color.white.opacity(0.55))
+                            .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
                             .background(Color.white.opacity(0.08))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .foregroundStyle(.neon)
+
                         Button(action: {
                             playMessage(normalizedMessage)
                         }) {
                             Text(isPlayingMessage ? "Playing…" : "Play")
-                                .font(.headline)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(isPlayingMessage ? Color.gray.opacity(0.3) : Color.blue.opacity(0.6))
+                                .font(.custom("berkelium bitmap", size: 14, relativeTo: .body))
+                                .foregroundStyle(isPlayingMessage || !canPlayMessage ? Color.white.opacity(0.45) : .neon)
+                                .frame(minWidth: 76, minHeight: 42)
+                                .padding(.horizontal, 8)
+                                .background(isPlayingMessage || !canPlayMessage ? Color.white.opacity(0.04) : Color.clear)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(isPlayingMessage || !canPlayMessage ? Color.white.opacity(0.08) : Color.neon, lineWidth: 1)
+                                )
                         }
                         .disabled(isPlayingMessage || !canPlayMessage)
                     }
 
                     HStack(spacing: 12) {
-                        Button(action: saveCurrentMessage) {
-                            Text("Save")
-                                .font(.headline)
+                        Button(action: deleteLastInput) {
+                            Text("Delete")
+                                .font(.custom("berkelium bitmap", size: 14, relativeTo: .body))
+                                .foregroundStyle(message.isEmpty ? Color.white.opacity(0.45) : .neon)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(canSaveMessage ? Color.neon.opacity(0.25) : Color.gray.opacity(0.2))
+                                .background(message.isEmpty ? Color.white.opacity(0.04) : Color.clear)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(message.isEmpty ? Color.white.opacity(0.08) : Color.neon, lineWidth: 1)
+                                )
                         }
-                        .disabled(isPlayingMessage || !canSaveMessage)
+                        .disabled(message.isEmpty)
 
-                        Text("\(savedMessages.count)/\(WarehouseSavedWordsStore.maxSavedMessages) saved")
-                            .font(.custom("berkelium bitmap", size: 12))
-                            .foregroundStyle(Color.white.opacity(0.75))
-
-                        Button(action: {
-                            isShowingSavedWordsPopup = true
-                        }) {
-                            Text("Saved Words")
-                                .font(.custom("berkelium bitmap", size: 12))
-                                .foregroundStyle(.neon)
+                        Button(action: clearInput) {
+                            Text("Clear")
+                                .font(.custom("berkelium bitmap", size: 14, relativeTo: .body))
+                                .foregroundStyle(message.isEmpty ? Color.white.opacity(0.45) : .neon)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(Color.white.opacity(0.08))
+                                .background(message.isEmpty ? Color.white.opacity(0.04) : Color.clear.opacity(0.22))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(message.isEmpty ? Color.white.opacity(0.08) : Color.neon, lineWidth: 1)
+                                )
                         }
-
-                        Spacer()
+                        .disabled(message.isEmpty)
                     }
 
-                    if let warehouseStatusMessage {
-                        Text(warehouseStatusMessage)
-                            .font(.custom("berkelium bitmap", size: 12))
-                            .foregroundStyle(.neon)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 12) {
+                        Spacer()
                     }
 
                 }
@@ -467,404 +612,60 @@ struct Practice: View {
                     savedWordsPopup
                 }
                 
-                HStack{
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("A")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
+                VStack(spacing: 4) {
+                    ForEach(Array(letterRows.enumerated()), id: \.offset) { _, row in
+                        HStack(spacing: 0) {
+                            ForEach(row, id: \.self) { letter in
+                                letterInputButton(for: letter)
+                            }
+                        }
                     }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .a)
-                        sendToWatch(.a)
-                        self.letterToShow = "A"
-                        playSound(for: "A".first!)
+
+                    Button(action: inputSpace) {
+                        Text("Space")
+                            .font(.custom("berkelium bitmap", size: 14, relativeTo: .body))
+                            .foregroundStyle(message.isEmpty || message.hasSuffix(" ") ? Color.white.opacity(0.45) : .neon)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(message.isEmpty || message.hasSuffix(" ") ? Color.white.opacity(0.04) : Color.clear.opacity(0.22))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(message.isEmpty || message.hasSuffix(" ") ? Color.white.opacity(0.08) : Color.neon, lineWidth: 1)
+                            )
                     }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("B")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .b)
-                        sendToWatch(.b)
-                        self.letterToShow = "B"
-                        playSound(for: "B".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("C")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .c)
-                        sendToWatch(.c)
-                        self.letterToShow = "C"
-                        playSound(for: "C".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("D")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .d)
-                        sendToWatch(.d)
-                        self.letterToShow = "D"
-                        playSound(for: "D".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("E")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .e)
-                        sendToWatch(.e)
-                        self.letterToShow = "E"
-                        playSound(for: "E".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("F")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .f)
-                        sendToWatch(.f)
-                        self.letterToShow = "F"
-                        playSound(for: "F".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("G")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .g)
-                        sendToWatch(.g)
-                        self.letterToShow = "G"
-                        playSound(for: "G".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("H")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .h)
-                        sendToWatch(.h)
-                        self.letterToShow = "H"
-                        playSound(for: "H".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("I")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .i)
-                        sendToWatch(.i)
-                        self.letterToShow = "I"
-                        playSound(for: "I".first!)
-                    }
-                }
-                
-                HStack{
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("J")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .j)
-                        sendToWatch(.j)
-                        self.letterToShow = "J"
-                        playSound(for: "J".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("K")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .k)
-                        sendToWatch(.k)
-                        self.letterToShow = "K"
-                        playSound(for: "K".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("L")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .l)
-                        sendToWatch(.l)
-                        self.letterToShow = "L"
-                        playSound(for: "L".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("M")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .m)
-                        sendToWatch(.m)
-                        self.letterToShow = "M"
-                        playSound(for: "M".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("N")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .n)
-                        sendToWatch(.n)
-                        self.letterToShow = "N"
-                        playSound(for: "N".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("O")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .o)
-                        sendToWatch(.o)
-                        self.letterToShow = "O"
-                        playSound(for: "O".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("P")
-                            .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .p)
-                        sendToWatch(.p)
-                        self.letterToShow = "P"
-                        playSound(for: "P".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("Q")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .q)
-                        sendToWatch(.q)
-                        self.letterToShow = "Q"
-                        playSound(for: "Q".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("R")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .r)
-                        sendToWatch(.r)
-                        self.letterToShow = "R"
-                        playSound(for: "R".first!)
-                    }
-                }
-                
-                HStack{
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("S")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .s)
-                        sendToWatch(.s)
-                        self.letterToShow = "S"
-                        playSound(for: "S".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("T")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .t)
-                        sendToWatch(.t)
-                        self.letterToShow = "T"
-                        playSound(for: "T".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("U")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .u)
-                        sendToWatch(.u)
-                        self.letterToShow = "U"
-                        playSound(for: "U".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("V")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .v)
-                        sendToWatch(.v)
-                        self.letterToShow = "V"
-                        playSound(for: "V".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("W")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .w)
-                        sendToWatch(.w)
-                        self.letterToShow = "W"
-                        playSound(for: "W".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("X")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .x)
-                        sendToWatch(.x)
-                        self.letterToShow = "X"
-                        playSound(for: "X".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("Y")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .y)
-                        sendToWatch(.y)
-                        self.letterToShow = "Y"
-                        playSound(for: "Y".first!)
-                    }
-                    
-                    ZStack{
-                            Image("Circle")
-                                .resizable()
-                                .scaledToFit()
-                            Text("Z")
-                                .font(.custom("berkelium bitmap", size: 20))
-                                .foregroundStyle(.neon)
-                    }
-                    .onTapGesture {
-                        morseEngine.performHaptic(for: .z)
-                        sendToWatch(.z)
-                        self.letterToShow = "Z"
-                        playSound(for: "Z".first!)
-                    }
+                    .disabled(message.isEmpty || message.hasSuffix(" "))
+                    .padding(.horizontal, 56)
                 }
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            topToolbar
+        }
+        .overlay(alignment: .top) {
+            if let warehouseStatusMessage {
+                Text(warehouseStatusMessage)
+                    .font(.custom("berkelium bitmap", size: 12))
+                    .foregroundStyle(.neon)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.92))
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.neon.opacity(0.8), lineWidth: 1)
+                    )
+                    .shadow(color: Color.neon.opacity(0.2), radius: 12)
+                    .padding(.top, 24)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: warehouseStatusMessage)
+        .onDisappear {
+            warehouseStatusDismissTask?.cancel()
+            warehouseStatusDismissTask = nil
+        }
     }
 }
 

@@ -260,9 +260,10 @@ struct LevelAlphabet: View {
                         .scaledToFit()
 
                     Text(letter)
-                        .font(.custom("berkelium bitmap", size: isLevelComplete ? 108 : 160))
-                        .minimumScaleFactor(0.6)
+                        .font(.custom("berkelium bitmap", size: isLevelComplete ? 92 : 118))
+                        .minimumScaleFactor(0.55)
                         .lineLimit(1)
+                        .frame(width: 150, height: 150)
                         .foregroundStyle(.neon)
                 }
                 .frame(maxHeight: 310)
