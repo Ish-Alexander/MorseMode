@@ -47,6 +47,7 @@ struct ContentView: View {
     @EnvironmentObject private var morseEngine: MorseEngine
     // Shared Morse code logic
     @EnvironmentObject var userProgress: UserProgress
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
     // Shared global data
     
     @StateObject private var connectivity = MorseModePhoneConnectivity.shared
@@ -57,6 +58,7 @@ struct ContentView: View {
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
     @State private var isShowingOnboardingReplay: Bool = false
+    @State private var isShowingPlaybackSettings: Bool = false
     @State private var flashingCard: HomeCard?
     
     private let contentCardSpacing: CGFloat = 24
@@ -110,8 +112,8 @@ struct ContentView: View {
                 .ignoresSafeArea()
             }
             .overlay(alignment: .topTrailing) {
-                replayOnboardingButton
-                    .padding(.top, 1)
+                topTrailingButtons
+                    .padding(.top, -10)
                     .padding(.trailing, contentCardSpacing)
             }
                 .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
@@ -174,15 +176,34 @@ struct ContentView: View {
             }
         }
         .environment(\.isInOnboarding, isInOnboarding)
+        .sheet(isPresented: $isShowingPlaybackSettings) {
+            PlaybackSettingsSheet()
+                .environmentObject(playbackSettings)
+                .preferredColorScheme(.dark)
+        }
         .preferredColorScheme(.dark)
     }
 
-    private var replayOnboardingButton: some View {
-        Button {
-            replayHaptics()
-            isShowingOnboardingReplay = true
-        } label: {
-            Image(systemName: "info.circle")
+    private var topTrailingButtons: some View {
+        HStack(spacing: 12) {
+            circularOverlayButton(systemName: "gearshape", label: "Playback settings") {
+                isShowingPlaybackSettings = true
+            }
+
+            circularOverlayButton(systemName: "info.circle", label: "Replay onboarding") {
+                triggerSuccessHaptic()
+                isShowingOnboardingReplay = true
+            }
+        }
+    }
+
+    private func circularOverlayButton(
+        systemName: String,
+        label: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.neon)
                 .padding(12)
@@ -193,7 +214,15 @@ struct ContentView: View {
                         .stroke(Color.neon.opacity(0.9), lineWidth: 1.5)
                 )
         }
-        .accessibilityLabel("Replay onboarding")
+        .accessibilityLabel(label)
+    }
+
+    private func triggerSuccessHaptic() {
+        guard playbackSettings.mode.allowsHaptics else { return }
+#if canImport(UIKit)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+#endif
     }
 
     private var topStatusRow: some View {
@@ -324,7 +353,16 @@ struct ContentView: View {
                     .shadow(color: Color.black.opacity(0.75), radius: 1)
                     .minimumScaleFactor(0.7)
                     .multilineTextAlignment(.center)
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color.neon.opacity(0.12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(Color.neon, lineWidth: 2)
+                            )
+                    )
             }
             .buttonStyle(.plain)
         }
@@ -384,6 +422,10 @@ struct ContentView: View {
                     .background(
                         RoundedRectangle(cornerRadius: 14)
                             .fill(Color.neon.opacity(0.12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(Color.neon, lineWidth: 2)
+                            )
                     )
             }
             .buttonStyle(.plain)
@@ -653,13 +695,6 @@ struct ContentView: View {
                     return nil
                 }
             }
-            private func replayHaptics() {
-                // Triggers haptic feedback
-#if canImport(UIKit)
-                let generator = UINotificationFeedbackGenerator()
-                generator.notificationOccurred(.success)
-#endif
-            }
 
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
@@ -838,5 +873,6 @@ private extension Comparable {
     ContentView()
         .environmentObject(MorseEngine())
         .environmentObject(UserProgress())
+        .environmentObject(PlaybackSettings())
         .environment(\.isInOnboarding, false)
 }

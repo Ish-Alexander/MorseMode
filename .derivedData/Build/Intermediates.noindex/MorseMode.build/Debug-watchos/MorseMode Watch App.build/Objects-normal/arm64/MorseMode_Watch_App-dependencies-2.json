@@ -211,392 +211,392 @@
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/Accessibility.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Accessibility-5JNJQLDMT4IL2DYKJUBM5Z4GB.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Accessibility-CNVQK4Z84FRE5K83I1ZZC2QP1.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Accessibility"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreData.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreData-9VZQDDSSCWW3N19SAO3I7W9W1.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreData-5Z5Z749HY92T9I58ZTP5HEBDH.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreData"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreFoundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreFoundation-7ODRIIUPMZNDJLSN993U3B4WP.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreFoundation-61Q2JHW9MAHD5B26U8O4BSZW4.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreFoundation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreGraphics.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreGraphics-73IN1M5MXYL97EESMXUWA3I0J.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreGraphics-8NN0XAU5KS1FBJRA5TV8YT2H3.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreGraphics"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreLocation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreLocation-8T79SG8V5NB2VHB96ZI60J7B6.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreLocation-3YX9GFQTXDUS4G35IEQ8Q6GN3.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreLocation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreText.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreText-CHXC13WXPEAPCZ3AR61NQUY1O.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreText-8LUHOX2T15AO3988Z2O6OFLRU.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreText"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreTransferable.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreTransferable-BIENNAIAROMEYJ4DFD0OW033.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreTransferable-C9LSSP9MN2FRRN9ARI9B1U3EX.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreTransferable"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/CoreVideo.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreVideo-46NCSHPNP6RIX8KQ5PDWEVIQ3.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/CoreVideo-CE1PF6EDBLVJ5OCMNUH4TA2AV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreVideo"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/Darwin.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Darwin-7CUGJYO7EZSPNTVYU47CSZS8P.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Darwin-BBWSCNQSC6RKU7RZPFT037SQ6.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Darwin"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/DataDetection.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/DataDetection-AAL8RUN1QPPP39LAT8RQ3MCSR.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/DataDetection-Y2LAIV2LD5QSRBCC2S8MMWNJ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "DataDetection"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/DeveloperToolsSupport.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/DeveloperToolsSupport-1WMSL8K1U94D2JXGDWDN7CKHE.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/DeveloperToolsSupport-6K3WD4RAB431PG70C7NA2IQUM.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "DeveloperToolsSupport"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/dispatch.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Dispatch-FKT7UHII3RINKQG8TRQXN7K9.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Dispatch-A6PQ50T3M5E9AHY0VRX8BZIJA.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Dispatch"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/Foundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Foundation-3HNN7DWROPAMRXN2172737WCI.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Foundation-6959GI1ES7EOQYG0FXU2DGEHC.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Foundation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/HomeKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/HomeKit-8R9S9O0VA5XI4EF29PB4OMLZ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/HomeKit-1D3QKQJ1CT3KDDHHDH5UMRU5.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "HomeKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinBasic.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/MachO-6DPWYUY5D1PCGKSW54NUJJW6C.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/MachO-5WNYLU8WSGTQENNZRYU0C6QVJ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "MachO"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/MapKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/MapKit-4UNGHY897I2DP6N7FENAF1HQH.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/MapKit-BEBUQMFQ3GIAWZVS7W5BNC9IY.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "MapKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/OSLog.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/OSLog-LSEZ0F5QP7KSB7VDZKX4LFW6.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/OSLog-ESTL89YXLQJ3JCFI3GOF41LHP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "OSLog"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/ObjectiveC.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ObjectiveC-AB5DOOARB2EX6I7YC4MM6HIQO.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ObjectiveC-22A64U2YL651BI5YCEK2TP6NM.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ObjectiveC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/QuartzCore.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/QuartzCore-570HV9G30F6RGVCAEHWRBCNTX.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/QuartzCore-4JD12381RZQ6IC2TG1Z3UVUV6.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "QuartzCore"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/SceneKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SceneKit-BX2DWB6Y8074233TMLJUR2TFY.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SceneKit-74IQJX24I2NOL413MIZ8F54G8.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SceneKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/Security.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Security-AVZLFQ9M07UZ796MD6KX7V3FF.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Security-2FG8U4QZRO2LTOO1FQ3YKVOE9.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Security"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/Spatial\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Spatial-1R2MO24KVWU7UU5AEEB9AOJFY.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Spatial-EBLJA8UEOTF4O5DSHWDPT9XD0.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Spatial"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftShims-4NWJCWE5RI5QW26X3P9YIB6I6.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftShims-46GBN7G5AFB63HD5WY8YILWQK.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/SwiftUI.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftUI-I92BW9BLDLKZVG9U9I4S8THD.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftUI-ELIMM52EU3VI55NNXMRC9IS36.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftUI"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/SwiftUICore.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftUICore-4BBMCA7SWVTLIBSN00VRO1LUB.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/SwiftUICore-E0M64IQEH7H75W7YEO6KPHGZO.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftUICore"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/Symbols.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Symbols-4XQED8KZ1TE0N8H4XVPMOFT67.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/Symbols-2KA8ZFOUHXNUUK8OZSA44B363.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Symbols"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/UIKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UIKit-EYUD6N3B362VEYQZ4SWGHXQFH.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UIKit-3AQ8N73RQNWWBOWLTC9M68ABJ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UIKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/SubFrameworks\/UIUtilities.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UIUtilities-8NIBAPK0OWG2OOZ05KIPUD4RY.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UIUtilities-M3ITRSJBR4B12WY6ZWYYKL4U.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UIUtilities"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/UniformTypeIdentifiers.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UniformTypeIdentifiers-5IBY80V6RU8MZZ27890E2PTBX.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UniformTypeIdentifiers-3TM479LIAZ8SEIJQ9UI6MD05T.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UniformTypeIdentifiers"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/UserNotifications.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UserNotifications-D9A1P3HLPAN03BTBDMTVNM17R.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/UserNotifications-1CE33ZU17JPPEQ7IOHOVOZQJ2.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UserNotifications"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/WatchConnectivity.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/WatchConnectivity-D5CSXACCK9EIX2VJHYC9JM3QZ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/WatchConnectivity-90LBSZV1PO95XG21ZKV6IPW7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "WatchConnectivity"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/WatchKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/WatchKit-D3ZV3ZME8HGAMT3BBL2F121QJ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/WatchKit-1W4FNILKF28C3BI2R6FTPBLUD.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "WatchKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/xpc.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/XPC-23PY136P8YB5WJCQ9I71HZJPJ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/XPC-AAJ2P9H8CO4FHLETPLF8ASEOQ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "XPC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_AvailabilityInternal-ACUD43YWA2AN6XFIGZRWC35BC.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_AvailabilityInternal-83H4AELBNTL3UHM1TTW5NJXT3.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_AvailabilityInternal"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_float-7HE3QK4XD2A6SWYH6MYWVJYBE.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_float-4SQ9TKO4TGVRAPKO5M61N5KUP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_float"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_intrinsics-1O2XBNGM8ZS5HC5L4ND7W1HET.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_intrinsics-7IK3AQFD1TKNO16SUENEZGRUI.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_intrinsics"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_inttypes-6NHMO4XBEVVUY2ECUA06367RY.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_inttypes-CNHTKZU1WEO3DY79XP2XDIDH7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_inttypes"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_limits-69K73L6CU32P2QCSP68LOP0SJ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_limits-2GWK5SIICB42XE2D893YTWRS7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_limits"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdarg-7VHST9LOC20EGHU88OC6AG18K.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdarg-9AXUBNNQTEFGEN0932A6N3G8U.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdarg"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdatomic-BEXBXT1D6TLCW81DOJ8ZEAFMW.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdatomic-DO1TNBJ8KWKX99M2YEQZ00SWW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdatomic"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdbool-BZ6W59KZW3V6BRYHH0OT9VAXQ.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdbool-16A93O7LZMV2MXAWH24AA0W88.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdbool"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stddef-157R0835NABAS2S4YSECYDVBL.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stddef-7DBHTM37GQLT0J4YZCB0KE4PJ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stddef"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdint-E24G956NMDTGLT100QB7P25OV.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_stdint-3CP3FZB8ULDCBTNF12F491UXV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdint"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_tgmath-3D43AJLR7AZTSCC5G99INBMP9.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_Builtin_tgmath-9YPTJ40UV69MWIQ1NC2621D96.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_tgmath"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation1-2VWPE1H3MS3YL0V2OIGWF2822.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation1-4A3FPMR2TTP7ZGSOCJP4CRPCZ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation1"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation2-5OV1O7ZUSLK4DF5MWICGFOZJF.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation2-3EOBOVAGBO4TBU4BW267D5EUV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation2"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinFoundation3.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation3-5ZUR2C3R69VSDW3ELAMHWFIHO.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_DarwinFoundation3-5RIFXZNSMHRNROWZVELPCTANA.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation3"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/System\/Library\/Frameworks\/_LocationEssentials.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_LocationEssentials-5UYNYWBKAZB9MF3LCU1QMSLSF.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_LocationEssentials-1BA9F47V3N1UWXIV2E3CODMWV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_LocationEssentials"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_SwiftConcurrencyShims-A1G61GBD5M06I4JQ192L8NOME.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/_SwiftConcurrencyShims-I2WFT7HO8G93ZRI5WUXNDLS2.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_SwiftConcurrencyShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os-99MIATJJXU0M3L2S19B32ZCRE.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os-5REB1RYDAXNCQE2Z7J8G6XT7K.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os_object-4TH4VK6C0DA8N0996DV631QF.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os_object-6XM04PP9NI3STULGZJ2DF5KN5.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_object"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os_workgroup-8024I8OFBEUIKDXPN3TNWL8SE.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/os_workgroup-65227X6VB72ZUUKTJKB3KAKSL.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_workgroup"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ptrauth-EO5A0YK21UXZYQDYSXCKF94TP.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ptrauth-I280B085CQ17QPRW5T62EXRN.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrauth"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ptrcheck-DQ9C0NV8B4QQO0ERHNLIMNPIH.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/ptrcheck-7GM2HL5Z2CFY1U1D5HKJGGGGW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrcheck"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/simd\/module.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/simd-B0B10P9APPK1TZ97QKPBIUVQA.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/simd-8JQTG7CMHXS9PQV454W0UTSJO.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "simd"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/WatchOS.platform\/Developer\/SDKs\/WatchOS.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/sys_types-CCEQMA6SU8S3QQLKN9DVKJWTD.pcm",
+    "clangModulePath" : "\/Users\/ishyslappy\/Desktop\/MorseMode\/.derivedData\/ModuleCache.noindex\/sys_types-3FR2800UEVDZEASERNMAFLN5Y.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "sys_types"

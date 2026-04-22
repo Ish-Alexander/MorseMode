@@ -52,12 +52,14 @@ let onboardingData: [OnboardingItem] = [
     )
 ]
 struct OnboardingView: View {
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
     @State private var selection: Int = 0
     // Which onboarding page is currently selected
     let items: [OnboardingItem]
     let onFinish: () -> Void
 
     private func triggerPageHaptic() {
+        guard playbackSettings.mode.allowsHaptics else { return }
         #if canImport(UIKit)
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
@@ -188,5 +190,6 @@ private struct PageControl: View {
 
 #Preview("Onboarding") {
     OnboardingView(items: onboardingData) { }
+        .environmentObject(PlaybackSettings())
         .preferredColorScheme(.dark)
 }

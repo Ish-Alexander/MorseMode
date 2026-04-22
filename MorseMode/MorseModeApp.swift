@@ -15,6 +15,182 @@ import GameKit
 import UIKit
 #endif
 
+enum PhonePlaybackMode: String, CaseIterable, Identifiable {
+    case hapticsOnly
+    case soundOnly
+    case hapticsAndSound
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .hapticsOnly:
+            return "Haptics Only"
+        case .soundOnly:
+            return "Sound Only"
+        case .hapticsAndSound:
+            return "Haptics and Sound"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .hapticsOnly:
+            return "Feel each Morse pattern without phone audio."
+        case .soundOnly:
+            return "Play Morse audio without phone vibration."
+        case .hapticsAndSound:
+            return "Use both phone vibration and audio together."
+        }
+    }
+
+    var allowsHaptics: Bool {
+        self != .soundOnly
+    }
+
+    var allowsSound: Bool {
+        self != .hapticsOnly
+    }
+}
+
+@MainActor
+final class PlaybackSettings: ObservableObject {
+    static let storageKey = "PlaybackSettings.mode"
+
+    @Published var mode: PhonePlaybackMode {
+        didSet {
+            UserDefaults.standard.set(mode.rawValue, forKey: Self.storageKey)
+        }
+    }
+
+    init() {
+        mode = PhonePlaybackMode(
+            rawValue: UserDefaults.standard.string(forKey: Self.storageKey) ?? ""
+        ) ?? .hapticsAndSound
+    }
+}
+
+enum MorseLetterAudio {
+    private static let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+
+    static func audioURL(for character: Character) -> URL? {
+        let upper = String(character).uppercased()
+        guard let first = upper.first, first.isLetter else { return nil }
+
+        let baseName = "\(first)_morse_code"
+        for ext in candidateExtensions {
+            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
+                return url
+            }
+        }
+        return nil
+    }
+
+    static func playbackDuration(for character: Character) -> TimeInterval {
+        guard let url = audioURL(for: character) else { return 0 }
+        do {
+            return try AVAudioPlayer(contentsOf: url).duration
+        } catch {
+            return 0
+        }
+    }
+
+    static func stop(_ player: AVAudioPlayer?) -> AVAudioPlayer? {
+        player?.stop()
+        return nil
+    }
+
+    static func play(
+        character: Character,
+        reusing currentPlayer: AVAudioPlayer?,
+        logPrefix: String
+    ) -> (player: AVAudioPlayer?, duration: TimeInterval) {
+        let upper = String(character).uppercased()
+        guard let first = upper.first, first.isLetter else {
+            return (stop(currentPlayer), 0)
+        }
+
+        guard let url = audioURL(for: first) else {
+            return (stop(currentPlayer), 0)
+        }
+
+        do {
+            if let player = currentPlayer, player.url == url {
+                player.currentTime = 0
+                player.play()
+                return (player, player.duration)
+            } else {
+                let player = try AVAudioPlayer(contentsOf: url)
+                player.prepareToPlay()
+                player.play()
+                return (player, player.duration)
+            }
+        } catch {
+            print("[Audio][\(logPrefix)] Failed to play \(url.lastPathComponent): \(error)")
+            return (currentPlayer, 0)
+        }
+    }
+}
+
+struct PlaybackSettingsSheet: View {
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Choose how Morse feedback should play on your phone.")
+                        .font(.custom("berkelium bitmap", size: 12))
+                        .foregroundStyle(Color.white.opacity(0.72))
+                        .listRowBackground(Color.black)
+                }
+
+                Section("Phone Playback") {
+                    ForEach(PhonePlaybackMode.allCases) { mode in
+                        Button {
+                            playbackSettings.mode = mode
+                        } label: {
+                            HStack(spacing: 14) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(mode.title)
+                                        .font(.custom("berkelium bitmap", size: 15))
+                                        .foregroundStyle(.neon)
+                                    Text(mode.detail)
+                                        .font(.custom("berkelium bitmap", size: 10))
+                                        .foregroundStyle(Color.white.opacity(0.72))
+                                        .multilineTextAlignment(.leading)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: playbackSettings.mode == mode ? "checkmark.circle.fill" : "circle")
+                                    .font(.system(size: 44, weight: .semibold))
+                                    .foregroundStyle(playbackSettings.mode == mode ? .neon : Color.white.opacity(0.3))
+                            }
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(Color.black)
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundStyle(.neon)
+                }
+            }
+        }
+    }
+}
+
 struct SharedDefaults {
     static let suiteName = "com.Ishauna.MorseModeTest"
     static let expKey = "sharedEXP"
@@ -518,6 +694,7 @@ struct MorseModeApp: App {
     // Creates one engine for whole app
     @StateObject private var userProgress = UserProgress()
     // Tracks user level
+    @StateObject private var playbackSettings = PlaybackSettings()
 
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     // Checks if user has seen the onboarding page
@@ -528,10 +705,12 @@ struct MorseModeApp: App {
                 ContentView()
                     .environmentObject(morseEngine)
                     .environmentObject(userProgress)
+                    .environmentObject(playbackSettings)
             } else {
                 OnboardingView(items: onboardingData) {
                     hasSeenOnboarding = true
                 }
+                .environmentObject(playbackSettings)
             }
         }
     }

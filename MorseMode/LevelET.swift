@@ -12,6 +12,7 @@ import AVFoundation
 struct LevelET: View {
     @EnvironmentObject private var userProgress: UserProgress
     @EnvironmentObject private var morseEngine: MorseEngine
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
     @EnvironmentObject private var levelFlow: LevelFlow
 
     @State private var letter: String = ""
@@ -50,44 +51,12 @@ struct LevelET: View {
     }
 
     private func playSoundForCurrentLetter() {
-        let upper = letter.uppercased()
-        guard let first = upper.first, first.isLetter else {
-            audioPlayer?.stop()
-            audioPlayer = nil
-            return
-        }
-
-        let baseName = "\(first)_morse_code"
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg"]
-
-        var foundURL: URL? = nil
-        for ext in candidateExtensions {
-            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
-                foundURL = url
-                break
-            }
-        }
-
-        guard let url = foundURL else {
-            if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
-            audioPlayer = nil
-            print("[Audio][LevelET] No audio file found for letter \(first)")
-            return
-        }
-
-        do {
-            if let player = audioPlayer, player.url == url {
-                player.currentTime = 0
-                player.play()
-            } else {
-                let player = try AVAudioPlayer(contentsOf: url)
-                player.prepareToPlay()
-                player.play()
-                audioPlayer = player
-            }
-        } catch {
-            print("[Audio][LevelET] Failed to play \(url.lastPathComponent): \(error)")
-        }
+        let playback = MorseLetterAudio.play(
+            character: Character(letter),
+            reusing: audioPlayer,
+            logPrefix: "LevelET"
+        )
+        audioPlayer = playback.player
     }
 
     private func sendToWatch(_ payload: [String: Any]) {
@@ -111,8 +80,12 @@ struct LevelET: View {
 
     private func playCurrentLetterAcrossDevices() {
         guard !letter.isEmpty else { return }
-        playHapticsForCurrentLetter()
-        playSoundForCurrentLetter()
+        if playbackSettings.mode.allowsHaptics {
+            playHapticsForCurrentLetter()
+        }
+        if playbackSettings.mode.allowsSound {
+            playSoundForCurrentLetter()
+        }
         sendToWatch([
             "action": "playMorse",
             "letter": letter
@@ -172,10 +145,12 @@ struct LevelET: View {
     private func appendSymbol(_ symbol: String) {
         guard !isLevelComplete else { return }
         guard inputPattern.count < 4 else { return }
-        if symbol == "." {
-            morseEngine.performInputHaptic(for: .dot)
-        } else if symbol == "-" {
-            morseEngine.performInputHaptic(for: .dash)
+        if playbackSettings.mode.allowsHaptics {
+            if symbol == "." {
+                morseEngine.performInputHaptic(for: .dot)
+            } else if symbol == "-" {
+                morseEngine.performInputHaptic(for: .dash)
+            }
         }
         inputPattern.append(symbol)
     }
@@ -368,5 +343,6 @@ struct LevelET: View {
     LevelET()
         .environmentObject(UserProgress())
         .environmentObject(MorseEngine())
+        .environmentObject(PlaybackSettings())
         .environmentObject(LevelFlow())
 }

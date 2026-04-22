@@ -484,6 +484,7 @@ final class DailyMorseViewModel: ObservableObject {
 
 struct Daily: View {
     @ObservedObject var vm: DailyMorseViewModel
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
     // Game logic object
     @State private var currentGuess: String = ""
     // What the user types
@@ -535,65 +536,24 @@ struct Daily: View {
     #endif
     }
     
-    private func audioURL(for letter: Character) -> URL? {
-        let upper = String(letter).uppercased()
-        guard let first = upper.first, first.isLetter else {
-            return nil
-        }
-
-        let baseName = "\(first)_morse_code"
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
-        for ext in candidateExtensions {
-            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
-                return url
-            }
-        }
-        return nil
-    }
-
     private func soundPlaybackDuration(for letter: Character) -> TimeInterval {
-        guard let url = audioURL(for: letter) else { return 0 }
-        do {
-            return try AVAudioPlayer(contentsOf: url).duration
-        } catch {
-            return 0
-        }
+        guard playbackSettings.mode.allowsSound else { return 0 }
+        return MorseLetterAudio.playbackDuration(for: letter)
     }
 
     @discardableResult
     private func playSound(for letter: Character) -> TimeInterval {
-        let upper = String(letter).uppercased()
-        guard let first = upper.first, first.isLetter else {
-            audioPlayer?.stop()
-            audioPlayer = nil
+        guard playbackSettings.mode.allowsSound else {
+            audioPlayer = MorseLetterAudio.stop(audioPlayer)
             return 0
         }
-
-        let baseName = "\(first)_morse_code"
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
-        guard let url = audioURL(for: letter) else {
-            if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
-            audioPlayer = nil
-            print("[Audio][Daily] No audio file for letter \(first). Tried: \(candidateExtensions.map { "\(baseName).\($0)" }.joined(separator: ", "))")
-            return 0
-        }
-        do {
-            if let player = audioPlayer, player.url == url {
-                player.currentTime = 0
-                player.play()
-                return player.duration
-            } else {
-                let player = try AVAudioPlayer(contentsOf: url)
-                player.prepareToPlay()
-                player.play()
-                audioPlayer = player
-                return player.duration
-            }
-        } catch {
-            print("[Audio][Daily] Failed to play \(url.lastPathComponent): \(error)")
-            // Finds the audio file, plays the matching letter, sends error code if audio not found
-            return 0
-        }
+        let playback = MorseLetterAudio.play(
+            character: letter,
+            reusing: audioPlayer,
+            logPrefix: "Daily"
+        )
+        audioPlayer = playback.player
+        return playback.duration
     }
 
     var body: some View {
@@ -728,7 +688,7 @@ struct Daily: View {
                                         }
                                 }
                             }
-                            .accessibilityLabel("Replay the last Morse haptics")
+                            .accessibilityLabel("Replay the Morse clue")
                             .disabled(isPlayingHaptics)
                             .opacity(isPlayingHaptics ? 0.5 : 1)
                             // Replays the morse code and haptics
@@ -864,7 +824,9 @@ struct Daily: View {
             let letterStart = audioStart
             let startWorkItem = DispatchWorkItem {
                 activeClueTokenID = tokenID
-                playSound(for: ch)
+                if playbackSettings.mode.allowsSound {
+                    playSound(for: ch)
+                }
             }
             playbackWorkItems.append(startWorkItem)
             DispatchQueue.main.asyncAfter(deadline: .now() + letterStart, execute: startWorkItem)
@@ -895,6 +857,17 @@ struct Daily: View {
                 let next = letters[i + 1]
                 audioStart += (next == " " ? wordGap : interCharGap)
             }
+        }
+
+        let totalPlaybackDuration = audioStart + unit
+
+        guard playbackSettings.mode.allowsHaptics else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + totalPlaybackDuration) {
+                cancelPlaybackHighlights()
+                isPlayingHaptics = false
+                completion()
+            }
+            return
         }
 
 #if canImport(CoreHaptics)
@@ -1049,4 +1022,5 @@ struct Daily: View {
 
 #Preview {
     Daily(vm: DailyMorseViewModel())
+        .environmentObject(PlaybackSettings())
 }

@@ -50,6 +50,7 @@ private enum WarehouseSavedWordsStore {
 @MainActor
 struct Practice: View {
     @ObservedObject var morseEngine: MorseEngine
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
     
     @State private var letterToShow: String = ""
     
@@ -141,40 +142,12 @@ struct Practice: View {
     }
     
     private func playSound(for character: Character) {
-        let upper = String(character).uppercased()
-        guard let first = upper.first, first.isLetter else {
-            audioPlayer?.stop()
-            audioPlayer = nil
-            return
-        }
-        let baseName = "\(first)_morse_code"
-        let candidateExtensions = ["ogg.mp3", "mp3", "ogg"]
-        var foundURL: URL? = nil
-        for ext in candidateExtensions {
-            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
-                foundURL = url
-                break
-            }
-        }
-        guard let url = foundURL else {
-            if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
-            audioPlayer = nil
-            print("[Audio][Practice] No audio file for letter \(first). Tried: \(candidateExtensions.map { "\(baseName).\($0)" }.joined(separator: ", "))")
-            return
-        }
-        do {
-            if let player = audioPlayer, player.url == url {
-                player.currentTime = 0
-                player.play()
-            } else {
-                let player = try AVAudioPlayer(contentsOf: url)
-                player.prepareToPlay()
-                player.play()
-                audioPlayer = player
-            }
-        } catch {
-            print("[Audio][Practice] Failed to play \(url.lastPathComponent): \(error)")
-        }
+        let playback = MorseLetterAudio.play(
+            character: character,
+            reusing: audioPlayer,
+            logPrefix: "Practice"
+        )
+        audioPlayer = playback.player
     }
     
     private func playLetterMorse(_ ch: Character) async {
@@ -182,13 +155,17 @@ struct Practice: View {
               let letterEnum = letter(from: ch) else { return }
         guard !Task.isCancelled else { return }
 
-        morseEngine.startMorseAudio()
         let visibleLetter = String(ch).uppercased()
         letterToShow = visibleLetter
-        playSound(for: ch)
+        if playbackSettings.mode.allowsSound {
+            morseEngine.startMorseAudio()
+            playSound(for: ch)
+        }
 
         sendToWatch(letterEnum)
-        morseEngine.performHaptic(for: letterEnum)
+        if playbackSettings.mode.allowsHaptics {
+            morseEngine.performHaptic(for: letterEnum)
+        }
 
         let playbackDuration = morseEngine.playbackDuration(for: letterEnum)
         if playbackDuration > 0 {
@@ -201,7 +178,9 @@ struct Practice: View {
         guard !isPlayingMessage else { return }
         let normalizedText = WarehouseSavedWordsStore.sanitized(text)
         guard !normalizedText.isEmpty else { return }
-        morseEngine.startMorseAudio()
+        if playbackSettings.mode.allowsSound {
+            morseEngine.startMorseAudio()
+        }
         let characters = Array(normalizedText)
         isPlayingMessage = true
         messagePlaybackTask?.cancel()
@@ -368,10 +347,12 @@ struct Practice: View {
     private func playInitialLetter() {
         guard let letter else { return }
         let initialLetter = String(describing: letter).uppercased()
-        morseEngine.performHaptic(for: letter)
+        if playbackSettings.mode.allowsHaptics {
+            morseEngine.performHaptic(for: letter)
+        }
         sendToWatch(letter)
         showLetterForPlayback(letter, character: initialLetter)
-        if let character = initialLetter.first {
+        if playbackSettings.mode.allowsSound, let character = initialLetter.first {
             playSound(for: character)
         }
     }
@@ -699,4 +680,5 @@ struct Practice: View {
 #Preview {
     let morseEngine = MorseEngine()
     Practice(morseEngine: morseEngine, letter: nil)
+        .environmentObject(PlaybackSettings())
 }
