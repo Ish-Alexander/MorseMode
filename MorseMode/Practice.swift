@@ -60,6 +60,8 @@ struct Practice: View {
     @State private var isShowingSavedWordsPopup: Bool = false
     @State private var isPlayingMessage: Bool = false
     @State private var audioPlayer: AVAudioPlayer? = nil
+    @State private var letterDisplayResetTask: Task<Void, Never>?
+    @State private var messagePlaybackTask: Task<Void, Never>?
     
     let letter: Letter?
     
@@ -176,29 +178,23 @@ struct Practice: View {
     }
     
     private func playLetterMorse(_ ch: Character) async {
-        guard let lower = lowercaseCharacter(ch), let pattern = morseMap[lower] else { return }
+        guard lowercaseCharacter(ch).flatMap({ morseMap[$0] }) != nil,
+              let letterEnum = letter(from: ch) else { return }
+        guard !Task.isCancelled else { return }
+
         morseEngine.startMorseAudio()
-        // Update display to current letter
-        letterToShow = String(ch).uppercased()
+        let visibleLetter = String(ch).uppercased()
+        letterToShow = visibleLetter
         playSound(for: ch)
-        // Send to watch once per letter
-        if let l = letter(from: ch) {
-            sendToWatch(l)
+
+        sendToWatch(letterEnum)
+        morseEngine.performHaptic(for: letterEnum)
+
+        let playbackDuration = morseEngine.playbackDuration(for: letterEnum)
+        if playbackDuration > 0 {
+            try? await Task.sleep(for: .seconds(playbackDuration))
         }
-        // For each symbol: dot=1 unit on, dash=3 units on, 1 unit off between symbols
-        for (idx, symbol) in pattern.enumerated() {
-            // Trigger haptic for the whole letter if engine only supports per-letter
-            if idx == 0, let l = letter(from: ch) {
-                morseEngine.performHaptic(for: l)
-            }
-            // Simulate symbol-on duration
-            let onUnits: UInt64 = (symbol == "-") ? 3 : 1
-            try? await Task.sleep(nanoseconds: onUnits * unitDuration)
-            // Intra-character gap (1 unit) except after last symbol
-            if idx < pattern.count - 1 {
-                try? await Task.sleep(nanoseconds: 1 * unitDuration)
-            }
-        }
+        guard !Task.isCancelled else { return }
     }
     
     private func playMessage(_ text: String) {
@@ -208,8 +204,10 @@ struct Practice: View {
         morseEngine.startMorseAudio()
         let characters = Array(normalizedText)
         isPlayingMessage = true
-        Task { @MainActor in
+        messagePlaybackTask?.cancel()
+        messagePlaybackTask = Task { @MainActor in
             for (idx, ch) in characters.enumerated() {
+                guard !Task.isCancelled else { break }
                 if ch == " " { // word gap = 7 units
                     letterToShow = ""
                     try? await Task.sleep(nanoseconds: wordGapUnits * unitDuration)
@@ -226,10 +224,22 @@ struct Practice: View {
                     }
                 }
             }
+            guard !Task.isCancelled else { return }
             letterToShow = ""
             morseEngine.stopMorseAudioPlayback()
             isPlayingMessage = false
+            messagePlaybackTask = nil
         }
+    }
+
+    private func stopActivePlayback() {
+        messagePlaybackTask?.cancel()
+        messagePlaybackTask = nil
+        audioPlayer?.stop()
+        audioPlayer = nil
+        morseEngine.stopMorseAudioPlayback()
+        isPlayingMessage = false
+        letterToShow = ""
     }
 
     private func saveCurrentMessage() {
@@ -269,16 +279,29 @@ struct Practice: View {
         }
     }
 
+    private func showLetterForPlayback(_ letter: Letter, character: String) {
+        letterDisplayResetTask?.cancel()
+        letterToShow = character
+
+        let playbackDuration = morseEngine.playbackDuration(for: letter)
+        guard playbackDuration > 0 else { return }
+
+        letterDisplayResetTask = Task {
+            try? await Task.sleep(for: .seconds(playbackDuration))
+            guard !Task.isCancelled else { return }
+            guard !isPlayingMessage, letterToShow == character else { return }
+            letterToShow = ""
+            letterDisplayResetTask = nil
+        }
+    }
+
     private func inputLetter(_ letter: Letter) {
         let character = String(describing: letter).uppercased()
         message += character
         warehouseStatusMessage = nil
-        morseEngine.performHaptic(for: letter)
-        sendToWatch(letter)
+        letterDisplayResetTask?.cancel()
+        letterDisplayResetTask = nil
         letterToShow = character
-        if let first = character.first {
-            playSound(for: first)
-        }
     }
 
     private func inputSpace() {
@@ -298,6 +321,7 @@ struct Practice: View {
         guard !message.isEmpty else { return }
         message = ""
         warehouseStatusMessage = nil
+        letterDisplayResetTask?.cancel()
         letterToShow = ""
     }
 
@@ -344,9 +368,9 @@ struct Practice: View {
     private func playInitialLetter() {
         guard let letter else { return }
         let initialLetter = String(describing: letter).uppercased()
-        letterToShow = initialLetter
         morseEngine.performHaptic(for: letter)
         sendToWatch(letter)
+        showLetterForPlayback(letter, character: initialLetter)
         if let character = initialLetter.first {
             playSound(for: character)
         }
@@ -402,10 +426,10 @@ struct Practice: View {
                                                     playMessage(savedMessage)
                                                 }) {
                                                     Text("Replay")
-                                                        .font(.custom("berkelium bitmap", size: 8))
+                                                        .font(.custom("berkelium bitmap", size: 7))
                                                         .foregroundStyle(.neon)
+                                                        .frame(minWidth: 44, minHeight: 44)
                                                         .padding(.horizontal, 10)
-                                                        .padding(.vertical, 6)
                                                         .background(Color.white.opacity(0.08))
                                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                                 }
@@ -416,7 +440,7 @@ struct Practice: View {
                                                 }) {
                                                     Image(systemName: "trash")
                                                         .foregroundStyle(Color.red.opacity(0.9))
-                                                        .padding(8)
+                                                        .frame(minWidth: 44, minHeight: 44)
                                                         .background(Color.white.opacity(0.06))
                                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                                 }
@@ -663,8 +687,11 @@ struct Practice: View {
         }
         .animation(.easeInOut(duration: 0.2), value: warehouseStatusMessage)
         .onDisappear {
+            stopActivePlayback()
             warehouseStatusDismissTask?.cancel()
             warehouseStatusDismissTask = nil
+            letterDisplayResetTask?.cancel()
+            letterDisplayResetTask = nil
         }
     }
 }

@@ -101,6 +101,17 @@ final class MorseEngine: ObservableObject {
         stopMorseAudio()
         // Stops audio playback
     }
+
+    func playbackDuration(for letter: Letter) -> TimeInterval {
+        let symbols = letter.morseRepresentation
+        guard !symbols.isEmpty else { return 0 }
+
+        return symbols.enumerated().reduce(0) { total, entry in
+            let (index, symbol) = entry
+            let gap = index < symbols.count - 1 ? interSymbolGap : 0
+            return total + symbol.duration + gap
+        }
+    }
     
     func performHaptic(for letter: Letter) {
         startMorseAudioIfNeeded(using: nil)
@@ -125,7 +136,7 @@ final class MorseEngine: ObservableObject {
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: 0)
             // Starts audio immediately
-            let totalDuration = time
+            let totalDuration = playbackDuration(for: letter)
             DispatchQueue.main.asyncAfter(deadline: .now() + totalDuration) { [weak self] in
                 self?.stopMorseAudio()
                 // Stops audio when finished

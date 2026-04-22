@@ -35,6 +35,14 @@ private enum AppDestination: Hashable {
     case journeyLevel(Int)
 }
 
+private enum HomeCard: Hashable {
+    case rank
+    case leaderboard
+    case daily
+    case journey
+    case warehouse
+}
+
 struct ContentView: View {
     @EnvironmentObject private var morseEngine: MorseEngine
     // Shared Morse code logic
@@ -49,6 +57,7 @@ struct ContentView: View {
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
     @State private var isShowingOnboardingReplay: Bool = false
+    @State private var flashingCard: HomeCard?
     
     private let contentCardSpacing: CGFloat = 24
     private let topSectionSpacing: CGFloat = 2
@@ -189,7 +198,7 @@ struct ContentView: View {
 
     private var topStatusRow: some View {
         HStack(alignment: .top, spacing: contentCardSpacing) {
-            dashboardButton {
+            dashboardButton(card: .rank) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 12) {
                         ZStack {
@@ -227,12 +236,14 @@ struct ContentView: View {
                 }
                 .padding(16)
             } destination: {
-                path.append(.journeyResume)
+                flashCard(.rank) {
+                    path.append(.journeyResume)
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 148)
 
-            dashboardButton {
+            dashboardButton(card: .leaderboard) {
                 VStack(spacing: 10) {
                     Spacer(minLength: 0)
                     Image(systemName: "trophy.fill")
@@ -247,7 +258,9 @@ struct ContentView: View {
                     Spacer(minLength: 0)
                 }
             } destination: {
-                path.append(.leaderboard)
+                flashCard(.leaderboard) {
+                    path.append(.leaderboard)
+                }
             }
             .frame(width: 122)
             .frame(height: 124)
@@ -301,7 +314,9 @@ struct ContentView: View {
                 .padding(.horizontal, 18)
 
             Button {
-                path.append(.daily)
+                flashCard(.daily) {
+                    path.append(.daily)
+                }
             } label: {
                 Text(dailyViewModel.isSolved ? "Mission Complete" : "Start Mission")
                     .font(.custom("berkelium bitmap", size: 28))
@@ -315,7 +330,7 @@ struct ContentView: View {
         }
         .padding(.vertical, 24)
         .padding(.horizontal, 14)
-        .background(cardBackground)
+        .background(cardBackground(for: .daily))
         .frame(height: 320)
     }
     
@@ -338,7 +353,11 @@ struct ContentView: View {
                         let point = points[index]
 
                         if userProgress.isLevelUnlocked(level) {
-                            Button(action: { path.append(.journeyLevel(level)) }) {
+                            Button(action: {
+                                flashCard(.journey) {
+                                    path.append(.journeyLevel(level))
+                                }
+                            }) {
                                 journeyNode(level)
                             }
                             .buttonStyle(.plain)
@@ -352,7 +371,11 @@ struct ContentView: View {
             }
             .frame(height: 220)
             
-            Button(action: { path.append(.journeyResume) }) {
+            Button(action: {
+                flashCard(.journey) {
+                    path.append(.journeyResume)
+                }
+            }) {
                 Text("Start Level \(currentJourneyLevel)")
                     .font(.custom("berkelium bitmap", size: 22))
                     .foregroundStyle(Color.neon)
@@ -367,13 +390,13 @@ struct ContentView: View {
         }
         .padding(.vertical, 22)
         .padding(.horizontal, 16)
-        .background(cardBackground)
+        .background(cardBackground(for: .journey))
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .frame(height: 360)
     }
     
     private var warehouseCard: some View {
-        dashboardButton {
+        dashboardButton(card: .warehouse) {
             HStack(spacing: 16) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -395,7 +418,9 @@ struct ContentView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 20)
         } destination: {
-            path.append(.warehouse)
+            flashCard(.warehouse) {
+                path.append(.warehouse)
+            }
         }
         .frame(height: 106)
     }
@@ -413,30 +438,52 @@ struct ContentView: View {
     }
     
     private func dashboardButton<Label: View>(
+        card: HomeCard? = nil,
         @ViewBuilder _ label: () -> Label,
         destination: @escaping () -> Void
     ) -> some View {
         Button(action: destination) {
             label()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(cardBackground)
+                .background(cardBackground(for: card))
         }
         .buttonStyle(.plain)
     }
     
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .fill(Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94))
+    private func cardBackground(for card: HomeCard?) -> some View {
+        let isFlashing = card != nil && card == flashingCard
+        let fillColor = isFlashing
+            ? Color(red: 0.82, green: 0.16, blue: 0.16).opacity(0.96)
+            : Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94)
+        let strokeColor = isFlashing ? Color.red.opacity(0.95) : Color.neon
+
+        return RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .fill(fillColor)
             .overlay(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(Color.neon, lineWidth: 2.8)
+                    .stroke(strokeColor, lineWidth: 2.8)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .stroke(Color.white.opacity(0.05), lineWidth: 1)
                     .padding(6)
             )
-            .shadow(color: Color.neon.opacity(0.12), radius: 12)
+            .shadow(color: strokeColor.opacity(isFlashing ? 0.24 : 0.12), radius: 12)
+            .animation(.easeInOut(duration: 0.12), value: isFlashing)
+    }
+
+    private func flashCard(_ card: HomeCard, action: @escaping () -> Void) {
+        flashingCard = card
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            action()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
+            if flashingCard == card {
+                flashingCard = nil
+            }
+        }
     }
     
     private func cardTitle(
@@ -556,11 +603,11 @@ struct ContentView: View {
     public struct DigitalRainBackground: View {
         // Tunables
         public var speed: Double = 60          // points per second
-        public var density: Int = 20         // approximate number of columns
-        public var glyphSize: CGFloat = 20     // font size for glyphs
+        public var density: Int = 12           // approximate number of columns
+        public var glyphSize: CGFloat = 18     // font size for glyphs
         public var randomize: Bool = true      // randomize stream timing
 
-        public init(speed: Double = 60, density: Int = 24, glyphSize: CGFloat = 16, randomize: Bool = true) {
+        public init(speed: Double = 60, density: Int = 12, glyphSize: CGFloat = 18, randomize: Bool = true) {
             self.speed = speed
             self.density = max(6, density)
             self.glyphSize = glyphSize
@@ -680,7 +727,7 @@ private struct RainColumn: View {
                         let speedPS = baseSpeed * (1.0 + jitter * 0.5)
                         let step = glyphSize * 1.05
                         let rowCount = max(1, Int(ceil(height / step)) + 3)
-                        let dropCount = max(2, min(5, rowCount / 10))
+                        let dropCount = max(1, min(3, rowCount / 14))
                         let font = Font.system(size: glyphSize, design: .monospaced)
                         var drewGlyph = false
 

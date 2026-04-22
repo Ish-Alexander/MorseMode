@@ -49,6 +49,79 @@ private func displayMorseClue(_ morse: String) -> String {
         .joined(separator: " ")
 }
 
+private struct MorseClueToken: Identifiable {
+    let id: Int
+    let text: String
+    let isSpace: Bool
+}
+
+private struct MorseClueFlowLayout: Layout {
+    var horizontalSpacing: CGFloat = 10
+    var verticalSpacing: CGFloat = 10
+
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        let maxWidth = proposal.width ?? .greatestFiniteMagnitude
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+
+        var lineWidth: CGFloat = 0
+        var lineHeight: CGFloat = 0
+        var totalWidth: CGFloat = 0
+        var totalHeight: CGFloat = 0
+
+        for size in sizes {
+            let nextWidth = lineWidth == 0 ? size.width : lineWidth + horizontalSpacing + size.width
+            if nextWidth > maxWidth, lineWidth > 0 {
+                totalWidth = max(totalWidth, lineWidth)
+                totalHeight += lineHeight + verticalSpacing
+                lineWidth = size.width
+                lineHeight = size.height
+            } else {
+                lineWidth = nextWidth
+                lineHeight = max(lineHeight, size.height)
+            }
+        }
+
+        totalWidth = max(totalWidth, lineWidth)
+        totalHeight += lineHeight
+
+        return CGSize(width: totalWidth, height: totalHeight)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        var x = bounds.minX
+        var y = bounds.minY
+        var lineHeight: CGFloat = 0
+
+        for (index, subview) in subviews.enumerated() {
+            let size = sizes[index]
+            if x > bounds.minX, x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += lineHeight + verticalSpacing
+                lineHeight = 0
+            }
+
+            subview.place(
+                at: CGPoint(x: x, y: y),
+                anchor: .topLeading,
+                proposal: ProposedViewSize(width: size.width, height: size.height)
+            )
+
+            x += size.width + horizontalSpacing
+            lineHeight = max(lineHeight, size.height)
+        }
+    }
+}
+
 struct DailyRoot: View {
     @ObservedObject var vm: DailyMorseViewModel
     @State private var showDaily: Bool = false
@@ -417,6 +490,8 @@ struct Daily: View {
     @FocusState private var isGuessFieldFocused: Bool
     @State private var isPlayingHaptics: Bool = false
     @State private var replayRotationAngle: Double = 0
+    @State private var activeClueTokenID: Int? = nil
+    @State private var playbackWorkItems: [DispatchWorkItem] = []
     // Prevents overlapping haptics
     @State private var audioPlayer: AVAudioPlayer? = nil
     // Plays morse code audio
@@ -426,6 +501,19 @@ struct Daily: View {
 #endif
 
     @Environment(\.scenePhase) private var scenePhase
+
+    private var clueTokens: [MorseClueToken] {
+        Array(vm.targetWord.uppercased()).enumerated().map { index, ch in
+            if ch == " " {
+                return MorseClueToken(id: index, text: "/", isSpace: true)
+            }
+            return MorseClueToken(
+                id: index,
+                text: displayMorseClue(morseMap[ch] ?? ""),
+                isSpace: false
+            )
+        }
+    }
     
     private func activateWatchSessionIfNeeded() {
     #if canImport(WatchConnectivity)
@@ -447,43 +535,64 @@ struct Daily: View {
     #endif
     }
     
-    private func playSound(for letter: Character) {
-     
+    private func audioURL(for letter: Character) -> URL? {
+        let upper = String(letter).uppercased()
+        guard let first = upper.first, first.isLetter else {
+            return nil
+        }
+
+        let baseName = "\(first)_morse_code"
+        let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+        for ext in candidateExtensions {
+            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
+                return url
+            }
+        }
+        return nil
+    }
+
+    private func soundPlaybackDuration(for letter: Character) -> TimeInterval {
+        guard let url = audioURL(for: letter) else { return 0 }
+        do {
+            return try AVAudioPlayer(contentsOf: url).duration
+        } catch {
+            return 0
+        }
+    }
+
+    @discardableResult
+    private func playSound(for letter: Character) -> TimeInterval {
         let upper = String(letter).uppercased()
         guard let first = upper.first, first.isLetter else {
             audioPlayer?.stop()
             audioPlayer = nil
-            return
-            
+            return 0
         }
+
         let baseName = "\(first)_morse_code"
         let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
-        var foundURL: URL? = nil
-        for ext in candidateExtensions {
-            if let url = Bundle.main.url(forResource: baseName, withExtension: ext) {
-                foundURL = url
-                break
-            }
-        }
-        guard let url = foundURL else {
+        guard let url = audioURL(for: letter) else {
             if audioPlayer?.isPlaying == true { audioPlayer?.stop() }
             audioPlayer = nil
             print("[Audio][Daily] No audio file for letter \(first). Tried: \(candidateExtensions.map { "\(baseName).\($0)" }.joined(separator: ", "))")
-            return
+            return 0
         }
         do {
             if let player = audioPlayer, player.url == url {
                 player.currentTime = 0
                 player.play()
+                return player.duration
             } else {
                 let player = try AVAudioPlayer(contentsOf: url)
                 player.prepareToPlay()
                 player.play()
                 audioPlayer = player
+                return player.duration
             }
         } catch {
             print("[Audio][Daily] Failed to play \(url.lastPathComponent): \(error)")
             // Finds the audio file, plays the matching letter, sends error code if audio not found
+            return 0
         }
     }
 
@@ -528,15 +637,13 @@ struct Daily: View {
                                 }
 
                                 // Morse clue below
-                                Text(displayMorseClue(vm.morseClue))
-                                    .font(.system(size: 28, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(.white)
-                                    .multilineTextAlignment(.center)
-                                    .lineLimit(nil)
-                                    .minimumScaleFactor(0.4)
-                                    .allowsTightening(true)
-                                    .padding(.horizontal, 16)
-                                    .frame(maxWidth: 220) // constrain to fit inside Tube image
+                                MorseClueFlowLayout(horizontalSpacing: 8, verticalSpacing: 8) {
+                                    ForEach(clueTokens) { token in
+                                        clueTokenView(token)
+                                    }
+                                }
+                                .frame(maxWidth: 220)
+                                .padding(.horizontal, 16)
                             }
                         }
                         
@@ -688,6 +795,7 @@ struct Daily: View {
     
     private func stopFeedbackPlaybackOnly() {
 #if canImport(UIKit)
+        cancelPlaybackHighlights()
     #if canImport(CoreHaptics)
         hapticEngine?.stop()
     #endif
@@ -696,11 +804,42 @@ struct Daily: View {
         isPlayingHaptics = false
 #endif
     }
+
+    @ViewBuilder
+    private func clueTokenView(_ token: MorseClueToken) -> some View {
+        let isActive = activeClueTokenID == token.id && !token.isSpace
+
+        Text(token.text)
+            .font(.system(size: 28, weight: .medium, design: .monospaced))
+            .foregroundStyle(isActive ? Color(red: 0.9, green: 1.0, blue: 0.92) : .white)
+            .padding(.horizontal, token.isSpace ? 0 : 6)
+            .padding(.vertical, token.isSpace ? 0 : 4)
+            .background {
+                if isActive {
+                    Capsule()
+                        .fill(Color.green.opacity(0.34))
+                        .blur(radius: 14)
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.green.opacity(0.55), lineWidth: 1)
+                        )
+                }
+            }
+            .shadow(color: isActive ? Color.green.opacity(0.95) : .clear, radius: 12)
+            .animation(.easeInOut(duration: 0.12), value: isActive)
+    }
+
+    private func cancelPlaybackHighlights() {
+        playbackWorkItems.forEach { $0.cancel() }
+        playbackWorkItems.removeAll()
+        activeClueTokenID = nil
+    }
     
     private func playMorseHaptics(for morse: String, completion: @escaping () -> Void) {
 #if canImport(UIKit)
         guard !isPlayingHaptics else { completion(); return }
         isPlayingHaptics = true
+        cancelPlaybackHighlights()
 
         // Base timing unit (seconds)
         let unit: TimeInterval = 0.08
@@ -721,9 +860,14 @@ struct Daily: View {
             }
 
             // Schedule audio at the start of this letter
-            DispatchQueue.main.asyncAfter(deadline: .now() + audioStart) {
+            let tokenID = i
+            let letterStart = audioStart
+            let startWorkItem = DispatchWorkItem {
+                activeClueTokenID = tokenID
                 playSound(for: ch)
             }
+            playbackWorkItems.append(startWorkItem)
+            DispatchQueue.main.asyncAfter(deadline: .now() + letterStart, execute: startWorkItem)
 
             // Advance by the duration of this letter’s Morse pattern (symbols + intra gaps)
             if let pattern = morseMap[ch] {
@@ -734,7 +878,16 @@ struct Daily: View {
                         letterDuration += intraCharGap
                     }
                 }
+                let highlightDuration = max(letterDuration, soundPlaybackDuration(for: ch))
                 audioStart += letterDuration
+
+                let clearWorkItem = DispatchWorkItem {
+                    if activeClueTokenID == tokenID {
+                        activeClueTokenID = nil
+                    }
+                }
+                playbackWorkItems.append(clearWorkItem)
+                DispatchQueue.main.asyncAfter(deadline: .now() + letterStart + highlightDuration, execute: clearWorkItem)
             }
 
             // Add inter-letter gap unless next is a space or end
@@ -818,6 +971,7 @@ struct Daily: View {
             try player.start(atTime: 0)
             // Stop flag after completion
             DispatchQueue.main.asyncAfter(deadline: .now() + relativeTime + unit) {
+                cancelPlaybackHighlights()
                 isPlayingHaptics = false
                 completion()
             }
@@ -874,6 +1028,7 @@ struct Daily: View {
             }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay + unit) {
+            cancelPlaybackHighlights()
             isPlayingHaptics = false
             completion()
         }
