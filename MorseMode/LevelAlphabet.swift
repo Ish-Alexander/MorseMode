@@ -171,24 +171,7 @@ struct LevelAlphabet: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 14) {
-                HStack {
-                    Button {
-                        levelFlow.exitToLevelSelect()
-                    } label: {
-                        Text("Back")
-                            .font(.custom("berkelium bitmap", size: 12))
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(
-                                Capsule()
-                                    .fill(Color.neon)
-                            )
-                    }
-                    .buttonStyle(.plain)
-
-                    Spacer()
-                }
+                JourneyLevelTopBar()
 
                 HStack(spacing: 18) {
                     Text("Correct: \(completedLetters.count)/26")

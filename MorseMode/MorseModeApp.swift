@@ -56,6 +56,7 @@ enum PhonePlaybackMode: String, CaseIterable, Identifiable {
 @MainActor
 final class PlaybackSettings: ObservableObject {
     static let storageKey = "PlaybackSettings.mode"
+    static let digitalRainPausedKey = "PlaybackSettings.digitalRainPaused"
 
     @Published var mode: PhonePlaybackMode {
         didSet {
@@ -63,10 +64,17 @@ final class PlaybackSettings: ObservableObject {
         }
     }
 
+    @Published var isDigitalRainPaused: Bool {
+        didSet {
+            UserDefaults.standard.set(isDigitalRainPaused, forKey: Self.digitalRainPausedKey)
+        }
+    }
+
     init() {
         mode = PhonePlaybackMode(
             rawValue: UserDefaults.standard.string(forKey: Self.storageKey) ?? ""
         ) ?? .hapticsAndSound
+        isDigitalRainPaused = UserDefaults.standard.bool(forKey: Self.digitalRainPausedKey)
     }
 }
 
@@ -134,7 +142,26 @@ enum MorseLetterAudio {
 
 struct PlaybackSettingsSheet: View {
     @EnvironmentObject private var playbackSettings: PlaybackSettings
+    @EnvironmentObject private var morseEngine: MorseEngine
     @Environment(\.dismiss) private var dismiss
+    @State private var audioPlayer: AVAudioPlayer?
+
+    private func preview(_ mode: PhonePlaybackMode) {
+        if mode.allowsHaptics {
+            morseEngine.performHaptic(for: .t)
+        }
+
+        if mode.allowsSound {
+            let playback = MorseLetterAudio.play(
+                character: "T",
+                reusing: audioPlayer,
+                logPrefix: "PlaybackSettings"
+            )
+            audioPlayer = playback.player
+        } else {
+            audioPlayer = MorseLetterAudio.stop(audioPlayer)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -150,6 +177,7 @@ struct PlaybackSettingsSheet: View {
                     ForEach(PhonePlaybackMode.allCases) { mode in
                         Button {
                             playbackSettings.mode = mode
+                            preview(mode)
                         } label: {
                             HStack(spacing: 14) {
                                 VStack(alignment: .leading, spacing: 6) {
@@ -174,6 +202,21 @@ struct PlaybackSettingsSheet: View {
                         .listRowBackground(Color.black)
                     }
                 }
+
+                Section("Background") {
+                    Toggle(isOn: $playbackSettings.isDigitalRainPaused) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Pause Digital Rain")
+                                .font(.custom("berkelium bitmap", size: 15))
+                                .foregroundStyle(.neon)
+                            Text("Freeze the animated background if you need a calmer screen.")
+                                .font(.custom("berkelium bitmap", size: 10))
+                                .foregroundStyle(Color.white.opacity(0.72))
+                        }
+                    }
+                    .tint(.neon)
+                    .listRowBackground(Color.black)
+                }
             }
             .scrollContentBackground(.hidden)
             .background(Color.black.ignoresSafeArea())
@@ -186,6 +229,56 @@ struct PlaybackSettingsSheet: View {
                     }
                     .foregroundStyle(.neon)
                 }
+            }
+        }
+    }
+}
+
+struct JourneyLevelTopBar: View {
+    @EnvironmentObject private var levelFlow: LevelFlow
+    @EnvironmentObject private var playbackSettings: PlaybackSettings
+    @EnvironmentObject private var morseEngine: MorseEngine
+    @State private var isShowingPlaybackSettings = false
+
+    var body: some View {
+        HStack {
+            Button {
+                levelFlow.exitToLevelSelect()
+            } label: {
+                Text("Back")
+                    .font(.custom("berkelium bitmap", size: 12))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.neon)
+                    )
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Button {
+                isShowingPlaybackSettings = true
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.neon)
+                    .padding(10)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.neon.opacity(0.85), lineWidth: 1.2)
+                    )
+            }
+            .buttonStyle(.plain)
+            .sheet(isPresented: $isShowingPlaybackSettings) {
+                PlaybackSettingsSheet()
+                    .environmentObject(playbackSettings)
+                    .environmentObject(morseEngine)
+                    .preferredColorScheme(.dark)
             }
         }
     }

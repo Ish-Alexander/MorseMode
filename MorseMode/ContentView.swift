@@ -62,7 +62,6 @@ struct ContentView: View {
     @State private var flashingCard: HomeCard?
     
     private let contentCardSpacing: CGFloat = 24
-    private let topSectionSpacing: CGFloat = 2
     
     private var progressFraction: Double {
         let needed = max(userProgress.expNeededForNextLevel, 1)
@@ -89,11 +88,11 @@ struct ContentView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: contentCardSpacing) {
                     topStatusRow
-                        .padding(.bottom, -(contentCardSpacing - topSectionSpacing))
                     dailyMissionCard
+                        .padding(.bottom, 24)
                     journeyCard
+                        .padding(.bottom, 40)
                     warehouseCard
-                        .padding(.top, 30)
                 }
                 .frame(maxWidth: 420)
                 .frame(maxWidth: .infinity)
@@ -104,7 +103,7 @@ struct ContentView: View {
             .background {
                 ZStack {
                     if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
-                        DigitalRainBackground()
+                        DigitalRainBackground(isPaused: playbackSettings.isDigitalRainPaused)
                     } else {
                         Color.black
                     }
@@ -179,6 +178,7 @@ struct ContentView: View {
         .sheet(isPresented: $isShowingPlaybackSettings) {
             PlaybackSettingsSheet()
                 .environmentObject(playbackSettings)
+                .environmentObject(morseEngine)
                 .preferredColorScheme(.dark)
         }
         .preferredColorScheme(.dark)
@@ -648,12 +648,14 @@ struct ContentView: View {
         public var density: Int = 12           // approximate number of columns
         public var glyphSize: CGFloat = 18     // font size for glyphs
         public var randomize: Bool = true      // randomize stream timing
+        public var isPaused: Bool = false
 
-        public init(speed: Double = 60, density: Int = 12, glyphSize: CGFloat = 18, randomize: Bool = true) {
+        public init(speed: Double = 60, density: Int = 12, glyphSize: CGFloat = 18, randomize: Bool = true, isPaused: Bool = false) {
             self.speed = speed
             self.density = max(6, density)
             self.glyphSize = glyphSize
             self.randomize = randomize
+            self.isPaused = isPaused
         }
 
         public var body: some View {
@@ -671,7 +673,8 @@ struct ContentView: View {
                                        columnWidth: columnWidth,
                                        speed: speed,
                                        glyphSize: glyphSize,
-                                       jitterSeed: randomize ? UInt64(idx) : 0)
+                                       jitterSeed: randomize ? UInt64(idx) : 0,
+                                       isPaused: isPaused)
                                 .frame(width: columnWidth, height: proxy.size.height)
                         }
                     }
@@ -704,6 +707,7 @@ private struct RainColumn: View {
     let speed: Double
     let glyphSize: CGFloat
     let jitterSeed: UInt64
+    let isPaused: Bool
     
     private var glyphs: [String] {
         // A set of katakana-like symbols and digits to evoke the look
@@ -727,7 +731,7 @@ private struct RainColumn: View {
     
     @ViewBuilder
     var body: some View {
-        if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+        if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *), !isPaused {
             RainColumnAnimated(height: height,
                                columnWidth: columnWidth,
                                speed: speed,
@@ -735,8 +739,95 @@ private struct RainColumn: View {
                                jitterSeed: jitterSeed,
                                glyphs: glyphs)
         } else {
-            Rectangle()
-                .fill(Color.black)
+            RainColumnStatic(height: height,
+                             columnWidth: columnWidth,
+                             speed: speed,
+                             glyphSize: glyphSize,
+                             jitterSeed: jitterSeed,
+                             glyphs: glyphs)
+        }
+    }
+
+    private struct RainColumnStatic: View {
+        let height: CGFloat
+        let columnWidth: CGFloat
+        let speed: Double
+        let glyphSize: CGFloat
+        let jitterSeed: UInt64
+        let glyphs: [String]
+
+        var body: some View {
+            Canvas(rendersAsynchronously: true) { ctx, _ in
+                let safeGlyphs = glyphs.isEmpty ? ["0"] : glyphs
+                let dt = 0.0
+
+                let baseSpeed = max(10.0, speed)
+                let jitter = jitterSeed == 0 ? 0.0 : Double(jitterSeed % 100) / 100.0
+                let speedPS = baseSpeed * (1.0 + jitter * 0.5)
+                let step = glyphSize * 1.05
+                let rowCount = max(1, Int(ceil(height / step)) + 3)
+                let dropCount = max(1, min(3, rowCount / 14))
+                let font = Font.system(size: glyphSize, design: .monospaced)
+                var drewGlyph = false
+
+                for row in 0..<rowCount {
+                    let y = CGFloat(row) * step
+                    guard y > -glyphSize && y < height + glyphSize else { continue }
+
+                    var opacity: Double = 0
+                    var glyphIndex = row
+
+                    for drop in 0..<dropCount {
+                        let dropSeed = jitterSeed &+ UInt64(drop &* 977)
+                        let spacing = Double(rowCount) / Double(dropCount)
+                        let cycleRows = Double(rowCount) + spacing * 2.0
+                        let trailLength = max(6.0, floor(Double(rowCount) * (0.18 + stableNoise(dropSeed, 11, 23) * 0.22)))
+                        let dropOffset = stableNoise(dropSeed, 17, 41) * cycleRows
+                        let head = (dt * speedPS / Double(step) + dropOffset).truncatingRemainder(dividingBy: cycleRows)
+                        let distance = head - Double(row)
+                        let wrappedDistance = distance >= 0 ? distance : distance + cycleRows
+                        guard wrappedDistance >= 0 && wrappedDistance <= trailLength else { continue }
+
+                        let gapNoise = stableNoise(dropSeed, UInt64(row), UInt64(Int(dt * 9.0) + drop * 13))
+                        let isHead = wrappedDistance < 0.75
+                        let shouldDraw = isHead || gapNoise > 0.28
+                        guard shouldDraw else { continue }
+
+                        let trailProgress = 1.0 - (wrappedDistance / max(trailLength, 1.0))
+                        let candidateOpacity = isHead
+                            ? 1.0
+                            : max(0.12, trailProgress * trailProgress * 0.85)
+
+                        if candidateOpacity > opacity {
+                            opacity = candidateOpacity
+                            glyphIndex = positiveModulo(Int(floor(head)) - row + row + drop * 7, safeGlyphs.count)
+                        }
+                    }
+
+                    guard opacity > 0 else { continue }
+                    drewGlyph = true
+
+                    let glyph = safeGlyphs[glyphIndex]
+                    let text = Text(glyph).font(font)
+                    var resolved = ctx.resolve(text)
+                    resolved.shading = .color(opacity > 0.92 ? .white : .green)
+
+                    var drawContext = ctx
+                    drawContext.opacity = opacity
+                    drawContext.draw(resolved, at: CGPoint(x: columnWidth * 0.5, y: y))
+                }
+
+                if !drewGlyph {
+                    let fallbackIndex = positiveModulo(Int(dt * speedPS / Double(step)), safeGlyphs.count)
+                    let text = Text(safeGlyphs[fallbackIndex]).font(font)
+                    var resolved = ctx.resolve(text)
+                    resolved.shading = .color(.green)
+
+                    var drawContext = ctx
+                    drawContext.opacity = 0.45
+                    drawContext.draw(resolved, at: CGPoint(x: columnWidth * 0.5, y: height * 0.5))
+                }
+            }
         }
     }
     
