@@ -10,7 +10,7 @@ final class LevelFlow: ObservableObject {
 
     func goToNextLevel() {
         guard let activeLevel else { return }
-        self.activeLevel = activeLevel < 14 ? activeLevel + 1 : nil
+        self.activeLevel = activeLevel < 15 ? activeLevel + 1 : nil
     }
 
     func exitToLevelSelect() {
@@ -65,6 +65,8 @@ struct LevelDestination: View {
             LevelFY()
         case 14:
             LevelAlphabet()
+        case 15:
+            LevelBlindAlphabet()
         default:
             EmptyView()
         }

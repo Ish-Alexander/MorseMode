@@ -69,13 +69,13 @@ struct ContentView: View {
     }
     
     private var currentJourneyLevel: Int {
-        (1...14).first(where: {
+        (1...15).first(where: {
             userProgress.isLevelUnlocked($0) && !userProgress.isLevelCompleted($0)
-        }) ?? ((1...14).last(where: { userProgress.isLevelUnlocked($0) }) ?? 1)
+        }) ?? ((1...15).last(where: { userProgress.isLevelUnlocked($0) }) ?? 1)
     }
 
     private var visibleJourneyLevels: [Int] {
-        let totalLevels = 14
+        let totalLevels = 15
         let previewCount = 5
         let highestStart = max(1, totalLevels - previewCount + 1)
         let startLevel = min(currentJourneyLevel, highestStart)

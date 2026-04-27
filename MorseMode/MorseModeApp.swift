@@ -353,13 +353,8 @@ class UserProgress: ObservableObject {
 
     func completeLevel(_ level: Int) {
         guard level > 0 else { return }
-        let isFirstCompletion = !completedLevels.contains(level)
         completedLevels.insert(level)
-        if isFirstCompletion {
-            addEXP(journeyEXPReward(for: level))
-        } else {
-            save()
-        }
+        addEXP(journeyEXPReward(for: level))
     }
 
     private func journeyEXPReward(for level: Int) -> Int {
@@ -368,6 +363,8 @@ class UserProgress: ObservableObject {
             return 100
         case 14:
             return 150
+        case 15:
+            return 200
         default:
             return 0
         }
