@@ -56,7 +56,7 @@ enum PhonePlaybackMode: String, CaseIterable, Identifiable {
 @MainActor
 final class PlaybackSettings: ObservableObject {
     static let storageKey = "PlaybackSettings.mode"
-    static let digitalRainPausedKey = "PlaybackSettings.digitalRainPaused"
+    static let digitalRainEnabledKey = "PlaybackSettings.digitalRainEnabled"
 
     @Published var mode: PhonePlaybackMode {
         didSet {
@@ -64,9 +64,9 @@ final class PlaybackSettings: ObservableObject {
         }
     }
 
-    @Published var isDigitalRainPaused: Bool {
+    @Published var isDigitalRainEnabled: Bool {
         didSet {
-            UserDefaults.standard.set(isDigitalRainPaused, forKey: Self.digitalRainPausedKey)
+            UserDefaults.standard.set(isDigitalRainEnabled, forKey: Self.digitalRainEnabledKey)
         }
     }
 
@@ -74,7 +74,11 @@ final class PlaybackSettings: ObservableObject {
         mode = PhonePlaybackMode(
             rawValue: UserDefaults.standard.string(forKey: Self.storageKey) ?? ""
         ) ?? .hapticsAndSound
-        isDigitalRainPaused = UserDefaults.standard.bool(forKey: Self.digitalRainPausedKey)
+        if UserDefaults.standard.object(forKey: Self.digitalRainEnabledKey) == nil {
+            isDigitalRainEnabled = true
+        } else {
+            isDigitalRainEnabled = UserDefaults.standard.bool(forKey: Self.digitalRainEnabledKey)
+        }
     }
 }
 
@@ -204,12 +208,12 @@ struct PlaybackSettingsSheet: View {
                 }
 
                 Section("Background") {
-                    Toggle(isOn: $playbackSettings.isDigitalRainPaused) {
+                    Toggle(isOn: $playbackSettings.isDigitalRainEnabled) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Pause Digital Rain")
+                            Text("Digital Rain")
                                 .font(.custom("berkelium bitmap", size: 15))
                                 .foregroundStyle(.neon)
-                            Text("Freeze the animated background if you need a calmer screen.")
+                            Text("Turn the animated background on or off.")
                                 .font(.custom("berkelium bitmap", size: 10))
                                 .foregroundStyle(Color.white.opacity(0.72))
                         }

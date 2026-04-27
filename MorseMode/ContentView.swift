@@ -103,7 +103,7 @@ struct ContentView: View {
             .background {
                 ZStack {
                     if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
-                        DigitalRainBackground(isPaused: playbackSettings.isDigitalRainPaused)
+                        DigitalRainBackground(isPaused: !playbackSettings.isDigitalRainEnabled)
                     } else {
                         Color.black
                     }

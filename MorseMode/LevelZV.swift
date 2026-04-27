@@ -211,10 +211,9 @@ struct LevelZV: View {
                             .frame(width: 78, height: 78)
                             .scaledToFit()
                             .rotationEffect(.degrees(rotationAngle))
-                        Image(systemName: "arrow.clockwise")
+                        Image(systemName: "play.fill")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.neon)
-                            .rotationEffect(.degrees(rotationAngle))
                     }
                 }
                 .buttonStyle(.plain)

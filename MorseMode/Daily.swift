@@ -164,17 +164,19 @@ final class DailyMorseViewModel: ObservableObject {
     // Updates screen automatically
     
     // Persistence keys per daily word
-
-    // Use a date-based suffix so repeats of the same word on different days are playable again
-    private var todayKeySuffix: String {
+    private static func dateKey(for date: Date = Date()) -> String {
         let cal = Calendar(identifier: .gregorian)
-        let startOfDay = cal.startOfDay(for: Date())
+        let startOfDay = cal.startOfDay(for: date)
         let formatter = DateFormatter()
         formatter.calendar = cal
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: startOfDay)
     }
+
+    // Use a date-based suffix so repeats of the same word on different days are playable again
+    private var activeDayKey: String
+    private var todayKeySuffix: String { activeDayKey }
 
     private var timeKey: String { "dailyTimeRemaining_\(todayKeySuffix)" }
     private var wrongKey: String { "dailyWrongGuesses_\(todayKeySuffix)" }
@@ -336,6 +338,38 @@ final class DailyMorseViewModel: ObservableObject {
     
     private var timer: Timer?
 
+    private func resetForCurrentDay(activate: Bool) {
+        timer?.invalidate()
+        timer = nil
+
+        activeDayKey = Self.dateKey()
+        targetWord = Self.wordForToday().uppercased()
+        revealed = []
+        wrongGuesses = []
+        timeRemaining = 180
+        isActive = activate
+
+        clearTimeRemaining()
+        clearWrongGuesses()
+        clearRevealed()
+        clearLastSavedAt()
+        clearIsActive()
+
+        if activate {
+            startTimer()
+        } else {
+            persistGameplayState()
+        }
+    }
+
+    @discardableResult
+    private func refreshForNewDayIfNeeded(activate: Bool) -> Bool {
+        let currentDayKey = Self.dateKey()
+        guard currentDayKey != activeDayKey else { return false }
+        resetForCurrentDay(activate: activate)
+        return true
+    }
+
     private func persistGameplayState(at date: Date = Date()) {
         saveTimeRemaining()
         saveWrongGuesses()
@@ -361,6 +395,7 @@ final class DailyMorseViewModel: ObservableObject {
     }
 
     init(word: String = "") {
+        self.activeDayKey = Self.dateKey()
         self.targetWord = (word.isEmpty ? Self.wordForToday() : word).uppercased()
         if isAlreadySolved {
             // Reveal all unique letters and keep game inactive
@@ -398,12 +433,20 @@ final class DailyMorseViewModel: ObservableObject {
     }
 
     func startTimer() {
+        if refreshForNewDayIfNeeded(activate: true) {
+            return
+        }
+
         timer?.invalidate()
         isActive = true
         persistGameplayState()
         // timeRemaining = 180  // Removed this line as per instructions
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] t in
             guard let self else { return }
+            if self.refreshForNewDayIfNeeded(activate: true) {
+                t.invalidate()
+                return
+            }
             if self.timeRemaining > 0 && self.isActive {
                 self.timeRemaining -= 1
                 self.persistGameplayState()
@@ -419,6 +462,9 @@ final class DailyMorseViewModel: ObservableObject {
     func syncStateForScenePhase(_ phase: ScenePhase) {
         switch phase {
         case .active:
+            if refreshForNewDayIfNeeded(activate: true) {
+                return
+            }
             restoreElapsedTimeIfNeeded()
             if isActive && timeRemaining > 0 && timer == nil {
                 startTimer()
@@ -451,6 +497,10 @@ final class DailyMorseViewModel: ObservableObject {
     }
 
     func guess(_ letter: Character) {
+        if refreshForNewDayIfNeeded(activate: true) {
+            return
+        }
+
         let upper = Character(String(letter).uppercased())
         guard isActive, timeRemaining > 0, upper.isLetter else { return }
         if targetWord.contains(upper) {
@@ -676,16 +726,10 @@ struct Daily: View {
                                         .scaledToFit()
                                         .ignoresSafeArea()
                                         .rotationEffect(.degrees(replayRotationAngle))
-                                    Image(systemName: "arrow.clockwise")
+                                    Image(systemName: "play.fill")
                                         .font(.system(size: 18, weight: .bold))
                                         .foregroundStyle(.neon)
-                                        .rotationEffect(.degrees(replayRotationAngle))
                                         .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
-                                        .onAppear {
-                                            withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
-                                                replayRotationAngle = 360
-                                            }
-                                        }
                                 }
                             }
                             .accessibilityLabel("Replay the Morse clue")
@@ -707,6 +751,9 @@ struct Daily: View {
         .onAppear {
             vm.syncStateForScenePhase(.active)
             activateWatchSessionIfNeeded()
+            withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
+                replayRotationAngle = 360
+            }
             // If today's word is already solved, don't play haptics or start timer
             if vm.isSolved {
                 // Still send to watch in case it wants to show the clue
