@@ -337,7 +337,7 @@ struct ContentView: View {
             cardTitle("Daily Intercept")
 
             Text(dailyMissionSummary)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.system(size: 18))
                 .foregroundStyle(Color.white.opacity(0.96))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 18)

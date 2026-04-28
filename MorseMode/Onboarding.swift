@@ -135,6 +135,30 @@ struct OnboardingView: View {
         .background(Color.black)
         .ignoresSafeArea()
         .tint(.neon)
+        .overlay(alignment: .topTrailing) {
+            exitButton
+                .padding(.top, 48)
+                .padding(.trailing, 24)
+        }
+    }
+
+    private var exitButton: some View {
+        Button {
+            triggerPageHaptic()
+            onFinish()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.neon)
+                .frame(width: 44, height: 44)
+                .background(Color.black.opacity(0.7))
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(.neon, lineWidth: 1)
+                )
+        }
+        .accessibilityLabel("Exit onboarding")
     }
 }
 

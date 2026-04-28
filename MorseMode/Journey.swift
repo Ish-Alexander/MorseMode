@@ -7,6 +7,79 @@
 
 import SwiftUI
 
+private struct JourneyLevelDetails {
+    let letters: String
+
+    static func forLevel(_ level: Int) -> JourneyLevelDetails {
+        switch level {
+        case 1:
+            return JourneyLevelDetails(
+                letters: "E, T"
+            )
+        case 2:
+            return JourneyLevelDetails(
+                letters: "A, N"
+            )
+        case 3:
+            return JourneyLevelDetails(
+                letters: "I, M"
+            )
+        case 4:
+            return JourneyLevelDetails(
+                letters: "S, O"
+            )
+        case 5:
+            return JourneyLevelDetails(
+                letters: "D, U"
+            )
+        case 6:
+            return JourneyLevelDetails(
+                letters: "R, K"
+            )
+        case 7:
+            return JourneyLevelDetails(
+                letters: "C, P"
+            )
+        case 8:
+            return JourneyLevelDetails(
+                letters: "B, G"
+            )
+        case 9:
+            return JourneyLevelDetails(
+                letters: "W, L"
+            )
+        case 10:
+            return JourneyLevelDetails(
+                letters: "Q, H"
+            )
+        case 11:
+            return JourneyLevelDetails(
+                letters: "Z, V"
+            )
+        case 12:
+            return JourneyLevelDetails(
+                letters: "X, J"
+            )
+        case 13:
+            return JourneyLevelDetails(
+                letters: "F, Y"
+            )
+        case 14:
+            return JourneyLevelDetails(
+                letters: "A-Z"
+            )
+        case 15:
+            return JourneyLevelDetails(
+                letters: "A-Z"
+            )
+        default:
+            return JourneyLevelDetails(
+                letters: "--"
+            )
+        }
+    }
+}
+
 struct Journey: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userProgress: UserProgress
@@ -30,22 +103,18 @@ struct Journey: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                Text("Agents Journey")
+                    .font(.custom("berkelium bitmap", size: 14))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+                    .padding(.top, 6)
+
                 Image("Leader")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: 430)
-                    .overlay {
-                        Text("AGENTS JOURNEY")
-                            .font(.custom("berkelium bitmap", size: 14))
-                            .foregroundStyle(.neon)
-                            .minimumScaleFactor(0.7)
-                            .lineLimit(1)
-                            .padding(.horizontal, 78)
-                            .offset(y: -4)
-                            .zIndex(1)
-                    }
-                .padding(.top, 6)
-                .padding(.horizontal, 12)
+                    .padding(.horizontal, 12)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
@@ -141,16 +210,22 @@ struct Journey: View {
     private var selectedLevelCard: some View {
         let isUnlocked = userProgress.isLevelUnlocked(selectedLevel)
         let isCompleted = userProgress.isLevelCompleted(selectedLevel)
+        let details = JourneyLevelDetails.forLevel(selectedLevel)
 
         return VStack(spacing: 10) {
             Text("Selected Level \(selectedLevel)")
                 .font(.custom("berkelium bitmap", size: 16))
                 .foregroundStyle(.neon)
 
+            levelInfoPill(label: "Letters: \(details.letters)")
+
             Text(statusText(isUnlocked: isUnlocked, isCompleted: isCompleted))
                 .font(.custom("berkelium bitmap", size: 14))
                 .foregroundStyle(Color.white.opacity(0.78))
                 .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
 
             if isUnlocked {
                 Button {
@@ -183,9 +258,26 @@ struct Journey: View {
         )
     }
 
+    @ViewBuilder
+    private func levelInfoPill(label: String) -> some View {
+        Text(label)
+            .font(.custom("berkelium bitmap", size: 10))
+            .foregroundStyle(.neon)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.06))
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.neon.opacity(0.35), lineWidth: 1)
+                    )
+            )
+    }
+
     private func statusText(isUnlocked: Bool, isCompleted: Bool) -> String {
         if isCompleted {
-            return "Completed. Replay it anytime for more EXP."
+            return "Completed.\nReplay it anytime for more EXP."
         }
         if isUnlocked {
             return "Unlocked and ready for play."
