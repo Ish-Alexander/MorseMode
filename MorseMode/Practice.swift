@@ -149,6 +149,20 @@ struct Practice: View {
         )
         audioPlayer = playback.player
     }
+
+    private func visualPlaybackDuration(for letter: Letter, character: Character) -> TimeInterval {
+        let hapticDuration = morseEngine.playbackDuration(for: letter)
+        let soundDuration = MorseLetterAudio.playbackDuration(for: character)
+
+        switch playbackSettings.mode {
+        case .hapticsOnly:
+            return hapticDuration > 0 ? hapticDuration : soundDuration
+        case .soundOnly:
+            return soundDuration > 0 ? soundDuration : hapticDuration
+        case .hapticsAndSound:
+            return max(hapticDuration, soundDuration)
+        }
+    }
     
     private func playLetterMorse(_ ch: Character) async {
         guard lowercaseCharacter(ch).flatMap({ morseMap[$0] }) != nil,
@@ -167,7 +181,7 @@ struct Practice: View {
             morseEngine.performHaptic(for: letterEnum)
         }
 
-        let playbackDuration = morseEngine.playbackDuration(for: letterEnum)
+        let playbackDuration = visualPlaybackDuration(for: letterEnum, character: ch)
         if playbackDuration > 0 {
             try? await Task.sleep(for: .seconds(playbackDuration))
         }
@@ -262,7 +276,8 @@ struct Practice: View {
         letterDisplayResetTask?.cancel()
         letterToShow = character
 
-        let playbackDuration = morseEngine.playbackDuration(for: letter)
+        guard let visibleCharacter = character.first else { return }
+        let playbackDuration = visualPlaybackDuration(for: letter, character: visibleCharacter)
         guard playbackDuration > 0 else { return }
 
         letterDisplayResetTask = Task {

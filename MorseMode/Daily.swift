@@ -591,6 +591,17 @@ struct Daily: View {
         return MorseLetterAudio.playbackDuration(for: letter)
     }
 
+    private func visualPlaybackDuration(hapticDuration: TimeInterval, soundDuration: TimeInterval) -> TimeInterval {
+        switch playbackSettings.mode {
+        case .hapticsOnly:
+            return hapticDuration > 0 ? hapticDuration : soundDuration
+        case .soundOnly:
+            return soundDuration > 0 ? soundDuration : hapticDuration
+        case .hapticsAndSound:
+            return max(hapticDuration, soundDuration)
+        }
+    }
+
     @discardableResult
     private func playSound(for letter: Character) -> TimeInterval {
         guard playbackSettings.mode.allowsSound else {
@@ -859,10 +870,12 @@ struct Daily: View {
         // Schedule audio playback aligned to the Morse timing per letter
         // Compute the start time for each letter based on its dot/dash pattern and configured gaps.
         var audioStart: TimeInterval = 0
+        var playbackEnd: TimeInterval = 0
         let letters = Array(vm.targetWord.uppercased())
         for (i, ch) in letters.enumerated() {
             if ch == " " {
                 audioStart += wordGap
+                playbackEnd = max(playbackEnd, audioStart)
                 continue
             }
 
@@ -887,8 +900,12 @@ struct Daily: View {
                         letterDuration += intraCharGap
                     }
                 }
-                let highlightDuration = max(letterDuration, soundPlaybackDuration(for: ch))
+                let highlightDuration = visualPlaybackDuration(
+                    hapticDuration: letterDuration,
+                    soundDuration: soundPlaybackDuration(for: ch)
+                )
                 audioStart += letterDuration
+                playbackEnd = max(playbackEnd, letterStart + highlightDuration)
 
                 let clearWorkItem = DispatchWorkItem {
                     if activeClueTokenID == tokenID {
@@ -906,7 +923,7 @@ struct Daily: View {
             }
         }
 
-        let totalPlaybackDuration = audioStart + unit
+        let totalPlaybackDuration = max(playbackEnd, audioStart) + unit
 
         guard playbackSettings.mode.allowsHaptics else {
             DispatchQueue.main.asyncAfter(deadline: .now() + totalPlaybackDuration) {
