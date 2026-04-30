@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DailyIntroLoadingView: View {
     var onFinished: () -> Void
+    // After the intro is done, it goes to daily view
 
     @State private var showWarning1: Bool = true
     @State private var warning1Opacity: Double = 1.0
@@ -12,6 +13,7 @@ struct DailyIntroLoadingView: View {
     private let flashInterval: TimeInterval = 0.2
     private let totalFlashDuration: TimeInterval = 1.2
     private let crossfadeDuration: TimeInterval = 0.6
+    // Flash and crossfade durations
 
     public init(onFinished: @escaping () -> Void) {
         self.onFinished = onFinished
@@ -42,6 +44,7 @@ struct DailyIntroLoadingView: View {
                     Spacer()
 
                     Button("Skip") {
+                        // Allows skipping of the intro
                         finish()
                     }
                     .font(.custom("berkelium bitmap", size: 14))

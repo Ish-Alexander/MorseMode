@@ -24,6 +24,7 @@ extension EnvironmentValues {
         set { self[IsInOnboardingKey.self] = newValue }
     }
 }
+// is the app showing onboarding?
 
 private enum AppDestination: Hashable {
     // Defines possible destinations
@@ -33,6 +34,7 @@ private enum AppDestination: Hashable {
     case journey
     case journeyResume
     case journeyLevel(Int)
+    case profile
 }
 
 private enum HomeCard: Hashable {
@@ -45,27 +47,34 @@ private enum HomeCard: Hashable {
 
 struct ContentView: View {
     @EnvironmentObject private var morseEngine: MorseEngine
-    // Shared Morse code logic
+    // Plays morse code
     @EnvironmentObject var userProgress: UserProgress
+    // Level and exp progress
     @EnvironmentObject private var playbackSettings: PlaybackSettings
-    // Shared global data
+    // Sound and haptics
+    @ObservedObject private var avatarStore = AvatarStore.shared
+    // Keeps the home avatar in sync with profile changes
     
     @StateObject private var connectivity = MorseModePhoneConnectivity.shared
     // Connects phone to watch
     @State private var path: [AppDestination] = []
+    // Where are you in the app?
     @StateObject private var dailyViewModel = DailyMorseViewModel()
+    // Handles daily puzzle logic
     
     // Set Environment(\.isInOnboarding) = true from your Onboarding view to disable watch-driven navigation while onboarding is active.
     @State private var isInOnboarding: Bool = false
     @State private var isShowingOnboardingReplay: Bool = false
-    @State private var isShowingPlaybackSettings: Bool = false
     @State private var flashingCard: HomeCard?
+    // Handles red flash when selecting where you want to go
     
     private let contentCardSpacing: CGFloat = 24
+    // Spacing between cards
     
     private var progressFraction: Double {
         let needed = max(userProgress.expNeededForNextLevel, 1)
         return min(max(Double(userProgress.currentEXP) / Double(needed), 0), 1)
+        // How full is the exp bar?
     }
     
     private var currentJourneyLevel: Int {
@@ -85,7 +94,9 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
+            // Moving between screens
             ScrollView(showsIndicators: false) {
+                // Allows scrolling up and down
                 VStack(spacing: contentCardSpacing) {
                     topStatusRow
                     dailyMissionCard
@@ -93,6 +104,7 @@ struct ContentView: View {
                     journeyCard
                         .padding(.bottom, 40)
                     warehouseCard
+                    // The order of the cards
                 }
                 .frame(maxWidth: 420)
                 .frame(maxWidth: .infinity)
@@ -106,6 +118,7 @@ struct ContentView: View {
                         DigitalRainBackground(isPaused: !playbackSettings.isDigitalRainEnabled)
                     } else {
                         Color.black
+                        // If the digital rain is disabled, it is just a black background
                     }
                 }
                 .ignoresSafeArea()
@@ -115,18 +128,21 @@ struct ContentView: View {
                     .padding(.top, -10)
                     .padding(.trailing, contentCardSpacing)
             }
+                .animation(.spring(response: 0.34, dampingFraction: 0.82), value: path)
                 .onReceive(connectivity.$requestedView.compactMap { $0 }) { requested in
-                    // If onboarding is active, ignore watch-driven navigation changes.
+                    // Listening for messages from the watch
                     guard !isInOnboarding else {
+                        // If onboarding is active, ignore watch-driven navigation changes.
                         DispatchQueue.main.async { connectivity.requestedView = nil }
                         return
                     }
                 
                     if let destination = mapRequestedView(requested) {
-                    // Pop to root first so all screens return to ContentView.
+                   // When watch calls for a screen, go to it.
                     path.removeAll()
-                    // Then navigate to the requested destination from root.
+                        // Pop to root first so all screens return to ContentView.
                     path.append(destination)
+                        // Then navigate to the requested destination from root.
                     if destination == .daily {
                         connectivity.sendWatchHaptics(
                             morse: dailyViewModel.morseClue,
@@ -147,6 +163,7 @@ struct ContentView: View {
                     )
                 }
                 .navigationDestination(for: AppDestination.self) { destination in
+                    // What to show for each destination
                     switch destination {
                     case .daily:
                         DailyRoot(vm: dailyViewModel)
@@ -160,11 +177,16 @@ struct ContentView: View {
                         Journey(openCurrentLevelOnAppear: true)
                     case .journeyLevel(let level):
                         Journey(initialSelectedLevel: level)
+                    case .profile:
+                        ProfileView()
+                            .environmentObject(userProgress)
+                            .environmentObject(playbackSettings)
                     }
                 }
         }
         .fullScreenCover(isPresented: $isShowingOnboardingReplay, onDismiss: {
             isInOnboarding = false
+            // Onboarding is Fullscreen
         }) {
             OnboardingView(items: onboardingData) {
                 isShowingOnboardingReplay = false
@@ -172,28 +194,20 @@ struct ContentView: View {
             }
             .onAppear {
                 isInOnboarding = true
+                // Onboarding plays one time when first opening app
             }
         }
         .environment(\.isInOnboarding, isInOnboarding)
-        .sheet(isPresented: $isShowingPlaybackSettings) {
-            PlaybackSettingsSheet()
-                .environmentObject(playbackSettings)
-                .environmentObject(morseEngine)
-                .preferredColorScheme(.dark)
-        }
         .preferredColorScheme(.dark)
     }
 
     private var topTrailingButtons: some View {
         HStack(spacing: 12) {
-            circularOverlayButton(systemName: "gearshape", label: "Playback settings") {
-                isShowingPlaybackSettings = true
-            }
-
             circularOverlayButton(systemName: "info.circle", label: "Replay onboarding") {
                 triggerSuccessHaptic()
                 isShowingOnboardingReplay = true
             }
+            // Onboarding info button
         }
     }
 
@@ -212,6 +226,7 @@ struct ContentView: View {
                 .overlay(
                     Circle()
                         .stroke(Color.neon.opacity(0.9), lineWidth: 1.5)
+                    // Overlay circle for settings and info buttons
                 )
         }
         .accessibilityLabel(label)
@@ -227,51 +242,45 @@ struct ContentView: View {
 
     private var topStatusRow: some View {
         HStack(alignment: .top, spacing: contentCardSpacing) {
-            dashboardButton(card: .rank) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(red: 0.97, green: 0.23, blue: 0.20), Color(red: 1.0, green: 0.88, blue: 0.12)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                            Circle()
-                                .stroke(Color.neon, lineWidth: 4)
-                                .padding(1)
-                            Image("Icon")
-                                .resizable()
-                                .scaledToFit()
-                                .padding(8)
-                        }
-                        .frame(width: 72, height: 72)
+            
+            // ── Rank card ──
+            // The entire card navigates to ProfileView.
+            // No split destinations — avatar and text both go to the same place.
+            Button {
+                triggerSuccessHaptic()
+                path.append(.profile)
+            } label: {
+                HStack(alignment: .top, spacing: 10) {
+                    ProfileAvatarCircle(size: 60, store: avatarStore)
+                        .frame(width: 60, height: 60)
 
+                    VStack(alignment: .leading, spacing: 10) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Rank: Field Operative")
+                            Text("Rank: \(rankName(for: userProgress.level))")
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .foregroundStyle(Color.white.opacity(0.95))
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .layoutPriority(2)
                             Text("LVL: \(userProgress.level)")
                                 .font(.system(size: 14, weight: .black, design: .rounded))
                                 .foregroundStyle(Color.white.opacity(0.95))
                         }
-
-                        Spacer(minLength: 0)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        expBar
                     }
-
-                    expBar
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .layoutPriority(1)
                 }
                 .padding(16)
-            } destination: {
-                flashCard(.rank) {
-                    path.append(.journeyResume)
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(minHeight: 148)
+                .background(cardBackground(for: .rank))
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 148)
+            .buttonStyle(.plain)
 
+            // ── Leaderboard card ──
             dashboardButton(card: .leaderboard) {
                 VStack(spacing: 10) {
                     Spacer(minLength: 0)
@@ -301,6 +310,7 @@ struct ContentView: View {
         GeometryReader { proxy in
             let width = max(proxy.size.width, 1)
             let fillWidth = max(42, width * progressFraction)
+            // EXP bar
             
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -335,6 +345,7 @@ struct ContentView: View {
     private var dailyMissionCard: some View {
         VStack(spacing: 18) {
             cardTitle("Daily Intercept")
+            // Daily intercept card
 
             Text(dailyMissionSummary)
                 .font(.system(size: 18))
@@ -344,6 +355,7 @@ struct ContentView: View {
 
             Button {
                 flashCard(.daily) {
+                    // Flashes red when selected
                     path.append(.daily)
                 }
             } label: {
@@ -375,12 +387,14 @@ struct ContentView: View {
     private var journeyCard: some View {
         VStack(spacing: 18) {
             journeyCardTitle
+            // Agents Journey Card
 
             GeometryReader { proxy in
                 let points = journeyPoints(in: proxy.size)
 
                 ZStack {
                     journeyConnectorPath(in: proxy.size)
+                    // Dotted line for Agents Journey
                         .stroke(
                             Color.neon,
                             style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [10, 9])
@@ -397,6 +411,7 @@ struct ContentView: View {
                                 }
                             }) {
                                 journeyNode(level)
+                                // Agents Journey Levels. Shows when theyre locked
                             }
                             .buttonStyle(.plain)
                             .position(point)
@@ -412,6 +427,7 @@ struct ContentView: View {
             Button(action: {
                 flashCard(.journey) {
                     path.append(.journeyResume)
+                    // Start Level button for Agents Journey
                 }
             }) {
                 Text("Start Level \(currentJourneyLevel)")
@@ -438,6 +454,7 @@ struct ContentView: View {
     }
     
     private var warehouseCard: some View {
+        // Warehouse Card
         dashboardButton(card: .warehouse) {
             HStack(spacing: 16) {
                 ZStack {
@@ -469,14 +486,10 @@ struct ContentView: View {
     
     private var dailyMissionSummary: String {
         if dailyViewModel.isSolved {
-            return "Today's intercept has been decrypted. Re-open the file and review the solved signal."
+            return "Today's intercept has been decrypted. Open the file to review the solved signal."
         }
         return "Incoming signal detected. Your daily objective is ready. Initiate decryption?"
-    }
-    
-    private var morsePrompt: String {
-        let clue = dailyViewModel.morseClue.trimmingCharacters(in: .whitespacesAndNewlines)
-        return clue.isEmpty ? "..." : clue
+        // Message that shows before/after Daily intercept is complete
     }
     
     private func dashboardButton<Label: View>(
@@ -488,6 +501,7 @@ struct ContentView: View {
             label()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(cardBackground(for: card))
+            // Controls the look of each card
         }
         .buttonStyle(.plain)
     }
@@ -498,12 +512,14 @@ struct ContentView: View {
             ? Color(red: 0.82, green: 0.16, blue: 0.16).opacity(0.96)
             : Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94)
         let strokeColor = isFlashing ? Color.red.opacity(0.95) : Color.neon
+        // The color of the red flash when selecting a card
 
         return RoundedRectangle(cornerRadius: 28, style: .continuous)
             .fill(fillColor)
             .overlay(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .stroke(strokeColor, lineWidth: 2.8)
+                // Controls the thickness of the borders for each card
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -524,6 +540,7 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
             if flashingCard == card {
                 flashingCard = nil
+                // How fast the card flashes
             }
         }
     }
@@ -544,12 +561,13 @@ struct ContentView: View {
                 .padding(.horizontal, imageHorizontalPadding)
                 .scaleEffect(imageScale)
 
-            Text(text)
+            Text("Daily Intercept")
                 .font(.custom("berkelium bitmap", size: 18))
                 .foregroundStyle(.white)
                 .shadow(color: Color.black.opacity(0.85), radius: 1)
                 .padding(.horizontal, horizontalPadding)
                 .padding(.bottom, 4)
+            // Daily Intercept Header
         }
     }
 
@@ -570,6 +588,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, -8)
+        // Agents Journey Header
     }
     
     private func journeyConnectorPath(in size: CGSize) -> Path {
@@ -582,6 +601,7 @@ struct ContentView: View {
             let p3 = points[2]
             let p4 = points[3]
             let p5 = points[4]
+            // Shows 5 points for levels
             let exitPoint = CGPoint(x: size.width * 0.18, y: size.height - 20)
             let arrowPoint = CGPoint(x: exitPoint.x + 14, y: exitPoint.y + 14)
 
@@ -605,6 +625,7 @@ struct ContentView: View {
             path.addLine(to: CGPoint(x: arrowPoint.x - 11, y: arrowPoint.y))
         }
     }
+    // Dotted Line for Agents Journey
     
     private func journeyPoints(in size: CGSize) -> [CGPoint] {
         let insetX = max(40, size.width * 0.14)
@@ -633,6 +654,7 @@ struct ContentView: View {
                 .frame(width: 78, height: 78)
                 .foregroundStyle(unlocked ? Color.neon : Color.white.opacity(0.18))
                 .shadow(color: unlocked ? Color.neon.opacity(active ? 0.55 : 0.28) : .clear, radius: 12)
+            // The level tabs for Agents Journey
 
             Text("\(level)")
                 .font(.custom("berkelium bitmap", size: 24))
@@ -643,9 +665,9 @@ struct ContentView: View {
 
     @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public struct DigitalRainBackground: View {
-        // Tunables
+        // Digital rain background
         public var speed: Double = 60          // points per second
-        public var density: Int = 12           // approximate number of columns
+        public var density: Int = 12           // number of columns
         public var glyphSize: CGFloat = 18     // font size for glyphs
         public var randomize: Bool = true      // randomize stream timing
         public var isPaused: Bool = false
@@ -710,7 +732,7 @@ private struct RainColumn: View {
     let isPaused: Bool
     
     private var glyphs: [String] {
-        // A set of katakana-like symbols and digits to evoke the look
+        // The falling letters
         let chars = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         let len = Int(ceil((height / glyphSize) * 1.5))
         // Seeded RNG for stable per-column glyphs (split to help the type-checker)
@@ -923,6 +945,7 @@ private struct RainColumn: View {
 }
 
 fileprivate struct SeededGenerator: RandomNumberGenerator {
+    // Makes it so each row of glyphs is random
     private var state: UInt64
     init(seed: UInt64) { self.state = seed == 0 ? 0xCBF29CE484222325 : seed }
     mutating func next() -> UInt64 {

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LeaderboardView: View {
     @StateObject private var gameCenter = GameCenterManager.shared
+    // Game center connectivity
 
     var body: some View {
         ZStack {
@@ -19,6 +20,7 @@ struct LeaderboardView: View {
                     .font(.custom("berkelium bitmap", size: 14))
                     .foregroundStyle(.neon)
                     .padding(.top, 6)
+                // Title of screen
 
                 Image("Leader")
                     .resizable()
@@ -35,6 +37,7 @@ struct LeaderboardView: View {
                         .font(.custom("berkelium bitmap", size: 11))
                         .foregroundStyle(Color.white.opacity(0.75))
                         .multilineTextAlignment(.center)
+                    // Shows a message on wha you should do to get a ranking
                 }
                 .padding(.horizontal, 24)
 
@@ -42,6 +45,7 @@ struct LeaderboardView: View {
                     VStack(spacing: 12) {
                         ForEach(rankedRows) { rankedRow in
                             leaderboardRow(rankedRow.entry, placement: rankedRow.placement)
+                            // Displays all players
                         }
 
                         if shouldShowEmptyState {
@@ -66,31 +70,60 @@ struct LeaderboardView: View {
     }
 
     private var rankedRows: [RankedLeaderboardRow] {
+        // Builds final list of players
         let entries = ([gameCenter.localPlayerRow].compactMap { $0 } + gameCenter.leaderboardRows)
+            .filter(shouldIncludeInLeaderboard)
             .reduce(into: [String: GameCenterLeaderboardRow]()) { bestRowsByPlayerID, entry in
+                // Keeps the best score of each player
                 guard let existing = bestRowsByPlayerID[entry.id] else {
                     bestRowsByPlayerID[entry.id] = entry
                     return
                 }
 
-                if entry.score < existing.score || (entry.score == existing.score && entry.isCurrentPlayer) {
+                if leaderboardPrecedes(entry, existing) || (entry.score == existing.score && entry.isCurrentPlayer) {
                     bestRowsByPlayerID[entry.id] = entry
                 }
             }
             .values
-            .sorted { lhs, rhs in
-                if lhs.score != rhs.score {
-                    return lhs.score < rhs.score
-                }
-                if lhs.rank != rhs.rank {
-                    return lhs.rank < rhs.rank
-                }
-                return lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
-            }
+            .sorted(by: leaderboardPrecedes)
 
         return entries.enumerated().map { index, entry in
             RankedLeaderboardRow(entry: entry, placement: index + 1)
+            // Shows rank for 1 player
         }
+    }
+
+    private var hasPlayedDailyIntercept: Bool {
+        DailyMorseViewModel.completionSecondsForToday() != nil
+    }
+
+    private func shouldIncludeInLeaderboard(_ entry: GameCenterLeaderboardRow) -> Bool {
+        !entry.isCurrentPlayer || entry.rank > 0 || entry.score > 0 || hasPlayedDailyIntercept
+    }
+
+    private func shouldShowCrown(for entry: GameCenterLeaderboardRow, placement: Int) -> Bool {
+        placement <= 3 && (!entry.isCurrentPlayer || hasPlayedDailyIntercept || entry.rank > 0 || entry.score > 0)
+    }
+
+    private func leaderboardPrecedes(_ lhs: GameCenterLeaderboardRow, _ rhs: GameCenterLeaderboardRow) -> Bool {
+        if lhs.score != rhs.score {
+            return lhs.score < rhs.score
+            // Sorts by fastest completion time first
+        }
+
+        if sortRank(for: lhs) != sortRank(for: rhs) {
+            return sortRank(for: lhs) < sortRank(for: rhs)
+        }
+
+        if lhs.incorrectGuesses != rhs.incorrectGuesses {
+            return lhs.incorrectGuesses < rhs.incorrectGuesses
+        }
+
+        return lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+    }
+
+    private func sortRank(for entry: GameCenterLeaderboardRow) -> Int {
+        entry.rank > 0 ? entry.rank : Int.max
     }
 
     private var shouldShowEmptyState: Bool {
@@ -132,7 +165,7 @@ struct LeaderboardView: View {
             if let myRankingRow {
                 VStack(alignment: .trailing, spacing: 5) {
                     HStack(spacing: 7) {
-                        if myRankingRow.placement <= 3 {
+                        if shouldShowCrown(for: myRankingRow.entry, placement: myRankingRow.placement) {
                             Image(systemName: "crown.fill")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(crownColor(for: myRankingRow.placement))
@@ -195,20 +228,22 @@ struct LeaderboardView: View {
                     .font(.custom("berkelium bitmap", size: 16))
                     .foregroundStyle(entry.isCurrentPlayer ? .neon : .white)
 
-                Text("Daily Intercept  •  \(format(seconds: entry.score))")
+                Text("Daily Intercept  •  \(format(seconds: entry.score))  •  \(entry.incorrectGuesses) wrong")
                     .font(.custom("berkelium bitmap", size: 10))
                     .foregroundStyle(Color.white.opacity(0.72))
             }
 
             Spacer(minLength: 0)
 
-            if placement <= 3 {
+            if shouldShowCrown(for: entry, placement: placement) {
                 Image(systemName: "crown.fill")
                     .foregroundStyle(crownColor(for: placement))
+                // Shows a crown for the top 3 placements for players
             } else if entry.isCurrentPlayer {
                 Text("YOU")
                     .font(.custom("berkelium bitmap", size: 10))
                     .foregroundStyle(.neon)
+              // Makes the current player stand out
             }
         }
         .padding(.horizontal, 16)
@@ -233,6 +268,7 @@ struct LeaderboardView: View {
             return Color(red: 0.78, green: 0.46, blue: 0.22)
         default:
             return .clear
+            // The color of the crowns
         }
     }
 
@@ -247,6 +283,7 @@ struct LeaderboardView: View {
                 .foregroundStyle(Color.white.opacity(0.68))
                 .multilineTextAlignment(.center)
         }
+        // Shows what to do instead of a blank screen
         .padding(.horizontal, 18)
         .padding(.vertical, 20)
         .background(

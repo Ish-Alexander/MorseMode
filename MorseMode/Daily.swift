@@ -26,6 +26,7 @@ private let morseMap: [Character: String] = [
     "P": ".--.","Q": "--.-", "R": ".-.",  "S": "...",  "T": "-",
     "U": "..-",  "V": "...-", "W": ".--",  "X": "-..-", "Y": "-.--",
     "Z": "--.."
+    // Table of letters to pull from
 ]
 
 fileprivate func encodeMorse(_ text: String) -> String {
@@ -38,6 +39,7 @@ fileprivate func encodeMorse(_ text: String) -> String {
 
 private func displayMorseClue(_ morse: String) -> String {
     let wordJoiner = "\u{2060}"
+    // Prevents dots and dashes from clumping together on screen
 
     return morse
         .split(separator: " ", omittingEmptySubsequences: false)
@@ -121,10 +123,12 @@ private struct MorseClueFlowLayout: Layout {
         }
     }
 }
+// Places morse chunks in rows, while wrapping to the next line
 
 struct DailyRoot: View {
     @ObservedObject var vm: DailyMorseViewModel
     @State private var showDaily: Bool = false
+    // Intro screen for the Daily intercept
 
     var body: some View {
         Group {
@@ -158,12 +162,12 @@ private func currentDateKey() -> String {
     formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.dateFormat = "yyyy-MM-dd"
     return formatter.string(from: startOfDay)
+    // Checks the calendar to get ready for word of the day
 }
 
 final class DailyMorseViewModel: ObservableObject {
     // Updates screen automatically
     
-    // Persistence keys per daily word
     private static func dateKey(for date: Date = Date()) -> String {
         let cal = Calendar(identifier: .gregorian)
         let startOfDay = cal.startOfDay(for: date)
@@ -172,6 +176,7 @@ final class DailyMorseViewModel: ObservableObject {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: startOfDay)
+        // Persistence keys per daily word
     }
 
     // Use a date-based suffix so repeats of the same word on different days are playable again
@@ -246,9 +251,9 @@ final class DailyMorseViewModel: ObservableObject {
         return Set(array.compactMap { $0.first })
     }
 
-    private func clearWrongGuesses() {
-        UserDefaults.standard.removeObject(forKey: wrongKey)
-    }
+//    private func clearWrongGuesses() {
+//        UserDefaults.standard.removeObject(forKey: wrongKey)
+//    }
     
     private func saveRevealed() {
         let array = Array(revealed).map { String($0) }
@@ -268,7 +273,7 @@ final class DailyMorseViewModel: ObservableObject {
     private func markSolved() {
         UserDefaults.standard.set(true, forKey: solvedKey)
         clearTimeRemaining()
-        clearWrongGuesses()
+//        clearWrongGuesses()
         clearRevealed()
         clearLastSavedAt()
         clearIsActive()
@@ -297,6 +302,7 @@ final class DailyMorseViewModel: ObservableObject {
         "PRAIRIE", "WATERFALL", "RAINBOW", "TROPHY", "ANCHOR", "COMPASS", "PICNIC",
         "POPCORN", "CAMPFIRE", "NOTEBOOK", "KITCHEN", "VILLAGE", "LIBRARY", "THEATER"
     ]
+    // List of words for the daily intercept
 
     private static let dailyWords: [String] = {
         var seen: Set<String> = []
@@ -329,6 +335,13 @@ final class DailyMorseViewModel: ObservableObject {
         return UserDefaults.standard.integer(forKey: key)
     }
 
+    static func incorrectGuessesForToday() -> Int {
+        let suffix = dateKey()
+        let key = "dailyWrongGuesses_\(suffix)"
+        guard let array = UserDefaults.standard.array(forKey: key) as? [String] else { return 0 }
+        return array.count
+    }
+
     @Published var targetWord: String
     @Published var revealed: Set<Character> = []
     @Published var wrongGuesses: Set<Character> = []
@@ -350,7 +363,7 @@ final class DailyMorseViewModel: ObservableObject {
         isActive = activate
 
         clearTimeRemaining()
-        clearWrongGuesses()
+//        clearWrongGuesses()
         clearRevealed()
         clearLastSavedAt()
         clearIsActive()
@@ -408,7 +421,7 @@ final class DailyMorseViewModel: ObservableObject {
             }
             // Clear any leftover persisted state for a solved day
             clearTimeRemaining()
-            clearWrongGuesses()
+//            clearWrongGuesses()
             clearLastSavedAt()
             clearIsActive()
         } else {
@@ -484,7 +497,6 @@ final class DailyMorseViewModel: ObservableObject {
     }
 
     var displayBlanks: String {
-        // Underscores for unrevealed letters, keeps spaces
         targetWord.map { ch -> String in
             if ch == " " { return "  " }
             return revealed.contains(ch) ? String(ch) : "_"
@@ -499,6 +511,7 @@ final class DailyMorseViewModel: ObservableObject {
     func guess(_ letter: Character) {
         if refreshForNewDayIfNeeded(activate: true) {
             return
+            // Converts to uppercase, checks if letter is in word
         }
 
         let upper = Character(String(letter).uppercased())
@@ -506,9 +519,11 @@ final class DailyMorseViewModel: ObservableObject {
         if targetWord.contains(upper) {
             revealed.insert(upper)
             saveRevealed()
+            // Letter is revealed
         } else {
             wrongGuesses.insert(upper)
             saveWrongGuesses()
+            // Letter is incorrect
         }
         saveLastSavedAt()
         // Adds letters to "Revealed" and "Wrong Guess" lines
@@ -517,15 +532,18 @@ final class DailyMorseViewModel: ObservableObject {
             timer?.invalidate()
             timer = nil
             let completionSeconds = max(0, 180 - timeRemaining)
+            markSolved()
             saveCompletionTime(completionSeconds)
             NotificationCenter.default.post(
                 name: .dailyInterceptCompleted,
                 object: nil,
-                userInfo: ["seconds": completionSeconds]
+                userInfo: [
+                    "seconds": completionSeconds,
+                    "incorrectGuesses": wrongGuesses.count
+                ]
             )
-            markSolved()
             clearTimeRemaining()
-            clearWrongGuesses()
+//            clearWrongGuesses()
             clearRevealed()
             // Stops timer when word is solved
         }
@@ -713,7 +731,6 @@ struct Daily: View {
                             .opacity(currentGuess.isEmpty || vm.timeRemaining == 0 || vm.isSolved ? 0.45 : 1)
                         }
                         
-                        // Wrong guesses
                         if !vm.wrongGuesses.isEmpty {
                             VStack(spacing: 6) {
                                 Text("Wrong Guesses")
@@ -722,6 +739,7 @@ struct Daily: View {
                                 Text(vm.wrongGuesses.sorted().map(String.init).joined(separator: " "))
                                     .font(.system(.body, design: .monospaced))
                                     .foregroundStyle(.red)
+                                // Wrong guesses
                             }
                         }
                         
@@ -741,6 +759,7 @@ struct Daily: View {
                                         .font(.system(size: 18, weight: .bold))
                                         .foregroundStyle(.neon)
                                         .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
+                                    // Replay Button
                                 }
                             }
                             .accessibilityLabel("Replay the Morse clue")
@@ -802,6 +821,7 @@ struct Daily: View {
     private func sanitizeGuessInput(_ value: String) -> String {
         let lettersOnly = value.uppercased().filter(\.isLetter)
         return lettersOnly.isEmpty ? "" : String(lettersOnly.prefix(1))
+        // Only allows 1 letter
     }
 
     private func submitGuess() {
@@ -860,7 +880,9 @@ struct Daily: View {
         cancelPlaybackHighlights()
 
         // Base timing unit (seconds)
-        let unit: TimeInterval = 0.08
+        let playbackRate = ProfileExtras.load().difficulty.speedMultiplier
+        let timeScale = 1 / max(playbackRate, 0.01)
+        let unit: TimeInterval = 0.08 * timeScale
         let dot = unit
         let dash = unit * 3 // dash lasts 3x as long as dot
         let intraCharGap = unit

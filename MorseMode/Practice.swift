@@ -345,7 +345,7 @@ struct Practice: View {
     // Plays entire typed message
             
     private func sendToWatch(_ letter: Letter) {
-        MorseModeConnectivity.shared.send([
+        MorseModePhoneConnectivity.shared.send([
             "action": "playMorse",
             "letter": String(describing: letter).uppercased()
             // Sends message to apple watch
@@ -355,7 +355,7 @@ struct Practice: View {
     private func activateWatchSessionIfNeeded() {
         guard WCSession.isSupported() else { return }
         if WCSession.default.activationState != .activated {
-            MorseModeConnectivity.shared.activate()
+            MorseModePhoneConnectivity.shared.activate()
         }
     }
 

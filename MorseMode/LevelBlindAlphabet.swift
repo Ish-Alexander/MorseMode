@@ -23,10 +23,6 @@ struct LevelBlindAlphabet: View {
     @State private var completedLetters: Set<String> = []
     @State private var isLevelComplete: Bool = false
 
-    #if canImport(WatchConnectivity)
-        private let watchDelegate = MorseWatchInputDelegate()
-    #endif
-
     private let targetLetters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map { String($0) }
     private let morseMap: [Character: String] = [
         "A": ".-",   "B": "-...", "C": "-.-.", "D": "-..",  "E": ".",
@@ -61,22 +57,12 @@ struct LevelBlindAlphabet: View {
     }
 
     private func sendToWatch(_ payload: [String: Any]) {
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(payload, replyHandler: nil)
-        } else {
-            try? WCSession.default.updateApplicationContext(payload)
-        }
+        MorseModePhoneConnectivity.shared.send(payload)
     }
 
     private func activateWatchSessionIfNeeded() {
         guard WCSession.isSupported() else { return }
-        let session = WCSession.default
-        if session.delegate == nil {
-            session.delegate = watchDelegate
-        }
-        if session.activationState != .activated {
-            session.activate()
-        }
+        MorseModePhoneConnectivity.shared.activate()
     }
 
     private func playCurrentLetterAcrossDevices() {

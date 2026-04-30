@@ -10,6 +10,7 @@ import AVFoundation
 import WatchConnectivity
 import Combine
 import GameKit
+import UserNotifications
 
 #if canImport(UIKit)
 import UIKit
@@ -30,6 +31,7 @@ enum PhonePlaybackMode: String, CaseIterable, Identifiable {
             return "Sound Only"
         case .hapticsAndSound:
             return "Haptics and Sound"
+            // How is the morse code being presented? Sound, haptics, or both?
         }
     }
 
@@ -55,6 +57,7 @@ enum PhonePlaybackMode: String, CaseIterable, Identifiable {
 
 @MainActor
 final class PlaybackSettings: ObservableObject {
+    // Stores user settings
     static let storageKey = "PlaybackSettings.mode"
     static let digitalRainEnabledKey = "PlaybackSettings.digitalRainEnabled"
 
@@ -62,6 +65,7 @@ final class PlaybackSettings: ObservableObject {
         didSet {
             UserDefaults.standard.set(mode.rawValue, forKey: Self.storageKey)
         }
+        // Remembers settings even when the app closes
     }
 
     @Published var isDigitalRainEnabled: Bool {
@@ -82,8 +86,158 @@ final class PlaybackSettings: ObservableObject {
     }
 }
 
+final class DailyNotificationManager {
+    static let shared = DailyNotificationManager()
+    // Notification controls
+
+    private let center = UNUserNotificationCenter.current()
+    private let notificationIdentifierPrefix = "MorseMode.dailyPracticeReminder"
+    private let reminderHour = 7
+    private let reminderMinute = 0
+    // What time the notification pops up
+    private let scheduledDayCount = 60
+    // How many days in advance it schedules reminders
+    private var completionObserver: NSObjectProtocol?
+
+    private init() {
+        completionObserver = NotificationCenter.default.addObserver(
+            forName: .dailyInterceptCompleted,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            Task {
+                await self?.syncWithSavedSetting()
+            }
+        }
+    }
+
+    deinit {
+        if let completionObserver {
+            NotificationCenter.default.removeObserver(completionObserver)
+        }
+    }
+
+    func syncWithSavedSetting() async {
+        guard ProfileExtras.load().notificationsEnabled else {
+            cancelDailyReminders()
+            return
+        }
+
+        _ = await scheduleDailyReminders()
+    }
+
+    func setDailyReminderEnabled(_ isEnabled: Bool) async -> Bool {
+        guard isEnabled else {
+            cancelDailyReminders()
+            return true
+        }
+
+        return await scheduleDailyReminders()
+    }
+
+    func cancelDailyReminders() {
+        center.removePendingNotificationRequests(withIdentifiers: scheduledNotificationIdentifiers())
+    }
+
+    private func scheduleDailyReminders() async -> Bool {
+        let settings = await center.notificationSettings()
+
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            break
+        case .notDetermined:
+            do {
+                let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                // Tells the phone to ask if the user wants notifications
+                guard granted else { return false }
+            } catch {
+                print("[Notifications] Authorization failed: \(error)")
+                return false
+            }
+        case .denied:
+            return false
+        @unknown default:
+            return false
+        }
+
+        cancelDailyReminders()
+
+        for reminderDate in nextReminderDates() {
+            let dayKey = dateKey(for: reminderDate)
+            guard !isDailyInterceptSolved(on: reminderDate) else { continue }
+            // Checks if the daily intercept has been solved
+            let content = UNMutableNotificationContent()
+            content.title = "Daily Intercept Ready"
+            content.body = "Crack today's Daily Intercept or keep leveling up your Morse skills."
+            content.sound = .default
+
+            let triggerComponents = Calendar(identifier: .gregorian).dateComponents(
+                [.year, .month, .day, .hour, .minute],
+                from: reminderDate
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+            let request = UNNotificationRequest(
+                identifier: notificationIdentifier(for: dayKey),
+                content: content,
+                trigger: trigger
+            )
+
+            do {
+                try await center.add(request)
+            } catch {
+                print("[Notifications] Failed to schedule daily reminder: \(error)")
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private func nextReminderDates(from now: Date = Date()) -> [Date] {
+        let calendar = Calendar(identifier: .gregorian)
+        let todayStart = calendar.startOfDay(for: now)
+        return (0..<scheduledDayCount).compactMap { offset in
+            guard let day = calendar.date(byAdding: .day, value: offset, to: todayStart),
+                  let reminderDate = calendar.date(bySettingHour: reminderHour, minute: reminderMinute, second: 0, of: day),
+                  reminderDate > now
+            else { return nil }
+            return reminderDate
+        }
+    }
+
+    private func scheduledNotificationIdentifiers(from date: Date = Date()) -> [String] {
+        let calendar = Calendar(identifier: .gregorian)
+        let cleanupStart = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: date)) ?? date
+        let dayIdentifiers = (0...scheduledDayCount).compactMap { offset -> String? in
+            guard let day = calendar.date(byAdding: .day, value: offset, to: cleanupStart) else { return nil }
+            return notificationIdentifier(for: dateKey(for: day))
+        }
+
+        return [notificationIdentifierPrefix] + dayIdentifiers
+    }
+
+    private func notificationIdentifier(for dayKey: String) -> String {
+        "\(notificationIdentifierPrefix).\(dayKey)"
+    }
+
+    private func isDailyInterceptSolved(on date: Date) -> Bool {
+        UserDefaults.standard.bool(forKey: "dailySolved_\(dateKey(for: date))")
+    }
+
+    private func dateKey(for date: Date) -> String {
+        let calendar = Calendar(identifier: .gregorian)
+        let startOfDay = calendar.startOfDay(for: date)
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: startOfDay)
+    }
+}
+
 enum MorseLetterAudio {
     private static let candidateExtensions = ["ogg.mp3", "mp3", "ogg", "wav", "m4a"]
+    // Plays sound file for selected letter
 
     static func audioURL(for character: Character) -> URL? {
         let upper = String(character).uppercased()
@@ -98,10 +252,10 @@ enum MorseLetterAudio {
         return nil
     }
 
-    static func playbackDuration(for character: Character) -> TimeInterval {
+    static func playbackDuration(for character: Character, playbackRate: Double = ProfileExtras.load().difficulty.speedMultiplier) -> TimeInterval {
         guard let url = audioURL(for: character) else { return 0 }
         do {
-            return try AVAudioPlayer(contentsOf: url).duration
+            return try AVAudioPlayer(contentsOf: url).duration / max(playbackRate, 0.01)
         } catch {
             return 0
         }
@@ -115,7 +269,8 @@ enum MorseLetterAudio {
     static func play(
         character: Character,
         reusing currentPlayer: AVAudioPlayer?,
-        logPrefix: String
+        logPrefix: String,
+        playbackRate: Double = ProfileExtras.load().difficulty.speedMultiplier
     ) -> (player: AVAudioPlayer?, duration: TimeInterval) {
         let upper = String(character).uppercased()
         guard let first = upper.first, first.isLetter else {
@@ -127,15 +282,20 @@ enum MorseLetterAudio {
         }
 
         do {
+            let rate = Float(max(playbackRate, 0.01))
             if let player = currentPlayer, player.url == url {
                 player.currentTime = 0
+                player.enableRate = true
+                player.rate = rate
                 player.play()
-                return (player, player.duration)
+                return (player, player.duration / Double(rate))
             } else {
                 let player = try AVAudioPlayer(contentsOf: url)
+                player.enableRate = true
+                player.rate = rate
                 player.prepareToPlay()
                 player.play()
-                return (player, player.duration)
+                return (player, player.duration / Double(rate))
             }
         } catch {
             print("[Audio][\(logPrefix)] Failed to play \(url.lastPathComponent): \(error)")
@@ -144,110 +304,19 @@ enum MorseLetterAudio {
     }
 }
 
-struct PlaybackSettingsSheet: View {
-    @EnvironmentObject private var playbackSettings: PlaybackSettings
-    @EnvironmentObject private var morseEngine: MorseEngine
-    @Environment(\.dismiss) private var dismiss
-    @State private var audioPlayer: AVAudioPlayer?
-
-    private func preview(_ mode: PhonePlaybackMode) {
-        if mode.allowsHaptics {
-            morseEngine.performHaptic(for: .t)
-        }
-
-        if mode.allowsSound {
-            let playback = MorseLetterAudio.play(
-                character: "T",
-                reusing: audioPlayer,
-                logPrefix: "PlaybackSettings"
-            )
-            audioPlayer = playback.player
-        } else {
-            audioPlayer = MorseLetterAudio.stop(audioPlayer)
-        }
-    }
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    Text("Choose how Morse feedback should play on your phone.")
-                        .font(.custom("berkelium bitmap", size: 12))
-                        .foregroundStyle(Color.white.opacity(0.72))
-                        .listRowBackground(Color.black)
-                }
-
-                Section("Phone Playback") {
-                    ForEach(PhonePlaybackMode.allCases) { mode in
-                        Button {
-                            playbackSettings.mode = mode
-                            preview(mode)
-                        } label: {
-                            HStack(spacing: 14) {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(mode.title)
-                                        .font(.custom("berkelium bitmap", size: 15))
-                                        .foregroundStyle(.neon)
-                                    Text(mode.detail)
-                                        .font(.custom("berkelium bitmap", size: 10))
-                                        .foregroundStyle(Color.white.opacity(0.72))
-                                        .multilineTextAlignment(.leading)
-                                }
-
-                                Spacer()
-
-                                Image(systemName: playbackSettings.mode == mode ? "checkmark.circle.fill" : "circle")
-                                    .font(.system(size: 44, weight: .semibold))
-                                    .foregroundStyle(playbackSettings.mode == mode ? .neon : Color.white.opacity(0.3))
-                            }
-                            .padding(.vertical, 6)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowBackground(Color.black)
-                    }
-                }
-
-                Section("Background") {
-                    Toggle(isOn: $playbackSettings.isDigitalRainEnabled) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Digital Rain")
-                                .font(.custom("berkelium bitmap", size: 15))
-                                .foregroundStyle(.neon)
-                            Text("Turn the animated background on or off.")
-                                .font(.custom("berkelium bitmap", size: 10))
-                                .foregroundStyle(Color.white.opacity(0.72))
-                        }
-                    }
-                    .tint(.neon)
-                    .listRowBackground(Color.black)
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .foregroundStyle(.neon)
-                }
-            }
-        }
-    }
-}
-
 struct JourneyLevelTopBar: View {
+    // Top bar inside levels
     @EnvironmentObject private var levelFlow: LevelFlow
+    @EnvironmentObject private var userProgress: UserProgress
     @EnvironmentObject private var playbackSettings: PlaybackSettings
     @EnvironmentObject private var morseEngine: MorseEngine
-    @State private var isShowingPlaybackSettings = false
+    @State private var isShowingProfileSettings = false
 
     var body: some View {
         HStack {
             Button {
                 levelFlow.exitToLevelSelect()
+                // Exits from levels to level map
             } label: {
                 Text("Back")
                     .font(.custom("berkelium bitmap", size: 12))
@@ -264,7 +333,7 @@ struct JourneyLevelTopBar: View {
             Spacer()
 
             Button {
-                isShowingPlaybackSettings = true
+                isShowingProfileSettings = true
             } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 18, weight: .semibold))
@@ -278,8 +347,11 @@ struct JourneyLevelTopBar: View {
                     )
             }
             .buttonStyle(.plain)
-            .sheet(isPresented: $isShowingPlaybackSettings) {
-                PlaybackSettingsSheet()
+            .sheet(isPresented: $isShowingProfileSettings) {
+                NavigationStack {
+                    ProfileView(initiallyShowingSettings: true)
+                }
+                    .environmentObject(userProgress)
                     .environmentObject(playbackSettings)
                     .environmentObject(morseEngine)
                     .preferredColorScheme(.dark)
@@ -424,46 +496,6 @@ class UserProgress: ObservableObject {
     }
 }
 
-#if canImport(WatchConnectivity)
-final class MorseWatchInputDelegate: NSObject, WCSessionDelegate {
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print("[Phone] didReceiveMessage: \(message)")
-        if let action = message["action"] as? String, action == "morseInput",
-           let pattern = message["pattern"] as? String {
-            print("[Phone] Received morseInput via message: \(pattern)")
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: ["action": action, "pattern": pattern])
-                print("[Phone] Posted MorseModeWatchInput notification (message path)")
-            }
-        }
-    }
-
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        if let action = applicationContext["action"] as? String, action == "morseInput",
-           let pattern = applicationContext["pattern"] as? String {
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: Notification.Name("MorseModeWatchInput"), object: nil, userInfo: ["action": action, "pattern": pattern])
-            }
-        }
-    }
-
-    #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) {
-    }
-
-    func sessionDidDeactivate(_ session: WCSession) {
-        WCSession.default.activate()
-    }
-    #endif
-
-    func sessionReachabilityDidChange(_ session: WCSession) {
-    }
-
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-    }
-}
-#endif
-
 extension MorseEngine: Observable {}
 
 struct GameCenterLeaderboardRow: Identifiable {
@@ -471,6 +503,7 @@ struct GameCenterLeaderboardRow: Identifiable {
     let rank: Int
     let displayName: String
     let score: Int
+    let incorrectGuesses: Int
     let isCurrentPlayer: Bool
 }
 
@@ -488,7 +521,7 @@ final class GameCenterManager: NSObject, ObservableObject {
     @Published private(set) var lastErrorMessage: String?
     @Published private(set) var isLoadingLeaderboard = false
 
-    private var pendingCompletionSeconds: Int?
+    private var pendingCompletion: (seconds: Int, incorrectGuesses: Int)?
 
     private override init() {
         super.init()
@@ -525,8 +558,11 @@ final class GameCenterManager: NSObject, ObservableObject {
             }
 
             if GKLocalPlayer.local.isAuthenticated {
-                if let pendingCompletionSeconds = self.pendingCompletionSeconds {
-                    self.submitDailyInterceptTime(seconds: pendingCompletionSeconds)
+                if let pendingCompletion = self.pendingCompletion {
+                    self.submitDailyInterceptTime(
+                        seconds: pendingCompletion.seconds,
+                        incorrectGuesses: pendingCompletion.incorrectGuesses
+                    )
                 } else {
                     self.submitTodayIfAvailable()
                 }
@@ -535,15 +571,15 @@ final class GameCenterManager: NSObject, ObservableObject {
         }
     }
 
-    func submitDailyInterceptTime(seconds: Int) {
-        pendingCompletionSeconds = seconds
+    func submitDailyInterceptTime(seconds: Int, incorrectGuesses: Int = 0) {
+        pendingCompletion = (seconds, incorrectGuesses)
         guard GKLocalPlayer.local.isAuthenticated else { return }
 
-        optimisticallyUpdateLocalPlayerRow(seconds: seconds)
+        optimisticallyUpdateLocalPlayerRow(seconds: seconds, incorrectGuesses: incorrectGuesses)
 
         GKLeaderboard.submitScore(
             seconds,
-            context: 0,
+            context: incorrectGuesses,
             player: GKLocalPlayer.local,
             leaderboardIDs: [Self.dailyInterceptLeaderboardID]
         ) { error in
@@ -552,7 +588,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                     self.lastErrorMessage = error.localizedDescription
                     return
                 }
-                self.pendingCompletionSeconds = nil
+                self.pendingCompletion = nil
                 self.lastErrorMessage = nil
                 self.loadDailyInterceptLeaderboard()
             }
@@ -561,7 +597,23 @@ final class GameCenterManager: NSObject, ObservableObject {
 
     func submitTodayIfAvailable() {
         guard let completionSeconds = DailyMorseViewModel.completionSecondsForToday() else { return }
-        submitDailyInterceptTime(seconds: completionSeconds)
+        submitDailyInterceptTime(
+            seconds: completionSeconds,
+            incorrectGuesses: incorrectGuessesForToday()
+        )
+    }
+
+    private func incorrectGuessesForToday() -> Int {
+        let calendar = Calendar(identifier: .gregorian)
+        let startOfDay = calendar.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let suffix = formatter.string(from: startOfDay)
+        let key = "dailyWrongGuesses_\(suffix)"
+        guard let array = UserDefaults.standard.array(forKey: key) as? [String] else { return 0 }
+        return array.count
     }
 
     func loadDailyInterceptLeaderboard() {
@@ -616,6 +668,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                         rank: entry.rank,
                         displayName: entry.player.displayName,
                         score: entry.score,
+                        incorrectGuesses: entry.context,
                         isCurrentPlayer: entry.player.gamePlayerID == GKLocalPlayer.local.gamePlayerID
                     )
                 }
@@ -626,6 +679,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                         rank: entry.rank,
                         displayName: entry.player.displayName,
                         score: entry.score,
+                        incorrectGuesses: entry.context,
                         isCurrentPlayer: true
                     )
                 }
@@ -643,12 +697,13 @@ final class GameCenterManager: NSObject, ObservableObject {
     @objc
     private func handleDailyInterceptCompleted(_ notification: Notification) {
         guard let seconds = notification.userInfo?["seconds"] as? Int else { return }
+        let incorrectGuesses = notification.userInfo?["incorrectGuesses"] as? Int ?? 0
         DispatchQueue.main.async {
-            self.submitDailyInterceptTime(seconds: seconds)
+            self.submitDailyInterceptTime(seconds: seconds, incorrectGuesses: incorrectGuesses)
         }
     }
 
-    private func optimisticallyUpdateLocalPlayerRow(seconds: Int) {
+    private func optimisticallyUpdateLocalPlayerRow(seconds: Int, incorrectGuesses: Int) {
         guard GKLocalPlayer.local.isAuthenticated else { return }
 
         let playerID = GKLocalPlayer.local.gamePlayerID
@@ -661,6 +716,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                 rank: existing.rank,
                 displayName: existing.displayName,
                 score: seconds,
+                incorrectGuesses: incorrectGuesses,
                 isCurrentPlayer: true
             )
         }
@@ -670,6 +726,7 @@ final class GameCenterManager: NSObject, ObservableObject {
             rank: localPlayerRow?.rank ?? leaderboardRows.first(where: { $0.id == playerID })?.rank ?? 0,
             displayName: displayName.isEmpty ? "You" : displayName,
             score: seconds,
+            incorrectGuesses: incorrectGuesses,
             isCurrentPlayer: true
         )
     }
@@ -696,90 +753,14 @@ final class GameCenterManager: NSObject, ObservableObject {
     #endif
 }
 
-class MorseModeConnectivity: NSObject, ObservableObject, WCSessionDelegate {
-    // Handles communication between the phone and watch
-    @Published var requestedView: String?
-    let objectWillChange = ObservableObjectPublisher()
-
-    static let shared = MorseModeConnectivity()
-    // Creates one instance across views
-
-    override init() {
-        super.init()
-        activate()
-        // automaically starts connection to watch
-    }
-
-    func activate() {
-        // Sets up watch connection
-        guard WCSession.isSupported() else { return }
-        let session = WCSession.default
-        session.delegate = self
-        session.activate()
-        // Watches for devices that cannot connect to watch
-    }
-
-    func send(_ data: [String: Any]) {
-        // Sends a dictionary
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(data, replyHandler: nil)
-        } else {
-            print("Watch not reachable")
-            
-        }
-    }
-
-    func session(_ session: WCSession,
-                 activationDidCompleteWith activationState: WCSessionActivationState,
-                 error: Error?) {
-    }
-
-    #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) { }
-
-    func sessionDidDeactivate(_ session: WCSession) {
-        WCSession.default.activate()
-    }
-    #endif
-
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        DispatchQueue.main.async { [weak self] in
-            if let action = applicationContext["action"] as? String,
-               action == "openView",
-               let view = applicationContext["view"] as? String {
-                self?.requestedView = view
-            }
-        }
-    }
-    
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        DispatchQueue.main.async { [weak self] in
-            if let action = message["action"] as? String,
-               action == "openView",
-               let view = message["view"] as? String {
-                self?.requestedView = view
-            }
-        }
-    }
-
-    // Optional: handle queued deliveries if using transferUserInfo on the watch
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
-        DispatchQueue.main.async { [weak self] in
-            if let action = userInfo["action"] as? String,
-               action == "openView",
-               let view = userInfo["view"] as? String {
-                self?.requestedView = view
-            }
-        }
-    }
-}
-
 @main
 struct MorseModeApp: App {
     init() {
-        MorseModeConnectivity.shared.activate()
-        _ = _initializePhoneConnectivity()
+        MorseModePhoneConnectivity.shared.activate()
         GameCenterManager.shared.authenticate()
+        Task {
+            await DailyNotificationManager.shared.syncWithSavedSetting()
+        }
         print("[App] PhoneConnectivity initialized at launch")
     }
     // Runs when app launches

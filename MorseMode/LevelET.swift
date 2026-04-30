@@ -16,19 +16,20 @@ struct LevelET: View {
     @EnvironmentObject private var levelFlow: LevelFlow
 
     @State private var letter: String = ""
+    // Current Letter
     @State private var inputPattern: String = ""
+    // What the user input
     @State private var lastFeedback: String = ""
     @State private var rotationAngle: Double = 0
+    // The rotation of the replay haptics button
     @State private var audioPlayer: AVAudioPlayer? = nil
+    // Audio for each letter
     @State private var correctCounts: [String: Int] = [
+        // How many times the user has progressed through a letter
         "E": 0,
         "T": 0
     ]
     @State private var isLevelComplete: Bool = false
-
-    #if canImport(WatchConnectivity)
-        private let watchDelegate = MorseWatchInputDelegate()
-    #endif
 
     private let targetLetters = ["E", "T"]
     private let morseMap: [Character: String] = [
@@ -44,12 +45,14 @@ struct LevelET: View {
         inputPattern.removeAll()
         return newLetter
     }
+    // Picks a letter from one that has not been mastered and makes it the current letter
 
     private func playHapticsForCurrentLetter() {
         guard let letterEnum = Letter(string: letter) else { return }
         morseEngine.performHaptic(for: letterEnum)
     }
-
+// Plays haptics for current letter
+    
     private func playSoundForCurrentLetter() {
         let playback = MorseLetterAudio.play(
             character: Character(letter),
@@ -58,24 +61,15 @@ struct LevelET: View {
         )
         audioPlayer = playback.player
     }
+    // Plays sound for current letter
 
     private func sendToWatch(_ payload: [String: Any]) {
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(payload, replyHandler: nil)
-        } else {
-            try? WCSession.default.updateApplicationContext(payload)
-        }
+        MorseModePhoneConnectivity.shared.send(payload)
     }
 
     private func activateWatchSessionIfNeeded() {
         guard WCSession.isSupported() else { return }
-        let session = WCSession.default
-        if session.delegate == nil {
-            session.delegate = watchDelegate
-        }
-        if session.activationState != .activated {
-            session.activate()
-        }
+        MorseModePhoneConnectivity.shared.activate()
     }
 
     private func playCurrentLetterAcrossDevices() {
@@ -91,6 +85,7 @@ struct LevelET: View {
             "letter": letter
         ])
     }
+    //Plays haptics and sound for current letter, while sending haptics to the apple watch
 
     private func submitPattern(_ pattern: String) {
         guard !letter.isEmpty else { return }
@@ -99,12 +94,14 @@ struct LevelET: View {
             lastFeedback = "No target letter"
             return
         }
+        // If target is empty, print message
 
         if pattern == expected {
             let completedLetter = String(targetChar)
             let updatedCount = min(correctCounts[completedLetter, default: 0] + 1, 5)
             correctCounts[completedLetter] = updatedCount
             inputPattern.removeAll()
+            // Updates count for mastery of letters
 
             let hasCompletedLevel = targetLetters.allSatisfy { correctCounts[$0, default: 0] >= 5 }
             if hasCompletedLevel {
@@ -114,6 +111,7 @@ struct LevelET: View {
             } else {
                 lastFeedback = "Correct! \(completedLetter) \(updatedCount)/5"
             }
+            // If all letters mastered, print message
 
             sendToWatch([
                 "action": "feedback",
@@ -138,6 +136,7 @@ struct LevelET: View {
                 if lastFeedback.contains("Incorrect") {
                     lastFeedback = ""
                 }
+                // Allows for success or incorrect feedback haptic on watch
             }
         }
     }
@@ -231,6 +230,7 @@ struct LevelET: View {
                     HStack(spacing: 12) {
                         morseButton(title: "DOT", symbol: ".")
                         morseButton(title: "DASH", symbol: "-")
+                        // Buttons for the . and -
                     }
 
                     HStack(spacing: 12) {
@@ -274,6 +274,7 @@ struct LevelET: View {
             playCurrentLetterAcrossDevices()
             withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false).speed(0.25)) {
                 rotationAngle = 360
+                // Rotation of replay button
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("MorseModeWatchInput"))) { notification in
@@ -292,6 +293,7 @@ struct LevelET: View {
     private func morseButton(title: String, symbol: String) -> some View {
         Button {
             appendSymbol(symbol)
+            // Addes a . or - to input, plays haptics
         } label: {
             Text(title == "DOT" ? "Dot ·" : "Dash -")
                 .font(.custom("berkelium bitmap", size: 18))
@@ -300,6 +302,7 @@ struct LevelET: View {
                 .padding(.vertical, 14)
                 .background(Color.neon)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            // Dot and Dash buttons
         }
         .buttonStyle(.plain)
         .disabled(isLevelComplete)
@@ -316,6 +319,7 @@ struct LevelET: View {
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(fill == Color.yellow.opacity(0.12) ? Color.yellow : Color.neon, lineWidth: 1.5)
+                // Send and Clear buttons
             }
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }

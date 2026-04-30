@@ -75,6 +75,7 @@ private struct JourneyLevelDetails {
         default:
             return JourneyLevelDetails(
                 letters: "--"
+                // What letters are taught in each level
             )
         }
     }
@@ -83,15 +84,19 @@ private struct JourneyLevelDetails {
 struct Journey: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userProgress: UserProgress
+    // Tracks exp and levels
     @StateObject private var levelFlow = LevelFlow()
+    // Opens a level when you press start
 
     @State private var selectedLevel: Int = 1
+    // Which level is currently selected
     @State private var hasHandledInitialLaunch = false
 
     private let openCurrentLevelOnAppear: Bool
     private let initialSelectedLevel: Int?
 
     private let levels = Array(1...15)
+    // Levels 1 - 15
 
     init(openCurrentLevelOnAppear: Bool = false, initialSelectedLevel: Int? = nil) {
         self.openCurrentLevelOnAppear = openCurrentLevelOnAppear
@@ -120,6 +125,7 @@ struct Journey: View {
                     VStack(spacing: 18) {
                         headerSummary
                         journeyMap
+                        // Scrolls the level map
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 12)
@@ -169,18 +175,21 @@ struct Journey: View {
 
             ProgressView(value: min(max(Double(userProgress.currentEXP) / Double(max(userProgress.expNeededForNextLevel, 1)), 0), 1))
                 .tint(.neon)
+            // Progress bar at top of screen
         }
     }
 
     private var journeyMap: some View {
         GeometryReader { geometry in
             let points = levelPoints(in: geometry.size)
+            // How the map looks
 
             ZStack {
                 JourneyConnector(points: points)
                     .stroke(
                         Color.neon.opacity(0.9),
                         style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [10, 10])
+                        // Curved line between levels
                     )
 
                 ForEach(Array(levels.enumerated()), id: \.element) { index, level in
@@ -201,6 +210,7 @@ struct Journey: View {
                     }
                     .buttonStyle(.plain)
                     .position(point)
+                    // Level buttons
                 }
             }
         }
@@ -304,6 +314,7 @@ struct Journey: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: 430)
+            // Bottom of page
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 8)
@@ -330,12 +341,14 @@ struct Journey: View {
             default:
                 x = rightX
             }
+            // Zig Zagging of map
 
             return CGPoint(x: x, y: y)
         }
     }
 
     private func currentJourneyLevel() -> Int {
+        // Finds the next level to play
         let currentUnlocked = levels.first(where: { level in
             userProgress.isLevelUnlocked(level) && !userProgress.isLevelCompleted(level)
         })
@@ -350,6 +363,7 @@ private struct LevelTab: View {
     let isUnlocked: Bool
     let isSelected: Bool
     let isCompleted: Bool
+    // What each level tab acts like
 
     var body: some View {
         ZStack {
@@ -361,6 +375,7 @@ private struct LevelTab: View {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .stroke(isSelected ? Color.neon : Color.clear, lineWidth: 3)
                         .padding(8)
+                    // What each level tab looks like
                 )
 
             VStack(spacing: 4) {
@@ -381,6 +396,7 @@ private struct LevelTab: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.75))
+                        // What locked levels look like
                 )
             }
         }
@@ -394,6 +410,7 @@ private struct LevelTab: View {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .black))
                         .foregroundStyle(Color.neon)
+                    // Shows a checkmark on the level tab when level is completed
                 }
                 .frame(width: 24, height: 24)
                     .padding(.top, 10)
@@ -425,7 +442,8 @@ private struct JourneyConnector: Shape {
                 control2: CGPoint(x: current.x, y: midY)
             )
         }
-
+// Journey curved lines between levels
+        
         return path
     }
 }

@@ -88,9 +88,20 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
         }
     }
 
-    private func playMorseClue(_ morse: String) {
-        print("[WatchHaptics] playMorseClue morse=\(morse)")
+    private func playbackRate(from dict: [String: Any]) -> Double {
+        if let rate = dict["playbackRate"] as? Double {
+            return rate
+        }
+        if let rate = dict["playbackRate"] as? NSNumber {
+            return rate.doubleValue
+        }
+        return 1
+    }
+
+    private func playMorseClue(_ morse: String, playbackRate: Double = 1) {
+        print("[WatchHaptics] playMorseClue morse=\(morse) playbackRate=\(playbackRate)")
         let unit: TimeInterval = 0.15
+        let timeScale = 1 / max(playbackRate, 0.01)
         let dot = unit
         let dash = unit * 4
         let intraCharGap = unit
@@ -110,39 +121,40 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
                     print("[WatchHaptics] dot at delay=\(delay)")
                     WKInterfaceDevice.current().play(.click)
                 }
-                delay += dot + intraCharGap
+                delay += (dot + intraCharGap) * timeScale
             case "-":
                 let pulseOffsets: [TimeInterval] = [0, 0.08]
                 for offset in pulseOffsets {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay + offset) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay + (offset * timeScale)) {
                         print("[WatchHaptics] dash pulse at delay=\(delay + offset)")
                         WKInterfaceDevice.current().play(.directionUp)
                     }
                 }
-                delay += dash + intraCharGap
+                delay += (dash + intraCharGap) * timeScale
             case " ":
-                delay += interCharGap
+                delay += interCharGap * timeScale
             case "/":
-                delay += wordGap
+                delay += wordGap * timeScale
             default:
                 break
             }
         }
     }
 
-    private func playWord(_ word: String) {
+    private func playWord(_ word: String, playbackRate: Double = 1) {
 
         var delay: Double = 0
+        let timeScale = 1 / max(playbackRate, 0.01)
 
         for ch in word.uppercased() {
 
             guard let letter = Letter(string: String(ch)) else { continue }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                MorseEngine.shared.performHaptic(for: letter)
+                MorseEngine.shared.performHaptic(for: letter, playbackRate: playbackRate)
             }
 
-            delay += 0.5   // spacing between letters (adjust as needed)
+            delay += 0.5 * timeScale   // spacing between letters (adjust as needed)
         }
     }
 
@@ -160,7 +172,7 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
             case "playWatchHaptics":
                 if let morse = dict["morse"] as? String {
                     print("[WatchConnectivity] action=playWatchHaptics morse=\(morse)")
-                    playMorseClue(morse)
+                    playMorseClue(morse, playbackRate: playbackRate(from: dict))
                     return
                 }
             case "playMorse":
@@ -178,7 +190,7 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
         }
 
         if let morse = dict["morseClue"] as? String {
-            playMorseClue(morse)
+            playMorseClue(morse, playbackRate: playbackRate(from: dict))
             return
         }
 
@@ -221,7 +233,7 @@ final class WatchConnectivityManager: NSObject, WCSessionDelegate {
             }()
             if let l = letter {
                 DispatchQueue.main.async {
-                    MorseEngine.shared.performHaptic(for: l)
+                    MorseEngine.shared.performHaptic(for: l, playbackRate: self.playbackRate(from: dict))
                 }
                 return
             } else {

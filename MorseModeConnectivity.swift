@@ -9,6 +9,7 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
     static let resendDailyMorseNotification = Notification.Name("ResendDailyMorse")
     
     @Published var requestedView: String?
+    @Published private(set) var isReachable: Bool = false
     private var lastWatchHapticsPayload: [String: Any]?
     
     private override init() {
@@ -18,13 +19,21 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
     
     func activate() {
         guard WCSession.isSupported() else { return }
-        WCSession.default.delegate = self
+        let session = WCSession.default
+        if session.delegate !== self {
+            session.delegate = self
+        }
         print("[PhoneConnectivity] Activating WCSession...")
-        WCSession.default.activate()
+        session.activate()
+        isReachable = session.isReachable
     }
     
     func send(_ payload: [String: Any]) {
+        var payload = payload
         let action = payload["action"] as? String ?? "unknown"
+        if (action == "playMorse" || action == "playWatchHaptics"), payload["playbackRate"] == nil {
+            payload["playbackRate"] = ProfileExtras.load().difficulty.speedMultiplier
+        }
         if WCSession.default.isReachable {
             print("[Phone->Watch] sendMessage action=\(action) reachable=true payload=\(payload)")
             WCSession.default.sendMessage(payload, replyHandler: nil)
@@ -43,7 +52,8 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
             "action": "playWatchHaptics",
             "morse": morse,
             "morseClue": morse,
-            "word": word
+            "word": word,
+            "playbackRate": ProfileExtras.load().difficulty.speedMultiplier
         ]
         lastWatchHapticsPayload = payload
         print("[Phone->Watch] caching watch haptics morse=\(morse) word=\(word)")
@@ -55,10 +65,16 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         print("[PhoneConnectivity] activationDidCompleteWith state: \(activationState.rawValue), error: \(String(describing: error))")
         print("[PhoneConnectivity] isReachable: \(session.isReachable)")
+        DispatchQueue.main.async {
+            self.isReachable = session.isReachable
+        }
     }
     
     func sessionReachabilityDidChange(_ session: WCSession) {
         print("[PhoneConnectivity] sessionReachabilityDidChange isReachable: \(session.isReachable)")
+        DispatchQueue.main.async {
+            self.isReachable = session.isReachable
+        }
     }
     
     func sessionDidBecomeInactive(_ session: WCSession) {
@@ -78,6 +94,11 @@ final class MorseModePhoneConnectivity: NSObject, ObservableObject, WCSessionDel
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
         print("[PhoneConnectivity] didReceiveApplicationContext: \(applicationContext)")
         handleIncomingPayload(applicationContext)
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        print("[PhoneConnectivity] didReceiveUserInfo: \(userInfo)")
+        handleIncomingPayload(userInfo)
     }
     
     // MARK: - Private Payload Handling

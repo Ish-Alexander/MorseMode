@@ -12,7 +12,7 @@ enum MorseCharacter{
     case dot
     case dash
     
-    func hapticEvents(relativeTime: TimeInterval) -> [CHHapticEvent] {
+    func hapticEvents(relativeTime: TimeInterval, timeScale: Double = 1) -> [CHHapticEvent] {
         // Creates a vibration pattern that makes dots feel crisp and dashes feel weighty.
         switch self {
         case .dot:
@@ -40,8 +40,8 @@ enum MorseCharacter{
                     .init(parameterID: .hapticIntensity, value: 1),
                     .init(parameterID: .hapticSharpness, value: 0.2)
                 ],
-                relativeTime: relativeTime + 0.02,
-                duration: 0.56
+                relativeTime: relativeTime + (0.02 * timeScale),
+                duration: 0.56 * timeScale
             )
             return [accent, body]
         }

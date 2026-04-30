@@ -70,7 +70,7 @@ final class MorseEngine: ObservableObject {
         return nil
     }
     
-    private func startMorseAudioIfNeeded(using url: URL?) {
+    private func startMorseAudioIfNeeded(using url: URL?, playbackRate: Double = ProfileExtras.load().difficulty.speedMultiplier) {
         guard !isAudioPlaying else { return }
         guard let url = url ?? resolveMorseAudioURL() else {
             print("MorseEngine: No suitable Morse audio file found in bundle for requested letter or known candidates.")
@@ -80,6 +80,8 @@ final class MorseEngine: ObservableObject {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.numberOfLoops = -1 // loop while Morse is playing
+            audioPlayer?.enableRate = true
+            audioPlayer?.rate = Float(max(playbackRate, 0.01))
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
             isAudioPlaying = true
@@ -103,30 +105,40 @@ final class MorseEngine: ObservableObject {
     }
 
     func playbackDuration(for letter: Letter) -> TimeInterval {
+        playbackDuration(for: letter, playbackRate: ProfileExtras.load().difficulty.speedMultiplier)
+    }
+
+    func playbackDuration(for letter: Letter, playbackRate: Double) -> TimeInterval {
         let symbols = letter.morseRepresentation
         guard !symbols.isEmpty else { return 0 }
+        let timeScale = 1 / max(playbackRate, 0.01)
 
         return symbols.enumerated().reduce(0) { total, entry in
             let (index, symbol) = entry
-            let gap = index < symbols.count - 1 ? interSymbolGap : 0
-            return total + symbol.duration + gap
+            let gap = index < symbols.count - 1 ? interSymbolGap * timeScale : 0
+            return total + (symbol.duration * timeScale) + gap
         }
     }
     
     func performHaptic(for letter: Letter) {
-        startMorseAudioIfNeeded(using: nil)
+        performHaptic(for: letter, playbackRate: ProfileExtras.load().difficulty.speedMultiplier)
+    }
+
+    func performHaptic(for letter: Letter, playbackRate: Double) {
+        startMorseAudioIfNeeded(using: nil, playbackRate: playbackRate)
         // Starts audio alongside haptics
         
         guard let engine else { return }
 
         var events: [CHHapticEvent] = []
         var time: TimeInterval = 0
+        let timeScale = 1 / max(playbackRate, 0.01)
         // Creates a list of vibrations and tells it when to happen
 
         for symbol in letter.morseRepresentation {
-            events.append(contentsOf: symbol.hapticEvents(relativeTime: time))
+            events.append(contentsOf: symbol.hapticEvents(relativeTime: time, timeScale: timeScale))
             // How each symbol knows how to generate its vibration
-            time += symbol.duration + interSymbolGap
+            time += (symbol.duration + interSymbolGap) * timeScale
             // adds a gap between symbols
         }
 
@@ -136,7 +148,7 @@ final class MorseEngine: ObservableObject {
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: 0)
             // Starts audio immediately
-            let totalDuration = playbackDuration(for: letter)
+            let totalDuration = playbackDuration(for: letter, playbackRate: playbackRate)
             DispatchQueue.main.asyncAfter(deadline: .now() + totalDuration) { [weak self] in
                 self?.stopMorseAudio()
                 // Stops audio when finished
