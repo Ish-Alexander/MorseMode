@@ -13,10 +13,12 @@ import AVFoundation
 private enum WarehouseSavedWordsStore {
     static let storageKey = "Warehouse.savedMessages"
     static let maxSavedMessages = 20
+    // handles saved messages
 
     static func sanitized(_ text: String) -> String {
         let filtered = text.filter { character in
             character == " " || character.isASCII && character.isLetter
+            // Doesnt allow for numbers or symbols, like emojis
         }
         return filtered
             .split(whereSeparator: \.isWhitespace)
@@ -28,6 +30,7 @@ private enum WarehouseSavedWordsStore {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
               let savedMessages = try? JSONDecoder().decode([String].self, from: data) else {
             return []
+            // Saved words stay even if app is closed
         }
         let cleanedMessages = savedMessages
             .map(sanitized)
@@ -53,14 +56,21 @@ struct Practice: View {
     @EnvironmentObject private var playbackSettings: PlaybackSettings
     
     @State private var letterToShow: String = ""
+        // Handles the big letter in the tube image
     
     @State private var message: String = ""
+    // What the user types
     @State private var savedMessages: [String] = WarehouseSavedWordsStore.load()
+    // Storing words
     @State private var warehouseStatusMessage: String?
     @State private var warehouseStatusDismissTask: Task<Void, Never>?
+    // Dismisses words when screen is closed
     @State private var isShowingSavedWordsPopup: Bool = false
+    // Shows saved words if true
     @State private var isPlayingMessage: Bool = false
+    // Stops overlapping playback
     @State private var audioPlayer: AVAudioPlayer? = nil
+    // Handles sounds for playback
     @State private var letterDisplayResetTask: Task<Void, Never>?
     @State private var messagePlaybackTask: Task<Void, Never>?
     
@@ -151,6 +161,7 @@ struct Practice: View {
     }
 
     private func visualPlaybackDuration(for letter: Letter, character: Character) -> TimeInterval {
+        // Handles timing for morse code sounds and haptics
         let hapticDuration = morseEngine.playbackDuration(for: letter)
         let soundDuration = MorseLetterAudio.playbackDuration(for: character)
 
@@ -209,7 +220,7 @@ struct Practice: View {
                 // Skip unsupported characters
                 guard lowercaseCharacter(ch).flatMap({ morseMap[$0] }) != nil else { continue }
                 await playLetterMorse(ch)
-                // Inter-letter gap = 3 units, unless next char is space or end
+                // Inter-letter gap = 3 units, unless next character is space or end
                 if idx < characters.count - 1 {
                     let next = characters[idx + 1]
                     if next != " " { // only add letter gap if next isn't a word gap
@@ -253,12 +264,14 @@ struct Practice: View {
         showWarehouseStatus(savedMessages.count == WarehouseSavedWordsStore.maxSavedMessages
             ? "Saved. Warehouse is holding 20 words."
             : "Saved to Warehouse")
+        // Message pops up to alert people
     }
 
     private func deleteSavedMessage(_ savedMessage: String) {
         savedMessages.removeAll { $0 == savedMessage }
         WarehouseSavedWordsStore.save(savedMessages)
         showWarehouseStatus("Removed from Warehouse")
+        // Message to alert that word has been deleted
     }
 
     private func showWarehouseStatus(_ message: String) {
@@ -286,6 +299,7 @@ struct Practice: View {
             guard !isPlayingMessage, letterToShow == character else { return }
             letterToShow = ""
             letterDisplayResetTask = nil
+            // Clears last letter from tube image when word is done playing
         }
     }
 
@@ -296,6 +310,7 @@ struct Practice: View {
         letterDisplayResetTask?.cancel()
         letterDisplayResetTask = nil
         letterToShow = character
+        // Allows letters to be input into text box
     }
 
     private func inputSpace() {
@@ -303,12 +318,14 @@ struct Practice: View {
         message += " "
         warehouseStatusMessage = nil
         letterToShow = ""
+        // Allows a space to be put into text box
     }
 
     private func deleteLastInput() {
         guard !message.isEmpty else { return }
         message.removeLast()
         warehouseStatusMessage = nil
+        // Delets one letter at a time from text box
     }
 
     private func clearInput() {
@@ -317,6 +334,7 @@ struct Practice: View {
         warehouseStatusMessage = nil
         letterDisplayResetTask?.cancel()
         letterToShow = ""
+        // Clears all letters from text box
     }
 
     private func label(for letter: Letter) -> String {
@@ -328,6 +346,7 @@ struct Practice: View {
         let circleSize = keyboardLetterFontSize * keyboardCircleScale
         return Button(action: {
             inputLetter(letter)
+            // Buttons for custom keyboard
         }) {
             ZStack {
                 Image("Circle")
@@ -570,6 +589,7 @@ struct Practice: View {
 
                         Button(action: {
                             playMessage(normalizedMessage)
+                            // Plays message in text box
                         }) {
                             Text(isPlayingMessage ? "Playing…" : "Play")
                                 .font(.custom("berkelium bitmap", size: 14, relativeTo: .body))
@@ -630,6 +650,7 @@ struct Practice: View {
                 }
                 .sheet(isPresented: $isShowingSavedWordsPopup) {
                     savedWordsPopup
+                    // Sheet popup for saved words
                 }
                 
                 VStack(spacing: 4) {

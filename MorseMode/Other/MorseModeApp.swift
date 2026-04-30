@@ -350,6 +350,7 @@ struct JourneyLevelTopBar: View {
             .sheet(isPresented: $isShowingProfileSettings) {
                 NavigationStack {
                     ProfileView(initiallyShowingSettings: true)
+                    // Opens a full profile and settings screen
                 }
                     .environmentObject(userProgress)
                     .environmentObject(playbackSettings)
@@ -670,6 +671,7 @@ final class GameCenterManager: NSObject, ObservableObject {
                         score: entry.score,
                         incorrectGuesses: entry.context,
                         isCurrentPlayer: entry.player.gamePlayerID == GKLocalPlayer.local.gamePlayerID
+                        // Ranks players by how many incorrect guesses they have after rainking time and player rank
                     )
                 }
 
@@ -760,6 +762,7 @@ struct MorseModeApp: App {
         GameCenterManager.shared.authenticate()
         Task {
             await DailyNotificationManager.shared.syncWithSavedSetting()
+            // Wait for allowed notifications
         }
         print("[App] PhoneConnectivity initialized at launch")
     }
@@ -777,6 +780,7 @@ struct MorseModeApp: App {
     var body: some Scene {
         WindowGroup {
             if hasSeenOnboarding {
+                // Shows onboarding if first time ever opening app
                 ContentView()
                     .environmentObject(morseEngine)
                     .environmentObject(userProgress)

@@ -881,6 +881,7 @@ struct Daily: View {
 
         // Base timing unit (seconds)
         let playbackRate = ProfileExtras.load().difficulty.speedMultiplier
+        // Changes the speed of playback depending on your selected setting
         let timeScale = 1 / max(playbackRate, 0.01)
         let unit: TimeInterval = 0.08 * timeScale
         let dot = unit
