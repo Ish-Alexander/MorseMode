@@ -477,7 +477,6 @@ final class DailyMorseViewModel: ObservableObject {
             clearTimeRemaining()
             clearWrongGuesses()
             clearRevealed()
-            // Stops timer when word is solved
         }
     }
 }
@@ -485,6 +484,7 @@ final class DailyMorseViewModel: ObservableObject {
 struct Daily: View {
     @ObservedObject var vm: DailyMorseViewModel
     @EnvironmentObject private var playbackSettings: PlaybackSettings
+    @EnvironmentObject private var userProgress: UserProgress
     // Game logic object
     @State private var currentGuess: String = ""
     // What the user types
@@ -724,6 +724,10 @@ struct Daily: View {
         .onDisappear {
             vm.syncStateForScenePhase(.inactive)
             stopFeedbackPlaybackOnly()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dailyInterceptCompleted)) { notification in
+            let xpReward = 50
+            userProgress.addEXP(xpReward)
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             vm.syncStateForScenePhase(newPhase)
@@ -1023,4 +1027,5 @@ struct Daily: View {
 #Preview {
     Daily(vm: DailyMorseViewModel())
         .environmentObject(PlaybackSettings())
+        .environmentObject(UserProgress())
 }

@@ -135,7 +135,7 @@ struct Journey: View {
                 }
             }
         }
-        .frame(height: 1120)
+        .frame(height: CGFloat(levels.count) * 80)
     }
 
     private var selectedLevelCard: some View {
@@ -152,116 +152,16 @@ struct Journey: View {
                 .foregroundStyle(Color.white.opacity(0.78))
                 .multilineTextAlignment(.center)
 
-            if selectedLevel == 1 && isUnlocked {
-                Button {
-                    levelFlow.open(1)
-                } label: {
-                    actionLabel(title: "Start Level 1", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 2 && isUnlocked {
-                Button {
-                    levelFlow.open(2)
-                } label: {
-                    actionLabel(title: "Start Level 2", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 3 && isUnlocked {
-                Button {
-                    levelFlow.open(3)
-                } label: {
-                    actionLabel(title: "Start Level 3", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 4 && isUnlocked {
-                Button {
-                    levelFlow.open(4)
-                } label: {
-                    actionLabel(title: "Start Level 4", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 5 && isUnlocked {
-                Button {
-                    levelFlow.open(5)
-                } label: {
-                    actionLabel(title: "Start Level 5", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 6 && isUnlocked {
-                Button {
-                    levelFlow.open(6)
-                } label: {
-                    actionLabel(title: "Start Level 6", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 7 && isUnlocked {
-                Button {
-                    levelFlow.open(7)
-                } label: {
-                    actionLabel(title: "Start Level 7", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 8 && isUnlocked {
-                Button {
-                    levelFlow.open(8)
-                } label: {
-                    actionLabel(title: "Start Level 8", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 9 && isUnlocked {
-                Button {
-                    levelFlow.open(9)
-                } label: {
-                    actionLabel(title: "Start Level 9", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 10 && isUnlocked {
-                Button {
-                    levelFlow.open(10)
-                } label: {
-                    actionLabel(title: "Start Level 10", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 11 && isUnlocked {
-                Button {
-                    levelFlow.open(11)
-                } label: {
-                    actionLabel(title: "Start Level 11", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 12 && isUnlocked {
-                Button {
-                    levelFlow.open(12)
-                } label: {
-                    actionLabel(title: "Start Level 12", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 13 && isUnlocked {
-                Button {
-                    levelFlow.open(13)
-                } label: {
-                    actionLabel(title: "Start Level 13", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else if selectedLevel == 14 && isUnlocked {
-                Button {
-                    levelFlow.open(14)
-                } label: {
-                    actionLabel(title: "Start Level 14", isUnlocked: isUnlocked)
-                }
-                .buttonStyle(.plain)
-            } else {
-                Button {
-                    selectedLevel = min(selectedLevel, levels.count)
-                } label: {
-                    actionLabel(
-                        title: isUnlocked ? "Start Level \(selectedLevel)" : "Level Locked",
-                        isUnlocked: isUnlocked
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(!isUnlocked)
+            Button {
+                levelFlow.open(selectedLevel)
+            } label: {
+                actionLabel(
+                    title: isUnlocked ? "Start Level \(selectedLevel)" : "Level Locked",
+                    isUnlocked: isUnlocked
+                )
             }
+            .buttonStyle(.plain)
+            .disabled(!isUnlocked)
         }
         .padding(16)
         .background(

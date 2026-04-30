@@ -537,19 +537,19 @@
 				CODE_SIGN_ENTITLEMENTS = "MorseMode Watch App/MorseMode Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 347R3MZ6QA;
+				DEVELOPMENT_TEAM = J85BA3UGF5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MorseMode-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MorseMode;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseModeTest;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.wisdom.MorseModeTest;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wisdom.MorseModeTest.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -572,19 +572,19 @@
 				CODE_SIGN_ENTITLEMENTS = "MorseMode Watch App/MorseMode Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 347R3MZ6QA;
+				DEVELOPMENT_TEAM = J85BA3UGF5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MorseMode-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MorseMode;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.Ishauna.MorseModeTest;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.wisdom.MorseModeTest;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wisdom.MorseModeTest.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -608,7 +608,7 @@
 				CODE_SIGN_ENTITLEMENTS = MorseMode/MorseMode.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 347R3MZ6QA;
+				DEVELOPMENT_TEAM = J85BA3UGF5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MorseMode/Info.plist;
@@ -624,7 +624,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wisdom.MorseModeTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -645,7 +645,7 @@
 				CODE_SIGN_ENTITLEMENTS = MorseMode/MorseMode.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 347R3MZ6QA;
+				DEVELOPMENT_TEAM = J85BA3UGF5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MorseMode/Info.plist;
@@ -661,7 +661,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Ishauna.MorseModeTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wisdom.MorseModeTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
