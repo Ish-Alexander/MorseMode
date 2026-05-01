@@ -282,7 +282,6 @@ struct ProfilePopupView: View {
     @State private var showAvatarPicker = false
     @State private var isEditingCodename = false
     @State private var editedCodename = ""
-    @State private var showSavedToast = false
     @FocusState private var codenameFieldFocused: Bool
 
     var body: some View {
@@ -302,7 +301,6 @@ struct ProfilePopupView: View {
                 }
                 .frame(height: 300)
                 .animation(.easeInOut(duration: 0.18), value: selectedTab)
-                saveButton.padding(.bottom, 14)
             }
             .background(
                 ZStack {
@@ -319,20 +317,8 @@ struct ProfilePopupView: View {
             .shadow(color: Color.neon.opacity(0.18), radius: 20, x: 0, y: 10)
             .padding(.horizontal, 20)
 
-            if showSavedToast {
-                Text("[ PROFILE UPDATED ]")
-                    .font(.custom("berkelium bitmap", size: 13)).foregroundStyle(Color.neon)
-                    .padding(.horizontal, 20).padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color(red: 0.04, green: 0.09, blue: 0.14).opacity(0.98))
-                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.neon, lineWidth: 1.8)))
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .offset(y: -300)
-            }
         }
         .animation(.spring(response: 0.34, dampingFraction: 0.82), value: isPresented)
-        .animation(.easeInOut(duration: 0.18), value: showSavedToast)
         .sheet(isPresented: $showAvatarPicker) {
             AvatarPickerSheet(isPresented: $showAvatarPicker, store: avatarStore)
                 .presentationDetents([.medium, .large])
@@ -341,7 +327,7 @@ struct ProfilePopupView: View {
     }
 
     private var headerSection: some View {
-        HStack(alignment: .center, spacing: 14) {
+        HStack(alignment: .center, spacing: 22) {
             Button { showAvatarPicker = true } label: {
                 ZStack(alignment: .bottomTrailing) {
                     ProfileAvatarCircle(size: 70, store: avatarStore)
@@ -383,8 +369,9 @@ struct ProfilePopupView: View {
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
-                            Image(systemName: "pencil").font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(Color.neon.opacity(0.65))
+                            Image(systemName: "pencil.circle.fill").font(.system(size: 20))
+                                .foregroundStyle(Color.neon)
+                                .background(Circle().fill(Color(red: 0.04, green: 0.09, blue: 0.14)).padding(2))
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }.buttonStyle(.plain)
@@ -416,7 +403,7 @@ struct ProfilePopupView: View {
                 Button { withAnimation(.easeInOut(duration: 0.2)) { selectedTab = tab } } label: {
                     VStack(spacing: 5) {
                         Text(tab.rawValue).font(.custom("berkelium bitmap", size: 13))
-                            .foregroundStyle(selectedTab == tab ? Color.neon : Color.white.opacity(0.38))
+                            .foregroundStyle(selectedTab == tab ? Color.neon : Color.white)
                         Rectangle().fill(selectedTab == tab ? Color.neon : Color.clear).frame(height: 2.2)
                             .shadow(color: selectedTab == tab ? Color.neon.opacity(0.6) : .clear, radius: 4)
                     }
@@ -529,6 +516,32 @@ struct ProfilePopupView: View {
                     }.buttonStyle(.plain)
                 }
             }
+
+            Button {
+                editedCodename = extras.codename
+                isEditingCodename = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "textformat")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.neon)
+                        .frame(width: 22)
+                    Text("Change Codename")
+                        .font(.custom("berkelium bitmap", size: 14))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.38))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(red: 0.04, green: 0.09, blue: 0.14).opacity(0.74))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.neon.opacity(0.25), lineWidth: 1.4)))
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -537,33 +550,12 @@ struct ProfilePopupView: View {
                 .stroke(Color.neon.opacity(0.3), lineWidth: 1.8)))
     }
 
-    private var saveButton: some View {
-        Button { saveExtras() } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "square.and.arrow.down").font(.system(size: 15, weight: .bold))
-                Text("SAVE CHANGES").font(.custom("berkelium bitmap", size: 16))
-            }
-            .foregroundStyle(Color(red: 0.04, green: 0.09, blue: 0.14))
-            .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.neon).shadow(color: Color.neon.opacity(0.5), radius: 10))
-        }.buttonStyle(.plain).padding(.horizontal, 18).padding(.top, 8)
-    }
-
     private func commitCodename() {
         let v = editedCodename.trimmingCharacters(in: .whitespacesAndNewlines)
         if !v.isEmpty { extras.codename = v }
         extras.save()
         isEditingCodename = false
         codenameFieldFocused = false
-    }
-
-    private func saveExtras() {
-        extras.save()
-        withAnimation { showSavedToast = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-            withAnimation { showSavedToast = false }
-        }
     }
 }
 
@@ -579,7 +571,6 @@ struct ProfileView: View {
     @State private var showAvatarPicker = false
     @State private var isEditingCodename = false
     @State private var editedCodename = ""
-    @State private var showSavedToast = false
     @State private var soundEnabled = true
     @State private var hapticsEnabled = true
     @State private var previewAudioPlayer: AVAudioPlayer?
@@ -610,29 +601,23 @@ struct ProfileView: View {
                     identityBlock.padding(.top, 12)
                     tabStrip
                     if isStatsTab { statsSection } else { settingsSection }
-                    saveButton.padding(.bottom, 32)
+                    Spacer(minLength: 32)
                 }
-            }
-
-            if showSavedToast {
-                VStack {
-                    Text("[ PROFILE UPDATED ]")
-                        .font(.custom("berkelium bitmap", size: 13)).foregroundStyle(Color.neon)
-                        .padding(.horizontal, 20).padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color(red: 0.04, green: 0.09, blue: 0.14).opacity(0.98))
-                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(Color.neon, lineWidth: 1.8)))
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    Spacer()
-                }.padding(.top, 12).zIndex(99)
             }
         }
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("AGENT PROFILE").font(.custom("berkelium bitmap", size: 16)).foregroundStyle(Color.neon)
+                Text("AGENT PROFILE")
+                    .font(.custom("berkelium bitmap", size: 16))
+                    .foregroundStyle(Color.neon)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.neon.opacity(0.38), lineWidth: 1.8)))
             }
         }
         .onAppear {
@@ -641,7 +626,6 @@ struct ProfileView: View {
             soundEnabled   = playbackSettings.mode.allowsSound
             hapticsEnabled = playbackSettings.mode.allowsHaptics
         }
-        .animation(.easeInOut(duration: 0.18), value: showSavedToast)
         .sheet(isPresented: $showAvatarPicker) {
             AvatarPickerSheet(isPresented: $showAvatarPicker, store: avatarStore)
                 .presentationDetents([.medium, .large])
@@ -650,7 +634,7 @@ struct ProfileView: View {
     }
 
     private var identityBlock: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 22) {
             Button { showAvatarPicker = true } label: {
                 ZStack(alignment: .bottomTrailing) {
                     ProfileAvatarCircle(size: 94, store: avatarStore)
@@ -688,8 +672,9 @@ struct ProfileView: View {
                     HStack(spacing: 8) {
                         Text(extras.codename.uppercased())
                             .font(.system(size: 20, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-                        Image(systemName: "pencil").font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.neon.opacity(0.65))
+                        Image(systemName: "pencil.circle.fill").font(.system(size: 24))
+                            .foregroundStyle(Color.neon)
+                            .background(Circle().fill(Color(red: 0.04, green: 0.09, blue: 0.14)).padding(3))
                     }
                 }.buttonStyle(.plain)
             }
@@ -714,7 +699,7 @@ struct ProfileView: View {
                 Button { withAnimation(.easeInOut(duration: 0.2)) { isStatsTab = isStats } } label: {
                     VStack(spacing: 5) {
                         Text(title).font(.custom("berkelium bitmap", size: 14))
-                            .foregroundStyle(isStatsTab == isStats ? Color.neon : Color.white.opacity(0.38))
+                            .foregroundStyle(isStatsTab == isStats ? Color.neon : Color.white)
                         Rectangle().fill(isStatsTab == isStats ? Color.neon : Color.clear).frame(height: 2.2)
                             .shadow(color: isStatsTab == isStats ? Color.neon.opacity(0.6) : .clear, radius: 4)
                     }
@@ -786,23 +771,6 @@ struct ProfileView: View {
                 }
             AgentToggleRow(label: "Digital Rain",        icon: "eye",                  isOn: isDigitalRainEnabled)
 
-            Button { isEditingCodename = true; isStatsTab = true } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "textformat").font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.neon).frame(width: 22)
-                    Text("Change Codename").font(.custom("berkelium bitmap", size: 14)).foregroundStyle(.white)
-                    Spacer()
-                    Text(extras.codename.uppercased()).font(.custom("berkelium bitmap", size: 10))
-                        .foregroundStyle(Color.white.opacity(0.38))
-                    Image(systemName: "chevron.right").font(.system(size: 11))
-                        .foregroundStyle(Color.white.opacity(0.38))
-                }
-                .padding(.horizontal, 16).padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(red: 0.08, green: 0.17, blue: 0.24).opacity(0.94))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.neon.opacity(0.3), lineWidth: 1.8)))
-            }.buttonStyle(.plain)
         }.padding(.horizontal, 24)
     }
 
@@ -844,48 +812,12 @@ struct ProfileView: View {
                 .stroke(Color.neon.opacity(0.3), lineWidth: 1.8)))
     }
 
-    private var saveButton: some View {
-        Button { saveAll() } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "square.and.arrow.down").font(.system(size: 15, weight: .bold))
-                Text("SAVE CHANGES").font(.custom("berkelium bitmap", size: 16))
-            }
-            .foregroundStyle(Color(red: 0.04, green: 0.09, blue: 0.14))
-            .frame(maxWidth: .infinity).padding(.vertical, 14)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.neon).shadow(color: Color.neon.opacity(0.5), radius: 10))
-        }.buttonStyle(.plain).padding(.horizontal, 24)
-    }
-
     private func commitCodename() {
         let v = editedCodename.trimmingCharacters(in: .whitespacesAndNewlines)
         if !v.isEmpty { extras.codename = v }
         extras.save()
         isEditingCodename = false
         codenameFieldFocused = false
-    }
-
-    private func saveAll() {
-        extras.save()
-        Task {
-            let accepted = await DailyNotificationManager.shared.setDailyReminderEnabled(extras.notificationsEnabled)
-            await MainActor.run {
-                if extras.notificationsEnabled && !accepted {
-                    extras.notificationsEnabled = false
-                    extras.save()
-                }
-            }
-        }
-        switch (soundEnabled, hapticsEnabled) {
-        case (true,  true):  playbackSettings.mode = .hapticsAndSound
-        case (true,  false): playbackSettings.mode = .soundOnly
-        case (false, true):  playbackSettings.mode = .hapticsOnly
-        case (false, false): playbackSettings.mode = .hapticsOnly
-        }
-        withAnimation { showSavedToast = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-            withAnimation { showSavedToast = false }
-        }
     }
 
     private func playSoundPreview() {
