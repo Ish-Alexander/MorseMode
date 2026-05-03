@@ -747,12 +747,20 @@ struct ProfileView: View {
 
             AgentToggleRow(label: "Sound Effects",       icon: "speaker.wave.2.fill", isOn: $soundEnabled)
                 .onChange(of: soundEnabled) { _, enabled in
+                    if !enabled && !hapticsEnabled {
+                        hapticsEnabled = true
+                    }
+                    savePlaybackMode()
                     if enabled {
                         playSoundPreview()
                     }
                 }
             AgentToggleRow(label: "Haptic Feedback",     icon: "hand.tap.fill",        isOn: $hapticsEnabled)
                 .onChange(of: hapticsEnabled) { _, enabled in
+                    if !enabled && !soundEnabled {
+                        soundEnabled = true
+                    }
+                    savePlaybackMode()
                     if enabled {
                         morseEngine.performHaptic(for: .t)
                     }
@@ -818,6 +826,20 @@ struct ProfileView: View {
         extras.save()
         isEditingCodename = false
         codenameFieldFocused = false
+    }
+
+    private func savePlaybackMode() {
+        switch (soundEnabled, hapticsEnabled) {
+        case (true, true):
+            playbackSettings.mode = .hapticsAndSound
+        case (true, false):
+            playbackSettings.mode = .soundOnly
+        case (false, true):
+            playbackSettings.mode = .hapticsOnly
+        case (false, false):
+            soundEnabled = true
+            playbackSettings.mode = .soundOnly
+        }
     }
 
     private func playSoundPreview() {
