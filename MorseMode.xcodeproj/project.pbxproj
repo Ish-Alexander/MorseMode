@@ -62,6 +62,8 @@
 		196E309B2F46037C00599E88 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 196E309A2F46037C00599E88 /* AppIcon.icon */; };
 		196E309C2F46037C00599E88 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 196E309A2F46037C00599E88 /* AppIcon.icon */; };
 		197D23812F226AF2003F8307 /* MorseMode Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 197D23802F226AF2003F8307 /* MorseMode Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		19BC583B2FA8CB5A00A2FBBA /* GameCenterResources.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = 19BC583A2FA8CB5A00A2FBBA /* GameCenterResources.gamekit */; };
+		19BC583C2FA8CB5A00A2FBBA /* GameCenterResources.gamekit in Resources */ = {isa = PBXBuildFile; fileRef = 19BC583A2FA8CB5A00A2FBBA /* GameCenterResources.gamekit */; };
 		19DDB3C52F3CD37100E1C059 /* PhoneConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */; };
 		19DDB3C72F3CE73500E1C059 /* MorseModeConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */; };
 /* End PBXBuildFile section */
@@ -120,6 +122,7 @@
 		196E309A2F46037C00599E88 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		197D23732F226AF2003F8307 /* MorseMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorseMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		197D23802F226AF2003F8307 /* MorseMode Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MorseMode Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19BC583A2FA8CB5A00A2FBBA /* GameCenterResources.gamekit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GameCenterResources.gamekit; sourceTree = "<group>"; };
 		19DDB3C42F3CD37100E1C059 /* PhoneConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneConnectivity.swift; sourceTree = "<group>"; };
 		19DDB3C62F3CE73500E1C059 /* MorseModeConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseModeConnectivity.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -180,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				196E30722F3F6E5700599E88 /* R_morse_code.ogg.mp3 */,
+				19BC583A2FA8CB5A00A2FBBA /* GameCenterResources.gamekit */,
 				196E306E2F3F6E5600599E88 /* S_morse_code.ogg.mp3 */,
 				196E306A2F3F6E5600599E88 /* T_morse_code.ogg.mp3 */,
 				196E30712F3F6E5700599E88 /* U_morse_code.ogg.mp3 */,
@@ -330,6 +334,7 @@
 				196E30642F3F6DEF00599E88 /* O_morse_code.ogg.mp3 in Resources */,
 				196E30652F3F6DEF00599E88 /* M_morse_code.ogg.mp3 in Resources */,
 				196E30662F3F6DEF00599E88 /* J_morse_code.ogg.mp3 in Resources */,
+				19BC583C2FA8CB5A00A2FBBA /* GameCenterResources.gamekit in Resources */,
 				196E30672F3F6DEF00599E88 /* P_morse_code.ogg.mp3 in Resources */,
 				196E30682F3F6DEF00599E88 /* Q_morse_code.ogg.mp3 in Resources */,
 				196E30692F3F6DEF00599E88 /* N_morse_code.ogg.mp3 in Resources */,
@@ -363,6 +368,7 @@
 				196E30862F3F71FD00599E88 /* K_morse_code.ogg.mp3 in Resources */,
 				196E30872F3F71FD00599E88 /* L_morse_code.ogg.mp3 in Resources */,
 				196E30882F3F71FD00599E88 /* M_morse_code.ogg.mp3 in Resources */,
+				19BC583B2FA8CB5A00A2FBBA /* GameCenterResources.gamekit in Resources */,
 				196E30892F3F71FD00599E88 /* N_morse_code.ogg.mp3 in Resources */,
 				196E308A2F3F71FD00599E88 /* O_morse_code.ogg.mp3 in Resources */,
 				196E308B2F3F71FD00599E88 /* P_morse_code.ogg.mp3 in Resources */,
@@ -628,12 +634,15 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -665,12 +674,15 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

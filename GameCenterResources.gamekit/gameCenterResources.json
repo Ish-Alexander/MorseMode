@@ -1,0 +1,35 @@
+{
+  "meta" : {
+    "version" : "2024-11-15"
+  },
+  "resources" : {
+    "leaderboardLocalizations" : {
+      "daily_intercept_time" : [
+        {
+          "locale" : "en-US",
+          "localID" : "daily_intercept_time-en-US",
+          "name" : "Daily Intercept Leaderboard"
+        }
+      ]
+    },
+    "leaderboards" : [
+      {
+        "activityProperties" : {
+
+        },
+        "archived" : false,
+        "defaultFormatter" : "ELAPSED_TIME_SECOND",
+        "recurrenceDuration" : "PT24H",
+        "recurrenceRule" : "FREQ=DAILY;INTERVAL=1",
+        "recurrenceStartDate" : "2026-04-16T04:00:00Z",
+        "referenceName" : "Daily Intercept Leaderboard",
+        "scoreRangeEnd" : null,
+        "scoreRangeStart" : null,
+        "scoreSortType" : "ASC",
+        "submissionType" : "BEST_SCORE",
+        "vendorIdentifier" : "daily_intercept_time",
+        "visibility" : "SHOW_FOR_ALL"
+      }
+    ]
+  }
+}
